@@ -1,0 +1,19 @@
+{
+    "name": "explt13/nosmi",
+    "description": "A simple lightweight MVC framework",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Explt13\\Nosmi\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "explt13",
+            "email": "az13rede4d@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=8.3.6"
+    }
+}
