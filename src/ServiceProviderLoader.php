@@ -21,7 +21,7 @@ class ServiceProviderLoader
     {
         foreach ($this->providers as $provider)
         {
-            $className = "app\\providers\\" . $provider;
+            $className = "Surfsail\\providers\\" . $provider;
             $object = $this->container->get($className);
             $object->register();
         }

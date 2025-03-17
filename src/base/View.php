@@ -21,7 +21,7 @@ class View
     public const INCLUDE_LAYOUT = 4;
     
     private RouteContext $route;
-    private array $meta = ["title" => "", "description" => "", "keywords" => ""]; // app/views/layouts/meta.php
+    private array $meta = ["title" => "", "description" => "", "keywords" => ""]; // src/views/layouts/meta.php
     
     public function __construct(RouteContext $route)
     {

@@ -25,7 +25,7 @@ class MiddlewareLoader
     public function run()
     {
         foreach ($this->middlewares as $middleware) {
-            $className = "app\\middlewares\\" . $middleware;
+            $className = "Surfsail\\middlewares\\" . $middleware;
             $object = $this->container->get($className);
             $object->run();
         }

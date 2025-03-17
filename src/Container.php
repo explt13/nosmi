@@ -19,12 +19,22 @@ class Container implements ContainerInterface
     * @param string $id Interface Name
     * @param callable $callback, fn(ContainerInterface $container) => new Concrete;
     */
-    public function set(string $id, callable $callback): void
+    public function set(string $id, callable $callback): bool
     {
         if (!interface_exists($id) && !class_exists($id)) {
             throw new \Exception("Cannot bind non-existent interface or class: $id");
         }
         $this->bindings[$id] = $callback;
+        return true;
+    }
+
+    public function remove(string $id): bool
+    {
+        if ($this->bindings[$id]) {
+            unset($this->bindings[$id]);
+            return true;
+        }
+        return false;
     }
 
     public function has(string $id): bool

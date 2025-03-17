@@ -23,7 +23,7 @@ class ControllerResolver
 
     public function resolve()
     {
-        $controller = "app\\controllers\\" . $this->route_context->prefix . $this->route_context->controller . 'Controller';
+        $controller = "Surfsail\\controllers\\" . $this->route_context->prefix . $this->route_context->controller . 'Controller';
         $controllerObject = $this->container->get($controller);
         $action = $this->lowerCamelCase($this->route_context->action) . "Action";
         if (method_exists($controllerObject, $action)) {
