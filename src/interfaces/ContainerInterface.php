@@ -9,4 +9,5 @@ interface ContainerInterface
     public function has(string $id): bool;
     public function get(string $id): object;
     public function autowire(string $service): object;
+    public function remove(string $id): bool;
 }

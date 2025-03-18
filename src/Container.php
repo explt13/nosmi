@@ -30,18 +30,28 @@ class Container implements ContainerInterface
 
     public function remove(string $id): bool
     {
-        if ($this->bindings[$id]) {
+        $deleted = false;
+        if (isset($this->bindings[$id])) {
             unset($this->bindings[$id]);
-            return true;
+            $deleted = true;
         }
-        return false;
+        if (isset($this->services[$id])) {
+            unset($this->services[$id]);
+            $deleted = true;
+        }
+        return $deleted;
     }
 
     public function has(string $id): bool
     {
         return isset($this->bindings[$id]);
     }
-    
+
+    /**
+     * @template T
+     * @param class-string<T> $id
+     * @return T
+     */
     public function get(string $id): object
     {
         if (isset($this->services[$id])) {

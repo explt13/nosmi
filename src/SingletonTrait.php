@@ -12,6 +12,10 @@ trait SingletonTrait{
     {
     }
 
+    
+    /**
+     * @return static
+     */
     public static function getInstance()
     {
         if (self::$instance === null) {

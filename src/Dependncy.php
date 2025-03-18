@@ -14,19 +14,18 @@ class Dependency implements DependencyInterface
         $this->container = $container;
     }
 
-    public function addDependency(string $dependency): bool
+    public function addDependency(string $dependency, bool $cacheDependecy = true): bool
     {
         $this->container->set($dependency, function($container) use ($dependency) {
             $container->autowire($dependency);
-        });
+        }, $cacheDependecy);
         return true;
     }
 
     public function removeDependency(string $dependency): bool
     {
-        $removed = $this->container->removeDependency($dependency);
+        $removed = $this->container->remove($dependency);
         if ($removed) {
-           
             return true;
         }
         return false;
