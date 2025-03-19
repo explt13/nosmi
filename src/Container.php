@@ -10,36 +10,29 @@ class Container implements ContainerInterface
     protected array $bindings = array();
     protected array $services = array();
 
-    public function init(array $dependencies)
-    {
-        $this->bindings = $dependencies;
-    }
-
     /** 
     * @param string $id Interface Name
-    * @param callable $callback, fn(ContainerInterface $container) => new Concrete;
+    * @param callable $callback, fn(ContainerInterface $container) => $container->autowire(Concrete::class);
     */
-    public function set(string $id, callable $callback): bool
+    public function set(string $id, callable $callback): void
     {
         if (!interface_exists($id) && !class_exists($id)) {
             throw new \Exception("Cannot bind non-existent interface or class: $id");
         }
         $this->bindings[$id] = $callback;
-        return true;
     }
 
-    public function remove(string $id): bool
+    public function remove(string $id): void
     {
-        $deleted = false;
+        if (!isset($this->bindings[$id]) && !isset($this->services[$id])) {
+            throw new \Exception('Cannot unset unpresented service');
+        }
         if (isset($this->bindings[$id])) {
             unset($this->bindings[$id]);
-            $deleted = true;
         }
         if (isset($this->services[$id])) {
             unset($this->services[$id]);
-            $deleted = true;
         }
-        return $deleted;
     }
 
     public function has(string $id): bool
@@ -52,21 +45,27 @@ class Container implements ContainerInterface
      * @param class-string<T> $id
      * @return T
      */
-    public function get(string $id): object
+    public function get(string $id, bool $cacheDependency): object
     {
-        if (isset($this->services[$id])) {
+        if ($cacheDependency && isset($this->services[$id])) {
             return $this->services[$id];
         }
         
         if (isset($this->bindings[$id]) && is_callable($this->bindings[$id])) {
-            $this->services[$id] = $this->bindings[$id]($this);
-            return $this->services[$id];
+            $dependency = $this->bindings[$id]($this);
+            if ($cacheDependency) {
+                $this->services[$id] = $dependency;
+            }
+            return $dependency;
         }
-        $this->services[$id] = $this->autowire($id);
-        return $this->services[$id];
+        $dependency = $this->autowire($id, $cacheDependency);
+        if ($cacheDependency) {
+            $this->services[$id] = $dependency;
+        }
+        return $dependency;
     }
     
-    public function autowire(string $service): object
+    protected function autowire(string $service, $cacheDependency): object
     {
         
         $reflectorClass = $this->getReflectorClass($service);
@@ -90,7 +89,7 @@ class Container implements ContainerInterface
             if (!class_exists($argType->getName()) && !interface_exists($argType->getName())) {
                 throw new \Exception("Parameter '{$arg->getName()}' is not a class or interface");
             }
-            $dependencies[$arg->getName()] = $this->get($argType->getName());
+            $dependencies[$arg->getName()] = $this->get($argType->getName(), $cacheDependency);
         }
         return new $service(...$dependencies);
     }
