@@ -11,64 +11,66 @@ class Container implements ContainerInterface
     protected array $services = array();
 
     /** 
-    * @param string $id Interface Name
+    * @param string $abstract Interface Name
     * @param callable $callback, fn(ContainerInterface $container) => $container->autowire(Concrete::class);
     */
-    public function set(string $id, callable $callback): void
+    public function set(string $abstract, callable $callback): void
     {
-        if (!interface_exists($id) && !class_exists($id)) {
-            throw new \Exception("Cannot bind non-existent interface or class: $id");
+        if (!interface_exists($abstract) && !class_exists($abstract)) {
+            throw new \Exception("Cannot bind non-existent interface or class: $abstract");
         }
-        $this->bindings[$id] = $callback;
+        $this->bindings[$abstract] = $callback;
     }
 
-    public function remove(string $id): void
+    public function remove(string $abstract): void
     {
-        if (!isset($this->bindings[$id]) && !isset($this->services[$id])) {
+        if (!isset($this->bindings[$abstract]) && !isset($this->services[$abstract])) {
             throw new \Exception('Cannot unset unpresented service');
         }
-        if (isset($this->bindings[$id])) {
-            unset($this->bindings[$id]);
+        if (isset($this->bindings[$abstract])) {
+            unset($this->bindings[$abstract]);
         }
-        if (isset($this->services[$id])) {
-            unset($this->services[$id]);
+        if (isset($this->services[$abstract])) {
+            unset($this->services[$abstract]);
         }
     }
 
-    public function has(string $id): bool
+    public function has(string $abstract): bool
     {
-        return isset($this->bindings[$id]);
+        return isset($this->bindings[$abstract]);
     }
 
     /**
      * @template T
-     * @param class-string<T> $id
+     * @param class-string<T> $abstract
      * @return T
      */
-    public function get(string $id, bool $cacheDependency): object
+    public function get(string $abstract, bool $getCached, bool $cacheService = true): object
     {
-        if ($cacheDependency && isset($this->services[$id])) {
-            return $this->services[$id];
+        if ($getCached && isset($this->services[$abstract])) {
+            return $this->services[$abstract];
         }
-        
-        if (isset($this->bindings[$id]) && is_callable($this->bindings[$id])) {
-            $dependency = $this->bindings[$id]($this);
-            if ($cacheDependency) {
-                $this->services[$id] = $dependency;
-            }
-            return $dependency;
+
+        if (!isset($this->bindings[$abstract])) {
+            throw new \Exception("No binding found for $abstract");
         }
-        $dependency = $this->autowire($id, $cacheDependency);
-        if ($cacheDependency) {
-            $this->services[$id] = $dependency;
+
+        $concrete = $this->bindings[$abstract]($this);
+        if ($cacheService) {
+            $this->cacheService($abstract, $concrete);
         }
-        return $dependency;
+        return $concrete;
+    }
+
+    protected function cacheService($abstract, $concrete)
+    {
+        $this->services[$abstract] = $concrete;
     }
     
     protected function autowire(string $service, $cacheDependency): object
     {
         
-        $reflectorClass = $this->getReflectorClass($service);
+        $reflectorClass = new \ReflectionClass($service);
         $reflectorConstructor = $reflectorClass->getConstructor();
 
         if (is_null($reflectorConstructor)) {
@@ -92,24 +94,5 @@ class Container implements ContainerInterface
             $dependencies[$arg->getName()] = $this->get($argType->getName(), $cacheDependency);
         }
         return new $service(...$dependencies);
-    }
-
-    protected function getReflectorClass(string &$service): \ReflectionClass
-    {
-        $reflectorClass = new \ReflectionClass($service);
-        
-        if ($reflectorClass->isInterface()) {
-            $service = preg_replace('/(interfaces\\\\|Interface)/', '', $service);
-            if (!class_exists($service)) {
-                throw new \Exception("Class $service not found");
-            }
-            $reflectorClass = new \ReflectionClass($service);
-        }
-
-        if ($reflectorClass->isAbstract()) {
-            throw new \Exception("Cannot instantiate abstract class: $service");
-        }
-
-        return $reflectorClass;
     }
 }
