@@ -1,7 +1,7 @@
 <?php
-namespace Explt13\Nosmi\base;
+namespace Explt13\Nosmi\Base;
 
-use Explt13\Nosmi\interfaces\CacheInterface;
+use Explt13\Nosmi\Interfaces\CacheInterface;
 use Explt13\Nosmi\Request;
 use Explt13\Nosmi\RouteContext;
 

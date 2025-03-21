@@ -1,6 +1,6 @@
 <?php
 
-namespace Explt13\Nosmi\interfaces;
+namespace Explt13\Nosmi\Interfaces;
 
 interface ContainerInterface
 {

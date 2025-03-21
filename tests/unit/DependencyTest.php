@@ -5,13 +5,15 @@ namespace Tests\unit;
 use Explt13\Nosmi\Container;
 use Explt13\Nosmi\DependencyManager;
 use PHPUnit\Framework\TestCase;
+use Tests\unit\mockdata\Dependency\FakeClassA;
+use Tests\unit\mockdata\Dependency\FakeClassB;
 
-class DependecyTest extends TestCase
+class DependencyTest extends TestCase
 {
     public function testContainerCache()
     {
         $container = Container::getInstance();
-        $dependencyManager = new DependencyManager($container);
+        // $dependencyManager = new DependencyManager($container);
         
         // $dependencyManager->addDependency();
 

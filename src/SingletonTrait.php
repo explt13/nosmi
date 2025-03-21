@@ -11,7 +11,6 @@ trait SingletonTrait{
     private function __clone()
     {
     }
-
     
     /**
      * @return static

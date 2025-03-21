@@ -3,8 +3,8 @@
 namespace Explt13\Nosmi;
 
 use Exception;
-use Explt13\Nosmi\base\View;
-use Explt13\Nosmi\interfaces\ContainerInterface;
+use Explt13\Nosmi\Base\View;
+use Explt13\Nosmi\Interfaces\ContainerInterface;
 
 class ControllerResolver
 {

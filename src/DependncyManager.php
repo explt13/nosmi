@@ -2,8 +2,8 @@
 
 namespace Explt13\Nosmi;
 
-use Explt13\Nosmi\interfaces\ContainerInterface;
-use Explt13\Nosmi\interfaces\DependencyManagerInterface;
+use Explt13\Nosmi\Interfaces\ContainerInterface;
+use Explt13\Nosmi\Interfaces\DependencyManagerInterface;
 
 class DependencyManager implements DependencyManagerInterface
 {

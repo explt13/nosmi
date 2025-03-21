@@ -2,7 +2,7 @@
 
 namespace Explt13\Nosmi;
 
-use Explt13\Nosmi\interfaces\ContainerInterface;
+use Explt13\Nosmi\Interfaces\ContainerInterface;
 
 class MiddlewareLoader
 {

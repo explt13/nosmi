@@ -1,8 +1,8 @@
 <?php
 
-namespace Explt13\Nosmi\base;
+namespace Explt13\Nosmi\Base;
 
-use Explt13\Nosmi\interfaces\WidgetInterface;
+use Explt13\Nosmi\Interfaces\WidgetInterface;
 
 abstract class Widget implements WidgetInterface
 {
