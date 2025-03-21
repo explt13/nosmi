@@ -1,7 +1,7 @@
 <?php
 namespace Explt13\Nosmi;
 
-use Explt13\Nosmi\interfaces\CacheInterface;
+use Explt13\Nosmi\Interfaces\CacheInterface;
 
 class Cache implements CacheInterface
 {

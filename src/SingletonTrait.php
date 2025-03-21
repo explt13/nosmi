@@ -11,7 +11,10 @@ trait SingletonTrait{
     private function __clone()
     {
     }
-
+    
+    /**
+     * @return static
+     */
     public static function getInstance()
     {
         if (self::$instance === null) {

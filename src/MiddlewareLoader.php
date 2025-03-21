@@ -2,7 +2,7 @@
 
 namespace Explt13\Nosmi;
 
-use Explt13\Nosmi\interfaces\ContainerInterface;
+use Explt13\Nosmi\Interfaces\ContainerInterface;
 
 class MiddlewareLoader
 {
@@ -25,7 +25,7 @@ class MiddlewareLoader
     public function run()
     {
         foreach ($this->middlewares as $middleware) {
-            $className = "app\\middlewares\\" . $middleware;
+            $className = "Surfsail\\middlewares\\" . $middleware;
             $object = $this->container->get($className);
             $object->run();
         }

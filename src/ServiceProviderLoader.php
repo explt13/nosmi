@@ -2,7 +2,7 @@
 
 namespace Explt13\Nosmi;
 
-use Explt13\Nosmi\interfaces\ContainerInterface;
+use Explt13\Nosmi\Interfaces\ContainerInterface;
 
 class ServiceProviderLoader
 {
@@ -21,7 +21,7 @@ class ServiceProviderLoader
     {
         foreach ($this->providers as $provider)
         {
-            $className = "app\\providers\\" . $provider;
+            $className = "Surfsail\\providers\\" . $provider;
             $object = $this->container->get($className);
             $object->register();
         }

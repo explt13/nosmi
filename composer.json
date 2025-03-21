@@ -7,6 +7,11 @@
             "Explt13\\Nosmi\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
     "authors": [
         {
             "name": "explt13",
@@ -15,6 +20,10 @@
     ],
     "version": "1.0.0",
     "require": {
-        "php": ">=8.3.6"
+        "php": ">=8.3.6",
+        "vlucas/phpdotenv": "^5.6"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^12.0"
     }
 }
