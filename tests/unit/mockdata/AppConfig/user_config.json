@@ -1,0 +1,37 @@
+{
+    "userparam1": {
+        "value": 1,
+        "readonly": true
+    },
+    "defaultparam1": {
+        "value": 2,
+        "readonly": false
+    },
+    "userparam3": {
+        "value": 5,
+        "readonly": false,
+        "some_another_attrib": "app"
+    },
+    "notvalueprovided": {
+        "value": 1,
+        "readonly": true,
+        "level": 2,
+        "1a": "some attrib"
+    },
+    "defaultparam4": [
+        1,
+        2,
+        3,
+        4
+    ],
+    "anotherparam": {
+        "value": {
+            "some1": "abc",
+            "some2": "def"
+        },
+        "readonly": true,
+        "level": 2,
+        "1a": "some attrib"
+    },
+    "scalarvalue": "string"
+}

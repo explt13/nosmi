@@ -1,14 +1,22 @@
 {
-    "somevalue1": {
+    "defaultparam1": {
         "value": 1,
-        "readonly": true
+        "readonly": false,
+        "framework": true
     },
-    "somevalue2": {
+    "defaultparam2": {
         "value": 2,
-        "readonly": true
+        "readonly": true,
+        "framework": true
     },
-    "somevalue3": {
+    "defaultparam3": {
         "value": 3,
-        "readonly": false
-    }
+        "readonly": false,
+        "framework": true
+    },
+    "defaultparam4": [
+        1,
+        2,
+        3
+    ]
 }
