@@ -2,7 +2,7 @@
 
 namespace Explt13\Nosmi\Exceptions;
 
-class ParameterValidationException extends \LogicException
+class ConfigParameterValidationException extends \LogicException
 {
     public function __construct($parameter_name, $attribute_name, $expected_value, $got_value)
     {

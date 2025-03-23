@@ -1,4 +1,5 @@
 {
+    "defaultparam0": "something",
     "defaultparam1": {
         "value": 1,
         "readonly": false,
