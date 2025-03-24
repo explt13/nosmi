@@ -2,6 +2,7 @@
 
 namespace Explt13\Nosmi\AppConfig;
 
+use DirectoryIterator;
 use Dotenv\Dotenv;
 use Explt13\Nosmi\Exceptions\ArrayNotAssocException;
 use Explt13\Nosmi\Exceptions\ConfigAttributeException;
@@ -14,34 +15,49 @@ class ConfigLoader
     /**
      * @var AppConfig $app_config App config instance
      */
-    private static AppConfig $app_config;
-   
+    protected AppConfig $app_config;
+    protected string $user_config_path;
+
+    public function __construct(?string $destination = null)
+    {
+        $this->app_config = AppConfig::getInstance();
+        $this->user_config_path = $destination ?? $this->getUserConfigPath();
+    }
     /**
      * Inits config loader
      */
-    public static function init(): void
+    public function init(): void
     {
-        self::$app_config = AppConfig::getInstance();
-        self::loadDefaultConfig();
-        self::loadUserConfig(self::$app_config->get('APP_ROOT') ?? __DIR__ . '/../../tests/unit/mockdata/AppConfig/user_config.json');
+        
+        $this->loadDefaultConfig();
+        $this->loadUserConfig($this->app_config->get('APP_ROOT') ?? __DIR__ . '/../../tests/unit/mockdata/AppConfig/user_config.json');
+    }
+
+    private function getUserConfigPath()
+    {
+        $assumed_root = dirname(__DIR__, 5);
+        if (!empty(glob($assumed_root . '/composer.json'))) {
+            $assumed_root .= '/config';
+        }
+        return $assumed_root;
     }
 
     /**
      * Loads framework's config
      */
-    public static function loadDefaultConfig()
+    public function loadDefaultConfig()
     {
-        $config = json_decode(file_get_contents(self::getConfigPath()), true);
+        $config = json_decode(file_get_contents($this->getConfigPath()), true);
 
         foreach($config as $name => $value)
         {
             if (!is_primitive($value) && !array_is_list($value)) {
                 if (!isset($value['value'])) throw new ConfigAttributeException('`value` attribute has not been provided for complex parameter');
                 if (!array_is_assoc($value)) throw new ArrayNotAssocException('Please provide an associative array for attributes for parameter: ' . $name);
-                self::$app_config->set($name, $value['value'], false, $value);
+                $this->app_config->set($name, $value['value'], false, $value);
                 continue;
             }
-            self::$app_config->set($name, $value);
+            $this->app_config->set($name, $value);
         }
     }
 
@@ -49,7 +65,7 @@ class ConfigLoader
      * Get a config path
      * @return string config path
      */
-    private static function getConfigPath(): string
+    private function getConfigPath(): string
     {
         return __DIR__ . '/../Config/default_config.json';
     }
@@ -61,23 +77,23 @@ class ConfigLoader
      * \_\_DIR\_\_ . '/config_folder/user_config.env;
      * @return void
      */
-    public static function loadUserConfig(string $dest): void
+    public function loadUserConfig(string $dest): void
     {
         $extension = pathinfo($dest, PATHINFO_EXTENSION);
         switch ($extension) {
             case 'ini':
-                $user_config = self::loadIniConfig($dest);
+                $user_config = $this->loadIniConfig($dest);
                 break;
             case 'env':
-                $user_config = self::loadEnvConfig($dest);
+                $user_config = $this->loadEnvConfig($dest);
                 break;
             case 'json':
-                $user_config = self::loadJsonConfig($dest);
+                $user_config = $this->loadJsonConfig($dest);
                 break;
             default:
                 throw new ResourceNotFoundException('Failed to load config, cannot find: ' . $dest);
         }
-        self::mergeConfigs($user_config);
+        $this->mergeConfigs($user_config);
     }
 
     /**
@@ -85,16 +101,16 @@ class ConfigLoader
      * @param array $user_config user configuration params array
      * @return void
      */
-    private static function mergeConfigs(array $user_config): void
+    private function mergeConfigs(array $user_config): void
     {
         foreach($user_config as $name => $value) {
             if (!is_primitive($value) && !array_is_list($value)) {
                 if (!isset($value['value'])) throw new ConfigAttributeException('`value` attribute has not been provided for complex parameter');
                 if (!array_is_assoc($value)) throw new ArrayNotAssocException('Please provide an associative array for attributes for parameter: ' . $name);
-                self::$app_config->set($name, $value['value'], false, $value);
+                $this->app_config->set($name, $value['value'], false, $value);
                 continue;
             }
-            self::$app_config->set($name, $value);
+            $this->app_config->set($name, $value);
         }
     }
 
@@ -103,7 +119,7 @@ class ConfigLoader
      * @param $dest the path to the .ini file
      * @return array
      */
-    private static function loadIniConfig($dest): array
+    private function loadIniConfig($dest): array
     {
         $config = parse_ini_file($dest);
         if (!$config) throw new FileReadException("Cannot read the ini file: $dest");
@@ -115,7 +131,7 @@ class ConfigLoader
      * @param $dest the path to the .env file
      * @return array
      */
-    private static function loadEnvConfig($dest): array
+    private function loadEnvConfig($dest): array
     {
         if (!is_file($dest)) throw new FileNotFoundException('Cannot find the file: ' . $dest);
     
