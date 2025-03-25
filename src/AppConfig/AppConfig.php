@@ -7,7 +7,7 @@ use Explt13\Nosmi\Exceptions\ArrayNotAssocException;
 use Explt13\Nosmi\Exceptions\ConfigAttributeException;
 use Explt13\Nosmi\SingletonTrait;
 
-class AppConfig
+class AppConfig implements ConfigInerface
 {
     use SingletonTrait;
 
@@ -16,14 +16,19 @@ class AppConfig
      */
     protected array $config = [];
 
-    private function __construct()
+    /**
+     * @var ConfigValidatorInterface a config validator
+     */
+    protected ConfigValidatorInterface $config_validator;
+
+    private function __construct(ConfigValidatorInterface $config_validator)
     {
-        require_once __DIR__ . '/../Utils/functions.php';
+        $this->config_validator = $config_validator;
     }
 
     /**
-     * Check whether a config paramter exists
-     * @param string $name paramter name to check
+     * Check whether a config parameter exists
+     * @param string $name parameter name to check
      * @return bool return true if exists else false
      */
     public function has(string $name): bool
@@ -84,7 +89,7 @@ class AppConfig
     {
         $parameter = $this->get($name, true); // value
         if ($parameter !== null) {
-            ConfigValidator::readonlyCheck($name, $parameter);
+            $this->config_validator->readonlyCheck($name, $parameter);
         }
     
         if (!empty($extra_attributes) && !array_is_assoc($extra_attributes)) {
@@ -100,7 +105,32 @@ class AppConfig
     }
 
     /**
-     * Reset configuration to default values
+     * Bulk set config parameters
+     * @param array $config_array a config array to set
+     * @return void
+     * @internal
+     */
+    public function bulkSet(array $config_array): void
+    {
+        foreach ($config_array as $name => $value) {
+            if ($this->config_validator->isComplexParameter($value) && $this->config_validator->isValidConfigComplexParameter($name, $value)) {
+                $this->set($name, $value['value'], false, $value);
+                continue;
+            }
+            $this->set($name, $value);
+        }
+    }
+
+    /**
+     * Removes configuration parameter using a key # todo
+     */
+    public function remove(string $key): void
+    {
+
+    }
+
+     /**
+     * Reset configuration to default values # todo
      */
     public function reset()
     {
