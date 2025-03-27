@@ -8,7 +8,6 @@ interface ConfigInerface
     public function get(string $name, bool $getWithAttributes=false): mixed;
     public function getAll(): array;
     public function set(string $name, mixed $value, bool $readonly = false, array $extra_attributes = []): void;
+    public function bulkSet(array $config_array): void;
     public function remove(string $key): void;
-    public function reset();
-
 }

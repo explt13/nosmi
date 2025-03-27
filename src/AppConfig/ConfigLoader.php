@@ -2,11 +2,7 @@
 
 namespace Explt13\Nosmi\AppConfig;
 
-use DirectoryIterator;
 use Dotenv\Dotenv;
-use Explt13\Nosmi\Exceptions\ArrayNotAssocException;
-use Explt13\Nosmi\Exceptions\ConfigAttributeException;
-use Explt13\Nosmi\Exceptions\FileNotFoundException;
 use Explt13\Nosmi\Exceptions\FileReadException;
 use Explt13\Nosmi\Exceptions\InvalidFileExtensionException;
 use Explt13\Nosmi\Exceptions\InvalidResourceException;
@@ -37,7 +33,7 @@ class ConfigLoader
     {
         $this->app_config = AppConfig::getInstance();
         $this->loadFrameworkConfig($this->getFrameworkConfigPath());
-        if ($this->validateConfigPath($config_path)) {
+        if ($this->validateConfigPath($config_path) !== false) {
             $this->loadUserConfig($this->app_config->get('APP_ROOT') ?? $this->getUserConfigPath($config_path));
         }
     }
@@ -53,7 +49,7 @@ class ConfigLoader
 
     /**
      * Loads framework's config
-     * @throws ConfigAttributeException|ArrayNotAssocException
+     * @return void
      */
     private function loadFrameworkConfig(string $dest): void
     {
@@ -63,7 +59,7 @@ class ConfigLoader
 
     /**
      * Gets user's config path;
-     * @param string $config_path a path to the user's config
+     * @param null|string $config_path a path to the user's config
      */
     private function getUserConfigPath(null|string $config_path): string
     {
@@ -71,6 +67,21 @@ class ConfigLoader
             return $config_path;
         }
         return $this->detectConfigFile();
+    }
+
+    /**
+     * Attempts to detect a config path
+     * @return string a resolved config path
+     * @throws ResourceNotFoundException
+     */
+    private function detectConfigFile(): string
+    {
+        $assumed_root = dirname(__DIR__, 5);
+        if (!empty(glob($assumed_root . '/composer.json'))) {
+            $assumed_root .= '/config';
+            return $assumed_root;
+        }
+        throw new ResourceNotFoundException("Cannot find a config file. Set the path explicitly or set it to false if config file is not supposed to present");
     }
 
     /**
@@ -97,26 +108,12 @@ class ConfigLoader
     }
 
     /**
-     * Tries to detect a config path
-     * @return string a resolved config path
-     * @throws ResourceNotFoundException
-     */
-    private function detectConfigFile(): string
-    {
-        $assumed_root = dirname(__DIR__, 5);
-        if (!empty(glob($assumed_root . '/composer.json'))) {
-            $assumed_root .= '/config';
-            return $assumed_root;
-        }
-        throw new ResourceNotFoundException("Cannot find a config file. Set the path explicitly or set it to false if config file is not supposed to present");
-    }
-
-    /**
      * Load an app config in .env, .json, .ini
      * @param string $dest destination to the config file \
      * Specify the full path, e.g
      * \_\_DIR\_\_ . '/config_folder/user_config.env;
      * @return void
+     * @throws InvalidFileExtensionException
      */
     public function loadUserConfig(string $dest): void
     {
@@ -155,12 +152,9 @@ class ConfigLoader
      * Loads .env config
      * @param $dest the path to the .env file
      * @return array
-     * @throws FileNotFoundException
      */
     private function loadEnvConfig(string $dest): array
     {
-        if (!is_file($dest)) throw new FileNotFoundException('Cannot find the file: ' . $dest);
-    
         $dirname = dirname($dest);
         $dotenv = Dotenv::createImmutable($dirname);
         $dotenv->load();

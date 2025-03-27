@@ -3,10 +3,7 @@
         "value": 1,
         "readonly": true
     },
-    "defaultparam1": {
-        "value": 2,
-        "readonly": false
-    },
+    "defaultparam1": 2,
     "userparam3": {
         "value": 5,
         "readonly": false,

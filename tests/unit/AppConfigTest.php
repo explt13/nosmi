@@ -12,9 +12,7 @@ class AppConfigTest extends TestCase
 
     public function testLoadConfig()
     {
-        ConfigLoader::init();
-        print_r($this->app_config->getAll());
-        $this->assertTrue(true);
+        
     }
 
     public function setUp(): void

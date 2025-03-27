@@ -2,9 +2,6 @@
 
 namespace Explt13\Nosmi\AppConfig;
 
-use Explt13\Nosmi\AppConfig\ConfigValidator;
-use Explt13\Nosmi\Exceptions\ArrayNotAssocException;
-use Explt13\Nosmi\Exceptions\ConfigAttributeException;
 use Explt13\Nosmi\SingletonTrait;
 
 class AppConfig implements ConfigInerface
@@ -15,6 +12,11 @@ class AppConfig implements ConfigInerface
      * @var array $config an array with parameters 
      */
     protected array $config = [];
+
+    /**
+     * @var string PARAMETER_NOT_SET a marker for unset parameters
+     */
+    public const PARAMETER_NOT_SET = '__PARAMETER_NOT_SET__';
 
     /**
      * @var ConfigValidatorInterface a config validator
@@ -43,25 +45,15 @@ class AppConfig implements ConfigInerface
      * get a parameter with associated attributes if they present \
      * ["param" => ["value" => value , ...attributes], ...]
      * </p>
-     * @return mixed returns null if a parameter is not present
+     * @return mixed returns self::PARAMETER_NOT_SET if a parameter is not present
      */
     public function get(string $name, bool $getWithAttributes=false): mixed
     {
         if ($this->has($name)) {
-            $value = $this->config[$name];
-            
-            if (is_primitive($value) || array_is_list($value)) {
-                return $value;
-            }
-
-            if (!isset($value['value'])) throw new ConfigAttributeException();
-            
-            if ($getWithAttributes) {
-                return $value;
-            }
-            return $value['value'];
+            $parameter = $this->config[$name];
+            return $getWithAttributes ? $parameter : $parameter['value'];
         }
-        return null;
+        return self::PARAMETER_NOT_SET;
     }
 
     /**
@@ -87,37 +79,33 @@ class AppConfig implements ConfigInerface
      */
     public function set(string $name, mixed $value, bool $readonly = false, array $extra_attributes = []): void
     {
-        $parameter = $this->get($name, true); // value
-        if ($parameter !== null) {
-            $this->config_validator->readonlyCheck($name, $parameter);
+        $parameter = $this->get($name, true);
+        if ($parameter !== self::PARAMETER_NOT_SET) {
+            $this->config_validator->checkReadonly($name, $parameter);
         }
-    
-        if (!empty($extra_attributes) && !array_is_assoc($extra_attributes)) {
-            throw new ArrayNotAssocException('Provide an associative array for extra_attributes for parameter: ' . $name);
-        }
-        
+        $this->config_validator->validateAttributes($name, $extra_attributes);
+
         $this->config[$name] = [
             'value' => $value,
             'readonly' => $readonly,
             ...$extra_attributes
         ];
-
     }
 
     /**
-     * Bulk set config parameters
+     * Set multiple config parameters at once
      * @param array $config_array a config array to set
      * @return void
-     * @internal
      */
     public function bulkSet(array $config_array): void
     {
-        foreach ($config_array as $name => $value) {
-            if ($this->config_validator->isComplexParameter($value) && $this->config_validator->isValidConfigComplexParameter($name, $value)) {
-                $this->set($name, $value['value'], false, $value);
+        foreach ($config_array as $name => $parameter) {
+            if ($this->config_validator->isComplexParameter($parameter)) {
+                $this->config_validator->validateParameterHasValue($name, $parameter);
+                $this->set($name, $parameter['value'], false, $parameter);
                 continue;
             }
-            $this->set($name, $value);
+            $this->set($name, $parameter);
         }
     }
 
@@ -126,14 +114,7 @@ class AppConfig implements ConfigInerface
      */
     public function remove(string $key): void
     {
-
-    }
-
-     /**
-     * Reset configuration to default values # todo
-     */
-    public function reset()
-    {
+        $parameter = $this->get($key);
 
     }
 }
