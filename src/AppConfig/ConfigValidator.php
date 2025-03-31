@@ -8,11 +8,7 @@ use Explt13\Nosmi\Exceptions\SetReadonlyException;
 
 class ConfigValidator implements ConfigValidatorInterface
 {
-    /**
-     * Checks if a config parameter is readonly.
-     * @param array $parameter a parameter retrieved from the config
-     * @return bool
-     */
+    
     public function isReadonly(array $parameter): bool
     {
         if (isset($parameter['readonly']) && $parameter['readonly'] === true) {
@@ -21,13 +17,6 @@ class ConfigValidator implements ConfigValidatorInterface
         return false;
     }
 
-    /**
-     * Checks if a config parameter is readonly, throws exception on failure
-     * @param string $parameter_name a paramter name
-     * @param array $parameter a parameter retrieved from the config
-     * @throws SetReadonlyException rejects a paramater to be set if check fails
-     * @return void
-     */
     public function checkReadonly(string $parameter_name, array $parameter): void
     {
         if (array_key_exists('readonly', $parameter) && $parameter['readonly'] === true) {
@@ -35,23 +24,11 @@ class ConfigValidator implements ConfigValidatorInterface
         }
     }
 
-    /**
-     * Checks if a parameter is complex
-     * @param mixed $parameter parameter parameter
-     * @return bool
-     */
     public function isComplexParameter($parameter): bool
     {
         return !is_primitive($parameter) && !array_is_list($parameter);
     }
 
-    /**
-     * Validates a parameter's attributes
-     * @param string $parameter_name a parameter name
-     * @param array $attributes attributes to check
-     * @throws ArrayNotAssocException
-     * @return void
-     */
     public function validateAttributes(string $parameter_name, array $attributes): void
     {
         if (!empty($attributes) && !array_is_assoc($attributes)) {
@@ -59,18 +36,16 @@ class ConfigValidator implements ConfigValidatorInterface
         }
     }
 
-    /**
-     * Validates a config parameter has value
-     * @param string $name parameter name
-     * @param mixed $parameter parameter body
-     * @throws ConfigAttributeException
-     * @return bool
-     */
     public function validateParameterHasValue(string $name, mixed $parameter): void
     {
         if (!array_key_exists('value', $parameter)) {
             throw new ConfigAttributeException("`value` attribute has not been provided for complex parameter: $name");
         }
+    }
+
+    public function isRemovable(array $parameter): bool
+    {
+        return (!isset($parameter['removable']) || $parameter['removable'] === true);
     }
 
     // #todo

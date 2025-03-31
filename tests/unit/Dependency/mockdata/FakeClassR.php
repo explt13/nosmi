@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\unit\mockdata\Dependency;
+namespace Tests\Unit\Dependency\mockdata;
 
 class FakeClassR
 {

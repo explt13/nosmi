@@ -4,11 +4,12 @@
          bootstrap="tests/bootstrap.php"
          cacheDirectory="tests/cache"
          displayDetailsOnTestsThatTriggerWarnings="true"
+         displayDetailsOnTestsThatTriggerDeprecations="true"
          colors="true"
   >
     <testsuites>
-        <testsuite name="unit">
-            <directory>tests/unit</directory>
+        <testsuite name="appconfig">
+            <directory>tests/unit/AppConfig</directory>
         </testsuite>
     </testsuites>
 </phpunit>

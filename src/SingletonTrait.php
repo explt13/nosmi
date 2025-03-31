@@ -4,12 +4,11 @@ namespace Explt13\Nosmi;
 trait SingletonTrait{
     private static $instance;
     
-    private function __construct()
+    private function __construct() {}
+    final protected function __clone() {}
+    final public function __wakeup()
     {
-    }
-
-    private function __clone()
-    {
+        throw new \Exception("Cannot unserialize singleton");
     }
     
     /**
@@ -17,9 +16,9 @@ trait SingletonTrait{
      */
     public static function getInstance()
     {
-        if (self::$instance === null) {
-            self::$instance = new static();
+        if (static::$instance === null) {
+            static::$instance = new static();
         }
-        return self::$instance;
+        return static::$instance;
     }
 }

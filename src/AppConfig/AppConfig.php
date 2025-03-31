@@ -2,9 +2,10 @@
 
 namespace Explt13\Nosmi\AppConfig;
 
+use Explt13\Nosmi\Exceptions\RemoveConfigParameterException;
 use Explt13\Nosmi\SingletonTrait;
 
-class AppConfig implements ConfigInerface
+class AppConfig implements ConfigInterface
 {
     use SingletonTrait;
 
@@ -13,9 +14,6 @@ class AppConfig implements ConfigInerface
      */
     protected array $config = [];
 
-    /**
-     * @var string PARAMETER_NOT_SET a marker for unset parameters
-     */
     public const PARAMETER_NOT_SET = '__PARAMETER_NOT_SET__';
 
     /**
@@ -23,30 +21,16 @@ class AppConfig implements ConfigInerface
      */
     protected ConfigValidatorInterface $config_validator;
 
-    private function __construct(ConfigValidatorInterface $config_validator)
+    private function __construct()
     {
-        $this->config_validator = $config_validator;
+        $this->config_validator = new ConfigValidator();
     }
 
-    /**
-     * Check whether a config parameter exists
-     * @param string $name parameter name to check
-     * @return bool return true if exists else false
-     */
     public function has(string $name): bool
     {
         return array_key_exists($name, $this->config);
     }
 
-    /**
-     * Get a configuration parameter
-     * @param string $name retrieve a configuration parameter by its name
-     * @param bool $getWithAttributes [optional] <p>
-     * get a parameter with associated attributes if they present \
-     * ["param" => ["value" => value , ...attributes], ...]
-     * </p>
-     * @return mixed returns self::PARAMETER_NOT_SET if a parameter is not present
-     */
     public function get(string $name, bool $getWithAttributes=false): mixed
     {
         if ($this->has($name)) {
@@ -56,27 +40,11 @@ class AppConfig implements ConfigInerface
         return self::PARAMETER_NOT_SET;
     }
 
-    /**
-     * Get all configuration parameters
-     * @return array array of parameters
-     */
     public function getAll(): array
     {
         return $this->config;
     }
 
-    /**
-     * Set a configuration parameter
-     * @param string $name a desired name for a parameter
-     * @param mixed $value a value for the parameter
-     * @param bool $readonly [optional] <p>
-     * whether parameter is should be only set once
-     * </p>
-     * @param array $extra_attributes [optional] <p>
-     * set extra attributes to the parameter. Must be an associative array.
-     * </p>
-     * @return void
-     */
     public function set(string $name, mixed $value, bool $readonly = false, array $extra_attributes = []): void
     {
         $parameter = $this->get($name, true);
@@ -92,11 +60,6 @@ class AppConfig implements ConfigInerface
         ];
     }
 
-    /**
-     * Set multiple config parameters at once
-     * @param array $config_array a config array to set
-     * @return void
-     */
     public function bulkSet(array $config_array): void
     {
         foreach ($config_array as $name => $parameter) {
@@ -109,12 +72,16 @@ class AppConfig implements ConfigInerface
         }
     }
 
-    /**
-     * Removes configuration parameter using a key # todo
-     */
-    public function remove(string $key): void
+    public function remove(string $name): bool
     {
-        $parameter = $this->get($key);
-
+        if ($this->has($name)) {
+            $parameter = $this->get($name, true);
+            if (!$this->config_validator->isRemovable($parameter)) {
+                throw new RemoveConfigParameterException($name, 'removable parameter');
+            }
+            unset($this->config[$name]);
+            return true;
+        }
+        return false;
     }
 }

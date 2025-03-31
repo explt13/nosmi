@@ -1,12 +1,11 @@
 <?php
 
-namespace Tests\unit;
+namespace Tests\Unit\Dependency;
 
 use Explt13\Nosmi\Container;
-use Explt13\Nosmi\DependencyManager;
 use PHPUnit\Framework\TestCase;
-use Tests\unit\mockdata\Dependency\FakeClassA;
-use Tests\unit\mockdata\Dependency\FakeClassB;
+use Tests\Unit\Dependency\mockdata\FakeClassA;
+use Tests\Unit\Dependency\mockdata\FakeClassB;
 
 class DependencyTest extends TestCase
 {
