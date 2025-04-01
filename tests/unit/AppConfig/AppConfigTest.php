@@ -22,7 +22,7 @@ class AppConfigTest extends TestCase
 
     public function tearDown(): void
     {
-        SingletonReset::resetSingleton($this->app_config::class);
+        SingletonReset::reset($this->app_config::class);
     }
 
     public static function setUpBeforeClass(): void

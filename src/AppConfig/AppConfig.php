@@ -3,9 +3,10 @@
 namespace Explt13\Nosmi\AppConfig;
 
 use Explt13\Nosmi\Exceptions\RemoveConfigParameterException;
+use Explt13\Nosmi\Interfaces\SingletonInterface;
 use Explt13\Nosmi\SingletonTrait;
 
-class AppConfig implements ConfigInterface
+class AppConfig implements ConfigInterface, SingletonInterface
 {
     use SingletonTrait;
 

@@ -3,18 +3,17 @@
 namespace Explt13\Nosmi\AppConfig;
 
 use Dotenv\Dotenv;
+use Explt13\Nosmi\Exceptions\FileNotFoundException;
 use Explt13\Nosmi\Exceptions\FileReadException;
 use Explt13\Nosmi\Exceptions\InvalidFileExtensionException;
-use Explt13\Nosmi\Exceptions\InvalidResourceException;
 use Explt13\Nosmi\Exceptions\ResourceNotFoundException;
-use SplFileInfo;
 
 class ConfigLoader
 {
     /**
-     * @var AppConfig $app_config App config instance
+     * @var ConfigInterface $app_config App config instance
      */
-    protected AppConfig $app_config;
+    protected ConfigInterface $app_config;
 
     /**
      * @var array{0: 'env', 1: 'json', 2: 'ini'} CONFIG_EXTENSTIONS available extensions for the config file
@@ -22,20 +21,12 @@ class ConfigLoader
     private const CONFIG_EXTENSTIONS = ['env', 'json', 'ini'];
 
     /**
-     * @param string $config_path [optional] <p> \
-     * A path to the app's config file.
-     * Setting path explicitly is recommended \
-     * Set it to __null__ to try resolve a path to the config automatically \
-     * Set it to __false__ to indicate that app does not use config 
-     * </p>
+     * @param ConfigInterface $app_config An app config object
      */
-    public function __construct(null|false|string $config_path = null)
+    public function __construct(ConfigInterface $app_config)
     {
-        $this->app_config = AppConfig::getInstance();
+        $this->app_config = $app_config;
         $this->loadFrameworkConfig($this->getFrameworkConfigPath());
-        if ($this->validateConfigPath($config_path) !== false) {
-            $this->loadUserConfig($this->app_config->get('APP_ROOT') ?? $this->getUserConfigPath($config_path));
-        }
     }
 
     /**
@@ -58,18 +49,6 @@ class ConfigLoader
     }
 
     /**
-     * Gets user's config path;
-     * @param null|string $config_path a path to the user's config
-     */
-    private function getUserConfigPath(null|string $config_path): string
-    {
-        if (!is_null($config_path)) {
-            return $config_path;
-        }
-        return $this->detectConfigFile();
-    }
-
-    /**
      * Attempts to detect a config path
      * @return string a resolved config path
      * @throws ResourceNotFoundException
@@ -85,55 +64,45 @@ class ConfigLoader
     }
 
     /**
-     * Validates a config path
-     * @param null|false|string $config path a path to the config
-     * @return bool returns __false__ if path is set to false meaning app does not have a config \
-     * returns __true__ if either a path is a null meaning left to autodetection or set to string that will be checked for validity
-     * @throws ResourceNotFoundException|InvalidResourceException
-     */
-    private function validateConfigPath(null|false|string $config_path): bool
-    {
-        if ($config_path === false) return false;
-        if (is_null($config_path)) return true;
-
-        if (!file_exists($config_path)) {
-            throw new ResourceNotFoundException("Cannot find the path to the config file: $config_path");
-        }
-        if (!is_file($config_path)) {
-            $file_info = new \SplFileInfo($config_path);
-            throw new InvalidResourceException($file_info->getType(), 'file');
-        }
-
-        return true;
-    }
-
-    /**
      * Load an app config in .env, .json, .ini
-     * @param string $dest destination to the config file \
-     * Specify the full path, e.g
+     * @param null|string $config_path [optional] <p> a destination to the config file \
+     * Set to null by default which will try to autodeteced the path to the config file
+     * Pass a full path, e.g
      * \_\_DIR\_\_ . '/config_folder/user_config.env;
+     * </p>
+     * 
      * @return void
-     * @throws InvalidFileExtensionException
+     * @throws InvalidFileExtensionException if a file has an unsupported extension
      */
-    public function loadUserConfig(string $dest): void
+    public function loadUserConfig(null|string $config_path = null): void
     {
-        $extension = pathinfo($dest, PATHINFO_EXTENSION);
-        switch ($extension) {
-            case 'ini':
-                $user_config = $this->loadIniConfig($dest);
-                break;
-            case 'env':
-                $user_config = $this->loadEnvConfig($dest);
-                break;
-            case 'json':
-                $user_config = $this->loadJsonConfig($dest);
-                break;
-            default:
-                throw new InvalidFileExtensionException("Invalid file extension $extension.", self::CONFIG_EXTENSTIONS);
-        };
+        if (is_null($config_path)) {
+            $config_path = $this->detectConfigFile();
+        }
+        if (!is_file($config_path) || !is_readable($config_path)) {
+            throw new FileNotFoundException('Cannot find a file: ' . $config_path);
+        }
+        
+        $extension = pathinfo($config_path, PATHINFO_EXTENSION);
+        if (!in_array($extension, self::CONFIG_EXTENSTIONS, true)) {
+            throw new InvalidFileExtensionException("Invalid file extension $extension.", self::CONFIG_EXTENSTIONS);
+        }
+        $user_config = $this->getConfig($extension, $config_path);
         $this->app_config->bulkSet($user_config);
     }
 
+    /**
+     * Get config array based on extension
+     * @return array a config array
+     */
+    private function getConfig($extension, $config_path): array
+    {
+        return match($extension) {
+            "ini" => $this->loadIniConfig($config_path),
+            "env" => $this->loadEnvConfig($config_path),
+            "json" => $this->loadJsonConfig($config_path)
+        };
+    }
     
     /**
      * Loads .ini config
@@ -167,7 +136,7 @@ class ConfigLoader
      * @return array
      * @throws FileReadException
      */
-    private static function loadJsonConfig(string $dest): array
+    private function loadJsonConfig(string $dest): array
     {
         $data = file_get_contents($dest);
         if (!$data) throw new FileReadException("Cannot read the json file: $dest");

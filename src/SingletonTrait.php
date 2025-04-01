@@ -1,7 +1,8 @@
 <?php
 namespace Explt13\Nosmi;
 
-trait SingletonTrait{
+trait SingletonTrait
+{
     private static $instance;
     
     private function __construct() {}
