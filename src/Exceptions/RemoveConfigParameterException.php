@@ -1,15 +1,12 @@
 <?php
 namespace Explt13\Nosmi\Exceptions;
 
-class RemoveConfigParameterException extends \LogicException
+class RemoveConfigParameterException extends BaseException
 {
+    protected const EXC_CODE = 1130;
+
     public function __construct(string $name, string $reason)
     {
-        parent::__construct($this->getDefaultMessage($name, $reason), 1007);
-    }
-    
-    private function getDefaultMessage(string $name, string $reason): string
-    {
-        return sprintf('Failed to remove config parameter "%s": %s', $name, $reason);
+        parent::__construct(sprintf('Failed to remove config parameter "%s": %s', $name, $reason));
     }
 }

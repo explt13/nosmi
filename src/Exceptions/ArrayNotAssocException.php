@@ -2,14 +2,16 @@
 
 namespace Explt13\Nosmi\Exceptions;
 
-class ArrayNotAssocException extends \InvalidArgumentException
+class ArrayNotAssocException extends BaseException
 {
-    public function __construct(?string $message = null, int $code = 1005)
+    protected const EXC_CODE = 1140;
+
+    public function __construct(?string $message = null)
     {
-        parent::__construct($message ?? $this->getDefaultMessage(), $code);
+        parent::__construct($message);
     }
 
-    private function getDefaultMessage(): string
+    protected function getDefaultMessage(): string
     {
         return "Please provide an associative array";
     }

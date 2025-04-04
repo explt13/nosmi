@@ -36,10 +36,10 @@ class ConfigValidator implements ConfigValidatorInterface
         }
     }
 
-    public function validateParameterHasValue(string $name, mixed $parameter): void
+    public function validateParameterHasValue(string $parameter_name, mixed $parameter): void
     {
         if (!array_key_exists('value', $parameter)) {
-            throw new ConfigAttributeException("`value` attribute has not been provided for complex parameter: $name");
+            throw new ConfigAttributeException($parameter_name, "value");
         }
     }
 

@@ -1,15 +1,15 @@
 <?php
 namespace Explt13\Nosmi\Exceptions;
 
-class InvalidResourceException extends \LogicException
+class InvalidResourceException extends BaseException
 {
-    public function __construct(string $got_resource, string $expected_resource)
-    {
-        parent::__construct($this->getDefaultMessage($got_resource, $expected_resource));
-    }
+    protected const EXC_CODE = 1100;
 
-    private function getDefaultMessage(string $got_resource, string $expected_resource): string
+    public function __construct(?string $got_resource, ?string $expected_resource)
     {
-        return "Invalid resource, got: $got_resource, expected: $expected_resource";
+        parent::__construct(sprintf("Invalid resource, got: %s, expected: %s",
+                $got_resource,
+                $expected_resource
+        ));
     }
 }

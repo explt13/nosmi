@@ -3,10 +3,12 @@
 namespace Explt13\Nosmi\AppConfig;
 
 use Dotenv\Dotenv;
-use Explt13\Nosmi\Exceptions\FileNotFoundException;
-use Explt13\Nosmi\Exceptions\FileReadException;
 use Explt13\Nosmi\Exceptions\InvalidFileExtensionException;
+use Explt13\Nosmi\Exceptions\InvalidResourceException;
 use Explt13\Nosmi\Exceptions\ResourceNotFoundException;
+use Explt13\Nosmi\Exceptions\ResourceReadException;
+use Explt13\Nosmi\Interfaces\FileValidatorInterface;
+use Explt13\Nosmi\Validators\FileValidator;
 
 class ConfigLoader
 {
@@ -14,6 +16,8 @@ class ConfigLoader
      * @var ConfigInterface $app_config App config instance
      */
     protected ConfigInterface $app_config;
+
+    protected FileValidatorInterface $file_validator;
 
     /**
      * @var array{0: 'env', 1: 'json', 2: 'ini'} CONFIG_EXTENSTIONS available extensions for the config file
@@ -23,9 +27,10 @@ class ConfigLoader
     /**
      * @param ConfigInterface $app_config An app config object
      */
-    public function __construct(ConfigInterface $app_config)
+    public function __construct(ConfigInterface $app_config, FileValidatorInterface $file_validator)
     {
         $this->app_config = $app_config;
+        $this->file_validator = $file_validator;
         $this->loadFrameworkConfig($this->getFrameworkConfigPath());
     }
 
@@ -79,41 +84,59 @@ class ConfigLoader
         if (is_null($config_path)) {
             $config_path = $this->detectConfigFile();
         }
-        if (!is_file($config_path) || !is_readable($config_path)) {
-            throw new FileNotFoundException('Cannot find a file: ' . $config_path);
-        }
-        
+        $this->validateConfigFilePath($config_path);
         $extension = pathinfo($config_path, PATHINFO_EXTENSION);
-        if (!in_array($extension, self::CONFIG_EXTENSTIONS, true)) {
-            throw new InvalidFileExtensionException("Invalid file extension $extension.", self::CONFIG_EXTENSTIONS);
-        }
         $user_config = $this->getConfig($extension, $config_path);
         $this->app_config->bulkSet($user_config);
     }
 
     /**
-     * Get config array based on extension
-     * @return array a config array
+     * Validate the path of the config file
+     * @param string $config_path the path to the config file
+     * @return void
      */
-    private function getConfig($extension, $config_path): array
+    protected function validateConfigFilePath(string $config_path): void
     {
-        return match($extension) {
+        if (!$this->file_validator->fileExists($config_path)) {
+            throw new ResourceNotFoundException('Cannot find a resource: ' . $config_path);
+        }
+
+        if (!$this->file_validator->isFile($config_path)) {
+            throw new InvalidResourceException('directory', 'file');
+        }
+        if (!$this->file_validator->isReadable($config_path)) {
+            throw new ResourceReadException('Cannot read a file ' . $config_path . ', please make sure the file has appropriate permissions');
+        }
+        if (!$this->file_validator->isValidExtension(pathinfo($config_path, PATHINFO_EXTENSION), self::CONFIG_EXTENSTIONS)) {
+            throw new InvalidFileExtensionException(self::CONFIG_EXTENSTIONS);
+        }
+    }
+
+    /**
+     * Get config array based on extension
+     * @param string $extension an extension to call the right loader
+     * @param
+     * @return array returns a config array
+     */
+    private function getConfig(string $extension, string $config_path): array
+    {
+        return match ($extension) {
             "ini" => $this->loadIniConfig($config_path),
             "env" => $this->loadEnvConfig($config_path),
             "json" => $this->loadJsonConfig($config_path)
         };
     }
-    
+
     /**
      * Loads .ini config
      * @param $dest the path to the .ini file
      * @return array
-     * @throws FileReadException
+     * @throws ResourceReadException
      */
     private function loadIniConfig(string $dest): array
     {
         $config = parse_ini_file($dest);
-        if (!$config) throw new FileReadException("Cannot read the ini file: $dest");
+        if (!$config) throw new ResourceReadException("Cannot read the ini file: $dest");
         return $config;
     }
 
@@ -134,12 +157,12 @@ class ConfigLoader
      * Loads .json config
      * @param $dest the path to the .json file
      * @return array
-     * @throws FileReadException
+     * @throws ResourceReadException
      */
     private function loadJsonConfig(string $dest): array
     {
         $data = file_get_contents($dest);
-        if (!$data) throw new FileReadException("Cannot read the json file: $dest");
+        if (!$data) throw new ResourceReadException("Cannot read the json file: $dest");
         return json_decode($data, true);
     }
 }

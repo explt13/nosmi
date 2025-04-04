@@ -2,26 +2,26 @@
 
 namespace Explt13\Nosmi\Exceptions;
 
-class InvalidFileExtensionException extends \RuntimeException
+class InvalidFileExtensionException extends BaseException
 {
-    public function __construct(?string $msg = null, ?array $allowed_extensions = null)
-    {
-        $msg = $msg ?? $this->getDefaultMessage();
-        $msg .= $this->availableExtensions($allowed_extensions);
-        parent::__construct($msg);
-    }
+    protected const EXC_CODE = 1150;
 
-    private function getDefaultMessage(): string
+    public function __construct(array $allowed_extensions)
     {
-        return "Invalid file extension, use appropriate file extension.";
+        parent::__construct(sprintf(
+            "Invalid file extension. %s",
+            $this->availableExtensions($allowed_extensions)
+        ));
     }
-
 
     private function availableExtensions($allowed_extensions): string|null
     {
-        if (!is_null($allowed_extensions)) {
-            return ' Supported file extension are: [' . join(', ', $allowed_extensions) . ']';
+        if (!empty($allowed_extensions)) {
+            return sprintf(
+                'Supported file extensions are: [%s]',
+                implode(', ', $allowed_extensions)
+            );
         }
-        return null;
+        return "";
     }
 }
