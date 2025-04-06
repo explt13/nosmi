@@ -11,5 +11,8 @@
         <testsuite name="appconfig">
             <directory>tests/unit/AppConfig</directory>
         </testsuite>
+        <testsuite name="dependencies">
+            <directory>tests/unit/Dependencies</directory>
+        </testsuite>
     </testsuites>
 </phpunit>

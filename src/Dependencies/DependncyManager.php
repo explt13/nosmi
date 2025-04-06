@@ -14,11 +14,13 @@ class DependencyManager implements DependencyManagerInterface
         $this->container = $container;
     }
 
-    public function addDependency(string $id, string $dependency, bool $cacheDependecy = false)
+    public function addDependency(string $abstract, string $dependency, bool $singleton = false)
     {
-        $this->container->set($id, function($container) use ($dependency) {
+        $this->container->set($abstract, function($container) use ($dependency) {
             $container->autowire($dependency);
-        }, $cacheDependecy);
+        }, $singleton);
+
+        $this->container->set($abstract, $dependency, $singleton);
    
     }
 

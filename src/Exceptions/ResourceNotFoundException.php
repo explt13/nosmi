@@ -9,10 +9,17 @@ class ResourceNotFoundException extends BaseException
 
     /**
      * @param string $resource a path to the resource
-     * @param ?string $message an exception message, if not set the default message will be provided
      */
-    public function __construct(string $resource)
+    public function __construct(
+        string $resource = self::CONTEXT_NOT_SET,
+        ?string $message = null
+    )
     {
-        parent::__construct(sprintf("Cannot find the resource: %s", $resource));
+        parent::__construct($message, compact('resource'));
+    }
+
+    protected function getDefaultMessage(array $context): string
+    {
+        return sprintf("Cannot find the resource: %s", $context['resource']);
     }
 }

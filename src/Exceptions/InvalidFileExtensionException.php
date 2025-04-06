@@ -6,15 +6,23 @@ class InvalidFileExtensionException extends BaseException
 {
     protected const EXC_CODE = 1150;
 
-    public function __construct(array $allowed_extensions)
+    public function __construct(
+        array $allowed_extensions = [],
+        ?string $message = null
+    )
     {
-        parent::__construct(sprintf(
-            "Invalid file extension. %s",
-            $this->availableExtensions($allowed_extensions)
-        ));
+        parent::__construct($message, compact('allowed_extensions'));
     }
 
-    private function availableExtensions($allowed_extensions): string|null
+    protected function getDefaultMessage(array $context): string
+    {
+        return sprintf(
+            "Invalid file extension. %s",
+            $this->availableExtensions($context['allowed_extensions'])
+        );
+    }
+
+    private function availableExtensions(array $allowed_extensions): string
     {
         if (!empty($allowed_extensions)) {
             return sprintf(
