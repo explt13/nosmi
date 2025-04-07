@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Dependencies\mockdata;
 
-class FakeClassPDynS
+class FakeClassPDynS implements IFakeClassPDynS
 {
     public function exampleMethod(): string
     {

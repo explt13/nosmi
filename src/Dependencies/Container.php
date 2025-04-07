@@ -48,11 +48,7 @@ class Container implements ContainerInterface, SingletonInterface
         return isset($this->bindings[$abstract]);
     }
 
-    /**
-     * @template T
-     * @param class-string<T> $abstract
-     * @return T
-     */
+
     public function get(string $abstract, bool $getNew = false): object
     {
         if (!$getNew && isset($this->services[$abstract])) {
@@ -94,7 +90,7 @@ class Container implements ContainerInterface, SingletonInterface
         foreach ($constructorArgs as $arg) {
             $argType = $arg->getType();
             if ($argType === null) {
-                throw new \Exception("Unable to resolve argument `{$arg->getName()}` for service `$service`", 1090);
+                throw new \LogicException("Unable to resolve argument `{$arg->getName()}` for service `$service`", 1090);
             }
             $dependencies[$arg->getName()] = $this->get($argType->getName());
         }

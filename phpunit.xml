@@ -8,11 +8,8 @@
          colors="true"
   >
     <testsuites>
-        <testsuite name="appconfig">
-            <directory>tests/unit/AppConfig</directory>
-        </testsuite>
-        <testsuite name="dependencies">
-            <directory>tests/unit/Dependencies</directory>
+        <testsuite name="unit">
+            <directory>tests/unit</directory>
         </testsuite>
     </testsuites>
 </phpunit>

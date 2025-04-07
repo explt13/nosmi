@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Dependencies\mockdata;
 
-class FakeClassKDynNotS
+class FakeClassKDynNotS implements IFakeClassKDynNotS
 {
     public function exampleMethod(): string
     {
