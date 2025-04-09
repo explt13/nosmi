@@ -2,6 +2,9 @@
 
 namespace Explt13\Nosmi\Logging;
 
+use Explt13\Nosmi\Interfaces\LogFormatterInterface;
+use Explt13\Nosmi\Interfaces\LogInterface;
+
 class Log implements LogInterface
 {
     private LogFormatterInterface $formatter; 

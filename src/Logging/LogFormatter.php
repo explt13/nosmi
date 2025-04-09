@@ -2,6 +2,8 @@
 
 namespace Explt13\Nosmi\Logging;
 
+use Explt13\Nosmi\Interfaces\LogFormatterInterface;
+
 class LogFormatter implements LogFormatterInterface
 {
 

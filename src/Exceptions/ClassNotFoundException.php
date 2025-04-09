@@ -16,7 +16,7 @@ class ClassNotFoundException extends BaseException
 
     protected function getDefaultMessage(array $context): string
     {
-        return sprintf("Class or interface `%s` not found.",
+        return sprintf("Class or interface `%s` is not found.",
             $context['class_name']
         );
     }

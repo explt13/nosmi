@@ -106,6 +106,12 @@ class ContainerTest extends TestCase
         $this->assertFalse($this->container->has(FakeClassA::class));
     }
 
+    public function testSetInterfaceConcreteDependency()
+    {
+        $this->expectException(ClassNotFoundException::class);
+        $this->container->set(IFakeClassPDynS::class, IFakeClassPDynS::class);
+    }
+
     public function testSingleton()
     {
         $class_a0 = $this->container->get(FakeClassA::class);
@@ -149,6 +155,7 @@ class ContainerTest extends TestCase
         $this->assertNotSame(['John', 990], $class_b1->getData());
         $this->assertSame(['John'], $class_b0->getData());
         $this->assertSame([990], $class_b1->getData());
+
         // put more data into B0 object
         $class_b0->putData(111);
         $this->assertNotSame([990, 111], $class_b1->getData());
@@ -160,6 +167,7 @@ class ContainerTest extends TestCase
         $class_a0 = $this->container->get(FakeClassA::class);
         $class_a1 = $this->container->get(FakeClassA::class);
         $class_a2 = $this->container->get(FakeClassA::class, true);
+
         // class_a3 should be the same as class_a2
         $class_a3 = $this->container->get(FakeClassA::class);
         $class_a0->putData('Alice');
@@ -170,6 +178,7 @@ class ContainerTest extends TestCase
         // class_a2 should have a new state, hence getData should be empty
         $this->assertSame([], $class_a2->getData());
         $this->assertSame([], $class_a3->getData());
+
         // put data to class_a3, classes a2 and a3 should be updated accordingly
         $class_a3->putData('Sam');
         $this->assertSame(['Sam'], $class_a2->getData());
@@ -194,7 +203,7 @@ class ContainerTest extends TestCase
         if ($fail === 'set not existed abstract') {
             $this->expectExceptionWithDetails(
                 ClassNotFoundException::class,
-                "Class or interface `Tests\Unit\Dependencies\mockdata\NOT_EXISTED_CLASS` not found.",
+                "Class or interface `Tests\Unit\Dependencies\mockdata\NOT_EXISTED_CLASS` is not found.",
                 1080
             );
             $this->container->set('Tests\Unit\Dependencies\mockdata\NOT_EXISTED_CLASS', FakeClassA::class);
@@ -202,7 +211,7 @@ class ContainerTest extends TestCase
         if ($fail === 'set not existed concrete') {
             $this->expectExceptionWithDetails(
                 ClassNotFoundException::class,
-                "Class or interface `Tests\Unit\Dependencies\mockdata\NOT_EXISTED_CLASS` not found.",
+                "Class `Tests\Unit\Dependencies\mockdata\NOT_EXISTED_CLASS` is not found.",
                 1080
             );
             $this->container->set(FakeClassA::class, 'Tests\Unit\Dependencies\mockdata\NOT_EXISTED_CLASS');
