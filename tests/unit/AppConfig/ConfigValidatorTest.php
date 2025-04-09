@@ -3,10 +3,10 @@
 namespace Tests\Unit\AppConfig;
 
 use Explt13\Nosmi\AppConfig\ConfigValidator;
-use Explt13\Nosmi\AppConfig\ConfigValidatorInterface;
 use Explt13\Nosmi\Exceptions\ArrayNotAssocException;
-use Explt13\Nosmi\Exceptions\ConfigAttributeException;
+use Explt13\Nosmi\Exceptions\MissingAssocArrayKeyException;
 use Explt13\Nosmi\Exceptions\SetReadonlyException;
+use Explt13\Nosmi\Interfaces\ConfigValidatorInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Tests\Unit\helpers\IncludeFiles;
@@ -178,9 +178,9 @@ class ConfigValidatorTest extends TestCase
     public function testHasValue(array $parameter)
     {
         if (!array_key_exists('value', $parameter)) {
-            $this->expectException(ConfigAttributeException::class);
+            $this->expectException(MissingAssocArrayKeyException::class);
         }
-        $this->config_validator->validateParameterHasValue(time(), $parameter);
+        $this->config_validator->validateParameterHasRequiredAttribute(time(), $parameter, 'value');
         $this->assertTrue(true);
     }
 

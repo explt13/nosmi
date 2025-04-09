@@ -2,6 +2,7 @@
 namespace Explt13\Nosmi;
 
 use Explt13\Nosmi\Interfaces\CacheInterface;
+use Explt13\Nosmi\Traits\SingletonTrait;
 
 class Cache implements CacheInterface
 {

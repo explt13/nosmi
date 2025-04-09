@@ -3,8 +3,9 @@
 namespace Explt13\Nosmi\AppConfig;
 
 use Explt13\Nosmi\Exceptions\ArrayNotAssocException;
-use Explt13\Nosmi\Exceptions\ConfigAttributeException;
+use Explt13\Nosmi\Exceptions\MissingAssocArrayKeyException;
 use Explt13\Nosmi\Exceptions\SetReadonlyException;
+use Explt13\Nosmi\Interfaces\ConfigValidatorInterface;
 
 class ConfigValidator implements ConfigValidatorInterface
 {
@@ -36,10 +37,10 @@ class ConfigValidator implements ConfigValidatorInterface
         }
     }
 
-    public function validateParameterHasValue(string $parameter_name, mixed $parameter): void
+    public function validateParameterHasRequiredAttribute(string $parameter_name, array $parameter, string $required): void
     {
-        if (!array_key_exists('value', $parameter)) {
-            throw new ConfigAttributeException($parameter_name, "value");
+        if (!array_key_exists($required, $parameter)) {
+            throw new MissingAssocArrayKeyException($parameter_name, $required);
         }
     }
 

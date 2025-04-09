@@ -1,5 +1,8 @@
 <?php
-namespace Explt13\Nosmi\Logging;
+namespace Explt13\Nosmi\Interfaces;
+
+use Explt13\Nosmi\Logging\LogFormatterModes;
+use Explt13\Nosmi\Logging\LogStatus;
 
 interface LogInterface
 {

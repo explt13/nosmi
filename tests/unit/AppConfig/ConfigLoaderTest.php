@@ -3,20 +3,17 @@
 namespace Tests\Unit\AppConfig;
 
 use Dotenv\Dotenv;
-use Explt13\Nosmi\AppConfig\AppConfig;
-use Explt13\Nosmi\AppConfig\ConfigInterface;
 use Explt13\Nosmi\AppConfig\ConfigLoader;
-use Explt13\Nosmi\Exceptions\FileNotFoundException;
 use Explt13\Nosmi\Exceptions\InvalidFileExtensionException;
 use Explt13\Nosmi\Exceptions\InvalidResourceException;
 use Explt13\Nosmi\Exceptions\ResourceNotFoundException;
+use Explt13\Nosmi\Interfaces\ConfigInterface;
 use Explt13\Nosmi\Interfaces\FileValidatorInterface;
 use Explt13\Nosmi\Validators\FileValidator;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Tests\Unit\helpers\IncludeFiles;
-use Tests\Unit\helpers\SingletonReset;
 
 class ConfigLoaderTest extends TestCase
 {

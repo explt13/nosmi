@@ -1,6 +1,6 @@
 <?php
 
-namespace Explt13\Nosmi\AppConfig;
+namespace Explt13\Nosmi\Interfaces;
 
 interface ConfigValidatorInterface
 {
@@ -37,13 +37,14 @@ interface ConfigValidatorInterface
     public function validateAttributes(string $parameter_name, array $attributes): void;
     
     /**
-     * Validates if a config parameter has value
+     * Validates if a config parameter has a required attribute
      * @param string $name the name of the parameter
      * @param mixed $parameter the parameter retrieved from the config
-     * @throws ConfigAttributeException
+     * @param string $required
+     * @throws MissingAssocArrayKeyException
      * @return bool
      */
-    public function validateParameterHasValue(string $parameter_name, mixed $parameter): void;
+    public function validateParameterHasRequiredAttribute(string $parameter_name, array $parameter, string $required): void;
     
     /**
      * Checks whether a parameter is removable

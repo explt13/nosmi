@@ -3,8 +3,10 @@
 namespace Explt13\Nosmi\AppConfig;
 
 use Explt13\Nosmi\Exceptions\RemoveConfigParameterException;
+use Explt13\Nosmi\Interfaces\ConfigInterface;
+use Explt13\Nosmi\Interfaces\ConfigValidatorInterface;
 use Explt13\Nosmi\Interfaces\SingletonInterface;
-use Explt13\Nosmi\SingletonTrait;
+use Explt13\Nosmi\Traits\SingletonTrait;
 
 class AppConfig implements ConfigInterface, SingletonInterface
 {
@@ -65,7 +67,7 @@ class AppConfig implements ConfigInterface, SingletonInterface
     {
         foreach ($config_array as $name => $parameter) {
             if ($this->config_validator->isComplexParameter($parameter)) {
-                $this->config_validator->validateParameterHasValue($name, $parameter);
+                $this->config_validator->validateParameterHasRequiredAttribute($name, $parameter, 'value');
                 $this->set($name, $parameter['value'], false, $parameter);
                 continue;
             }

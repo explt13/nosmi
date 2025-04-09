@@ -1,6 +1,6 @@
 <?php
 
-namespace Explt13\Nosmi\AppConfig;
+namespace Explt13\Nosmi\Interfaces;
 
 interface ConfigInterface
 {

@@ -1,8 +1,6 @@
 <?php
 namespace Explt13\Nosmi\Base;
 
-use Explt13\Nosmi\Db;
-
 abstract class Model
 {
     protected array $attributes = [];

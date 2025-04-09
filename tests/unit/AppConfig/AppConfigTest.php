@@ -3,9 +3,9 @@
 namespace Tests\Unit\AppConfig;
 
 use Explt13\Nosmi\AppConfig\AppConfig;
-use Explt13\Nosmi\AppConfig\ConfigInterface;
 use Explt13\Nosmi\Exceptions\RemoveConfigParameterException;
 use Explt13\Nosmi\Exceptions\SetReadonlyException;
+use Explt13\Nosmi\Interfaces\ConfigInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Tests\Unit\helpers\IncludeFiles;

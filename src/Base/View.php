@@ -1,7 +1,7 @@
 <?php
 namespace Explt13\Nosmi\Base;
 
-use Explt13\Nosmi\RouteContext;
+use Explt13\Nosmi\Routing\RouteContext;
 
 class View
 {

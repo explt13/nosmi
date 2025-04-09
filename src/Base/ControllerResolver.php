@@ -1,10 +1,12 @@
 <?php
 
-namespace Explt13\Nosmi;
+namespace Explt13\Nosmi\Base;
 
 use Exception;
 use Explt13\Nosmi\Base\View;
 use Explt13\Nosmi\Interfaces\ContainerInterface;
+use Explt13\Nosmi\Routing\Request;
+use Explt13\Nosmi\Routing\RouteContext;
 
 class ControllerResolver
 {

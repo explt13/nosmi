@@ -7,8 +7,8 @@ use Explt13\Nosmi\Exceptions\InvalidFileExtensionException;
 use Explt13\Nosmi\Exceptions\InvalidResourceException;
 use Explt13\Nosmi\Exceptions\ResourceNotFoundException;
 use Explt13\Nosmi\Exceptions\ResourceReadException;
+use Explt13\Nosmi\Interfaces\ConfigInterface;
 use Explt13\Nosmi\Interfaces\FileValidatorInterface;
-use Explt13\Nosmi\Validators\FileValidator;
 
 class ConfigLoader
 {

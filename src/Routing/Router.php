@@ -1,6 +1,8 @@
 <?php
-namespace Explt13\Nosmi;
+namespace Explt13\Nosmi\Routing;
 
+use Explt13\Nosmi\Base\ControllerResolver;
+use Explt13\Nosmi\Middlewares\MiddlewareLoader;
 
 class Router
 {

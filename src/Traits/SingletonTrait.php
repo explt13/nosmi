@@ -1,5 +1,5 @@
 <?php
-namespace Explt13\Nosmi;
+namespace Explt13\Nosmi\Traits;
 
 trait SingletonTrait
 {

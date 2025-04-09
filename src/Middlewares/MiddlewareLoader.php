@@ -1,6 +1,6 @@
 <?php
 
-namespace Explt13\Nosmi;
+namespace Explt13\Nosmi\Middlewares;
 
 use Explt13\Nosmi\Interfaces\ContainerInterface;
 

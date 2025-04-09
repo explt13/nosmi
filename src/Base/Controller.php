@@ -2,8 +2,8 @@
 namespace Explt13\Nosmi\Base;
 
 use Explt13\Nosmi\Interfaces\CacheInterface;
-use Explt13\Nosmi\Request;
-use Explt13\Nosmi\RouteContext;
+use Explt13\Nosmi\Routing\Request;
+use Explt13\Nosmi\Routing\RouteContext;
 
 abstract class Controller
 {

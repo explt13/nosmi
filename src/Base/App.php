@@ -1,7 +1,10 @@
 <?php
-namespace Explt13\Nosmi;
+namespace Explt13\Nosmi\Base;
 
+use Explt13\Nosmi\Base\ServiceProviderLoader;
+use Explt13\Nosmi\Dependencies\Container;
 use Explt13\Nosmi\Interfaces\ContainerInterface;
+use Explt13\Nosmi\Routing\Router;
 
 class App
 {
