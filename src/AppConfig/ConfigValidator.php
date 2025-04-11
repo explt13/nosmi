@@ -6,6 +6,7 @@ use Explt13\Nosmi\Exceptions\ArrayNotAssocException;
 use Explt13\Nosmi\Exceptions\MissingAssocArrayKeyException;
 use Explt13\Nosmi\Exceptions\SetReadonlyException;
 use Explt13\Nosmi\Interfaces\ConfigValidatorInterface;
+use Explt13\Nosmi\Utils\Types;
 
 class ConfigValidator implements ConfigValidatorInterface
 {
@@ -27,12 +28,12 @@ class ConfigValidator implements ConfigValidatorInterface
 
     public function isComplexParameter($parameter): bool
     {
-        return !is_primitive($parameter) && !array_is_list($parameter);
+        return !Types::is_primitive($parameter) && !array_is_list($parameter);
     }
 
     public function validateAttributes(string $parameter_name, array $attributes): void
     {
-        if (!empty($attributes) && !array_is_assoc($attributes)) {
+        if (!empty($attributes) && !Types::array_is_assoc($attributes)) {
             throw new ArrayNotAssocException('Provide an associative array for extra_attributes for parameter: ' . $parameter_name);
         }
     }

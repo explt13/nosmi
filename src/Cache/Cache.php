@@ -1,5 +1,5 @@
 <?php
-namespace Explt13\Nosmi;
+namespace Explt13\Nosmi\Cache;
 
 use Explt13\Nosmi\Interfaces\CacheInterface;
 use Explt13\Nosmi\Traits\SingletonTrait;

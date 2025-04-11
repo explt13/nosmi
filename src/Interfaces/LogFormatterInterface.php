@@ -5,5 +5,5 @@ use Explt13\Nosmi\Logging\LogFormatterModes;
 
 interface LogFormatterInterface
 {
-    public function format(array $log, LogFormatterModes $mode): string;
+    public function format(array $log): string;
 }

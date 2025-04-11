@@ -5,6 +5,7 @@ namespace Explt13\Nosmi\Dependencies;
 use Explt13\Nosmi\Exceptions\MissingAssocArrayKeyException;
 use Explt13\Nosmi\Interfaces\ContainerInterface;
 use Explt13\Nosmi\Interfaces\DependencyManagerInterface;
+use Explt13\Nosmi\Utils\Types;
 
 final class DependencyManager implements DependencyManagerInterface
 {
@@ -21,13 +22,15 @@ final class DependencyManager implements DependencyManagerInterface
     }
 
     /**
-     * @param array<string, string|array{concrete: string, singleton: bool}> $dependencies
+     * @param string $path the path to the dependencies
+     * @note dependencies structure array<string, string|array{concrete: string, singleton: bool}> 
      */
-    public function loadDependencies(array $dependencies): void
+    public function loadDependencies(string $path): void
     {
+        $dependencies = require_once $path;
         foreach ($dependencies as $abstract => $dependency)
         {
-            if (!is_primitive($dependency) && array_is_assoc($dependency)) {
+            if (!Types::is_primitive($dependency) && Types::array_is_assoc($dependency)) {
                 if (!isset($dependency['concrete'])) {
                     // Log critical
                     throw MissingAssocArrayKeyException::withMessage(sprintf("Cannot set the dependency %s missing the key: %s", $abstract, 'concrete'));
@@ -49,7 +52,7 @@ final class DependencyManager implements DependencyManagerInterface
 
     public function hasDependency(string $abstract)
     {
-        $this->container->has($abstract);
+        return $this->container->has($abstract);
     }
 
     public function removeDependency(string $abstract)

@@ -14,10 +14,23 @@ interface DependencyManagerInterface
      */
     public function getDependency(string $abstract, bool $getNew = false): object;
     
+    /**
+     * Load an array of dependencies
+     * @param string $path the path to the dependencies file
+     * @example dependencies structure: \
+     * [ \
+     *   "InterfaceA" => "ClassA", \
+     *   "InterfaceB" => [ \
+     *       "concrete" => "ClassB",
+     *       "singleton" => true \
+     *   ] \
+     * ]
+     */
+    public function loadDependencies(string $path): void;
     
-    public function loadDependencies(array $dependencies): void;
+    public function addDependency(string $abstract, string $concrete, bool $singleton = false): void;
     
-    public function addDependency(string $id, string $dependency);
-    
-    public function removeDependency(string  $id);
+    public function removeDependency(string $abstract);
+
+    public function hasDependency(string $abstract);
 }

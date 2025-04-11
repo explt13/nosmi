@@ -2,3 +2,4 @@ composer.lock
 vendor
 .vscode
 tests/unit/Logging/logs
+src/Config/.env

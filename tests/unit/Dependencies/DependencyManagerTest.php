@@ -55,27 +55,6 @@ class DependencyManagerTest extends TestCase
 
     public function testLoadDependencies()
     {
-        $deps = [
-            FakeClassA::class => [
-                "concrete" => FakeClassA::class,
-                "singleton" => false
-            ],
-            IFakeClassPDynS::class => [
-                "concrete" => FakeClassPDynS::class,
-                "singleton" => true
-            ],
-            IFakeClassKDynNotS::class => [
-                "concrete" => FakeClassKDynNotS::class,
-                "singleton" => false
-            ],
-            FakeClassB::class => FakeClassB::class,
-            
-            // should fail because of missing concrete key
-            FakeClassC::class => [
-                "concrete2" => FakeClassC::class,
-            ]
-        ];
-        
         $expectedCalls = [
             [FakeClassA::class, FakeClassA::class, false],
             [IFakeClassPDynS::class, FakeClassPDynS::class, true],
@@ -98,6 +77,6 @@ class DependencyManagerTest extends TestCase
         $this->expectException(MissingAssocArrayKeyException::class);
         $this->expectExceptionMessage(sprintf("Cannot set the dependency %s missing the key: concrete", FakeClassC::class));
         $this->expectExceptionCode(1131);
-        $this->dep_manager->loadDependencies($deps);
+        $this->dep_manager->loadDependencies(__DIR__.'/mockdata/fake_deps.php');
     }
 }

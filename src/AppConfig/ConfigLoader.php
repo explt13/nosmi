@@ -9,6 +9,7 @@ use Explt13\Nosmi\Exceptions\ResourceNotFoundException;
 use Explt13\Nosmi\Exceptions\ResourceReadException;
 use Explt13\Nosmi\Interfaces\ConfigInterface;
 use Explt13\Nosmi\Interfaces\FileValidatorInterface;
+use Explt13\Nosmi\Validators\FileValidator;
 
 class ConfigLoader
 {
@@ -19,6 +20,8 @@ class ConfigLoader
 
     protected FileValidatorInterface $file_validator;
 
+    public const DEFAULT_FRAMEWORK_CONFIG_PATH = __DIR__ . '/../Config/.env';
+
     /**
      * @var array{0: 'env', 1: 'json', 2: 'ini'} CONFIG_EXTENSTIONS available extensions for the config file
      */
@@ -27,30 +30,10 @@ class ConfigLoader
     /**
      * @param ConfigInterface $app_config An app config object
      */
-    public function __construct(ConfigInterface $app_config, FileValidatorInterface $file_validator)
+    public function __construct(ConfigInterface $app_config)
     {
         $this->app_config = $app_config;
-        $this->file_validator = $file_validator;
-        $this->loadFrameworkConfig($this->getFrameworkConfigPath());
-    }
-
-    /**
-     * Get a config path
-     * @return string config path
-     */
-    private function getFrameworkConfigPath(): string
-    {
-        return __DIR__ . '/../Config/default_config.json';
-    }
-
-    /**
-     * Loads framework's config
-     * @return void
-     */
-    private function loadFrameworkConfig(string $dest): void
-    {
-        $config = json_decode(file_get_contents($dest), true);
-        $this->app_config->bulkSet($config);
+        $this->file_validator = new FileValidator();
     }
 
     /**
@@ -69,7 +52,7 @@ class ConfigLoader
     }
 
     /**
-     * Load an app config in .env, .json, .ini
+     * Load a config in .env, .json, .ini
      * @param null|string $config_path [optional] <p> a destination to the config file \
      * Set to null by default which will try to autodeteced the path to the config file
      * Pass a full path, e.g
@@ -79,15 +62,15 @@ class ConfigLoader
      * @return void
      * @throws InvalidFileExtensionException if a file has an unsupported extension
      */
-    public function loadUserConfig(null|string $config_path = null): void
+    public function loadConfig(null|string $config_path = null): void
     {
         if (is_null($config_path)) {
             $config_path = $this->detectConfigFile();
         }
         $this->validateConfigFilePath($config_path);
         $extension = pathinfo($config_path, PATHINFO_EXTENSION);
-        $user_config = $this->getConfig($extension, $config_path);
-        $this->app_config->bulkSet($user_config);
+        $config = $this->getConfig($extension, $config_path);
+        $this->app_config->bulkSet($config);
     }
 
     /**

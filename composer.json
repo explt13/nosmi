@@ -9,7 +9,8 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Tests\\Unit\\": "tests/unit/"
+            "Tests\\Unit\\": "tests/unit/",
+            "Tests\\Integration\\": "tests/integration/"
         }
     },
     "authors": [
@@ -18,7 +19,7 @@
             "email": "az13rede4d@gmail.com"
         }
     ],
-    "version": "1.0.0",
+    "version": "0.3.1",
     "require": {
         "php": ">=8.3.6",
         "vlucas/phpdotenv": "^5.6",

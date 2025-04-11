@@ -19,7 +19,6 @@ class ConfigLoaderTest extends TestCase
 {
     private (ConfigInterface&MockObject)|null $mock_app_config;
     private ConfigLoader|null $config_loader;
-    private FileValidatorInterface|null $file_validator;
 
     public static function setUpBeforeClass(): void
     {
@@ -28,26 +27,24 @@ class ConfigLoaderTest extends TestCase
     public function setUp(): void
     {
         $this->mock_app_config = $this->createMock(ConfigInterface::class);
-        $this->file_validator = new FileValidator();
-        $this->config_loader = new ConfigLoader($this->mock_app_config, $this->file_validator);
+        $this->config_loader = new ConfigLoader($this->mock_app_config);
     }
 
     public function tearDown(): void
     {
         $this->mock_app_config = null;
         $this->config_loader = null;
-        $this->file_validator = null;
     }
 
     public function testLoadFrameworkConfig()
     {
+        Dotenv::createImmutable(dirname(__FILE__, 4) . '/src/Config')->load();
         $this->mock_app_config
              ->expects(($this->once()))
              ->method('bulkSet')
-             ->with(json_decode(file_get_contents(dirname(__FILE__, 4) . '/src/Config/default_config.json'), true));
-        // Loads default config on creation 
-        $loader = new ConfigLoader($this->mock_app_config, $this->file_validator);
-        unset($loader);
+             ->with($_ENV);
+
+        $this->config_loader->loadConfig(dirname(__FILE__, 4) . '/src/Config/.env');
     }
 
     public static function loadUserConfigProvider()
@@ -125,7 +122,7 @@ class ConfigLoaderTest extends TestCase
             }
         }
 
-        $this->config_loader->loadUserConfig($path);
+        $this->config_loader->loadConfig($path);
 
     }
 
@@ -136,7 +133,7 @@ class ConfigLoaderTest extends TestCase
              ->expects(($this->once()))
              ->method('bulkSet')
              ->with(json_decode(file_get_contents($config_path), true));
-        $this->config_loader->loadUserConfig($config_path);
+        $this->config_loader->loadConfig($config_path);
 
 
     }
@@ -148,7 +145,7 @@ class ConfigLoaderTest extends TestCase
              ->expects(($this->once()))
              ->method('bulkSet')
              ->with(parse_ini_file($config_path));
-        $this->config_loader->loadUserConfig($config_path);
+        $this->config_loader->loadConfig($config_path);
     }
 
     public function testLoadEnvUserConfig()
@@ -159,6 +156,6 @@ class ConfigLoaderTest extends TestCase
              ->expects(($this->once()))
              ->method('bulkSet')
              ->with($_ENV);
-        $this->config_loader->loadUserConfig($config_path);
+        $this->config_loader->loadConfig($config_path);
     }
 }

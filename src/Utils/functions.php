@@ -1,18 +1,4 @@
 <?php
-function debug(mixed $arr)
-{
-    echo "<pre>" . print_r($arr, 1) . "</pre>";
-}
-
-function debugIncludedFile()
-{
-    $backtrace = debug_backtrace();
-    foreach ($backtrace as $trace) {
-        if (isset($trace['file'])) {
-            echo "<div style='color: green; font-size: 28px'>Included in {$trace['file']} on line {$trace['line']}</div><br/>";
-        }
-    }
-}
 
 function redirect(?string $path = null, string $reason_msg = '', ?string $redirect_after = null): void
 {
@@ -35,15 +21,4 @@ function redirect(?string $path = null, string $reason_msg = '', ?string $redire
 function isAjax(): bool
 {
     return (strtolower($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '') === 'xmlhttprequest');
-}
-
-
-function is_primitive($value): bool
-{
-    return is_scalar($value) || is_null($value);
-}
-
-function array_is_assoc($value): bool
-{
-    return count($value) === count(array_filter($value, fn($key) => !is_int($key), ARRAY_FILTER_USE_KEY));
 }

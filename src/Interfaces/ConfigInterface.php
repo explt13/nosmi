@@ -4,10 +4,7 @@ namespace Explt13\Nosmi\Interfaces;
 
 interface ConfigInterface
 {
-     /**
-     * @var string PARAMETER_NOT_SET a marker for unset parameters
-     */
-    public const PARAMETER_NOT_SET = '__PARAMETER_NOT_SET__';
+
 
     /**
      * Check whether a config parameter exists
@@ -23,7 +20,7 @@ interface ConfigInterface
      * get a parameter with associated attributes if they present \
      * ["param" => ["value" => value , ...attributes], ...]
      * </p>
-     * @return mixed returns self::PARAMETER_NOT_SET if a parameter is not present
+     * @return mixed returns null if a parameter is not present
      */
     public function get(string $name, bool $getWithAttributes=false): mixed;
 

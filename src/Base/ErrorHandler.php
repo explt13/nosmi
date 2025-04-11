@@ -1,15 +1,20 @@
 <?php
 namespace Explt13\Nosmi\Base;
 
+use Explt13\Nosmi\AppConfig\AppConfig;
+use Explt13\Nosmi\Logging\Logger;
 use Explt13\Nosmi\Traits\SingletonTrait;
 
 class ErrorHandler
 {
     use SingletonTrait;
+    protected readonly bool $debug;
 
     private function __construct()
     {
-        if (DEBUG) {
+        $config = AppConfig::getInstance();
+        $this->debug = $config->get('APP_DEBUG');
+        if ($this->debug) {
             error_reporting(E_ALL);
             set_error_handler([$this, 'errorHandler'], E_NOTICE | E_WARNING);
         } else {
@@ -34,8 +39,8 @@ class ErrorHandler
 
     private function logError(string $message = '', $file = '', $line = '')
     {
-        error_log("[" . date("Y-m-d H:i:s P") . "] Error: {$message} | File: {$file} | Line: {$line}
-                    \n--------------------------------------\n", 3, ROOT . '/tmp/errors.log');
+        $logger = new Logger();
+        // $logger->log()
     }
     
     private function render($err_type, $err_message, $err_file, $err_line, $callstack, $err_response = 500)
@@ -46,7 +51,7 @@ class ErrorHandler
         http_response_code($err_response);
         
         if (isAjax()) {
-            if (!DEBUG) {
+            if (!$this->debug) {
                 if ($err_response >= 500 && $err_response < 600) {
                     $err_message = "Operation has failed. Try again later";
                 }
@@ -56,7 +61,7 @@ class ErrorHandler
         }
 
         $view_path = APP . '/views/errors';
-        if (!DEBUG) {
+        if (!$this->debug) {
             switch ($err_response) {
                 case 404:
                     require_once $view_path . "/404.php";

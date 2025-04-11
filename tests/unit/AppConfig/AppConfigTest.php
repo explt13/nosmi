@@ -107,7 +107,7 @@ class AppConfigTest extends TestCase
 
     public function testGetNotExisted()
     {
-        $this->assertSame($this->app_config::PARAMETER_NOT_SET, $this->app_config->get('not_existed'));
+        $this->assertSame(null, $this->app_config->get('not_existed'));
     }
     
     public function testHas()

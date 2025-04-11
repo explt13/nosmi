@@ -13,7 +13,7 @@ use Explt13\Nosmi\Base\Registry;
 use Explt13\Nosmi\Base\ServiceProviderLoader;
 use Explt13\Nosmi\Base\View;
 use Explt13\Nosmi\Base\Widget;
-use Explt13\Nosmi\Cache;
+use Explt13\Nosmi\Cache\Cache;
 use Explt13\Nosmi\Dependencies\Container;
 use Explt13\Nosmi\Dependencies\ContainerValidator;
 use Explt13\Nosmi\Dependencies\DependencyManager;
@@ -23,10 +23,9 @@ use Explt13\Nosmi\Interfaces\ConfigValidatorInterface;
 use Explt13\Nosmi\Interfaces\ContainerInterface;
 use Explt13\Nosmi\Interfaces\FileValidatorInterface;
 use Explt13\Nosmi\Interfaces\LogFormatterInterface;
-use Explt13\Nosmi\Interfaces\LogInterface;
-use Explt13\Nosmi\Logging\Log;
-use Explt13\Nosmi\Logging\LogFormatter;
-use Explt13\Nosmi\Logging\LogFormatterModes;
+use Explt13\Nosmi\Interfaces\LoggerInterface;
+use Explt13\Nosmi\Logging\DefaultFormatter;
+use Explt13\Nosmi\Logging\Logger;
 use Explt13\Nosmi\Logging\LogStatus;
 use Explt13\Nosmi\Middlewares\MiddlewareLoader;
 use Explt13\Nosmi\Routing\Request;
@@ -42,9 +41,8 @@ return [
     ContainerInterface::class => Container::class,
     ContainerValidator::class => ContainerValidator::class,
     DependencyManager::class => DependencyManager::class,
-    LogInterface::class => Log::class,
-    LogFormatterInterface::class => LogFormatter::class,
-    LogFormatterModes::class => LogFormatterModes::class,
+    LoggerInterface::class => Logger::class,
+    LogFormatterInterface::class => DefaultFormatter::class,
     LogStatus::class => LogStatus::class,
     ClassValidator::class => ClassValidator::class,
     FileValidatorInterface::class => FileValidator::class,

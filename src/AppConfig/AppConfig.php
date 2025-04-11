@@ -17,8 +17,6 @@ class AppConfig implements ConfigInterface, SingletonInterface
      */
     protected array $config = [];
 
-    public const PARAMETER_NOT_SET = '__PARAMETER_NOT_SET__';
-
     /**
      * @var ConfigValidatorInterface a config validator
      */
@@ -40,7 +38,7 @@ class AppConfig implements ConfigInterface, SingletonInterface
             $parameter = $this->config[$name];
             return $getWithAttributes ? $parameter : $parameter['value'];
         }
-        return self::PARAMETER_NOT_SET;
+        return null;
     }
 
     public function getAll(): array
@@ -51,7 +49,7 @@ class AppConfig implements ConfigInterface, SingletonInterface
     public function set(string $name, mixed $value, bool $readonly = false, array $extra_attributes = []): void
     {
         $parameter = $this->get($name, true);
-        if ($parameter !== self::PARAMETER_NOT_SET) {
+        if ($parameter) {
             $this->config_validator->checkReadonly($name, $parameter);
         }
         $this->config_validator->validateAttributes($name, $extra_attributes);
