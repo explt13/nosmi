@@ -11,19 +11,36 @@ class Logger implements LoggerInterface
 {
     use SingletonTrait;
 
-    private LogFormatterInterface $formatter; 
+    private LogFormatterInterface $formatter;
+    private ?LogFormatterInterface $info_formatter = null;
+    private ?LogFormatterInterface $warning_formatter = null;
+    private ?LogFormatterInterface $error_formatter = null;
 
-    public function __construct()
+    protected function __construct()
     {
         $this->formatter = new DefaultFormatter();
     }
 
-    public function changeFormatter(LogFormatterInterface $formatter): void
+    public function setFormatter(LogFormatterInterface $formatter, ?LogStatus $forStatus = null): void
     {
-        $this->formatter = $formatter;
+        if (is_null($forStatus)) {
+            $this->formatter = $formatter;
+            return;
+        }
+        switch ($forStatus->name) {
+            case "INFO":
+                $this->info_formatter = $formatter;
+                break;
+            case "WARNING":
+                $this->warning_formatter = $formatter;
+                break;
+            case "ERROR":
+                $this->error_formatter = $formatter;
+                break;
+        }
     }
 
-    protected function log(string $message, LogStatus $status, ?string $dest = null): void
+    protected function log(string $message, LogStatus $status, ?LogFormatterInterface $formatter, ?string $dest = null): void
     {
         $config = AppConfig::getInstance();
         if (is_null($dest)) {
@@ -41,26 +58,28 @@ class Logger implements LoggerInterface
         if (!file_exists($log_dir) && !mkdir($log_dir, 0755, true) && !is_dir($log_dir)) {
             throw new \RuntimeException("Failed to create log directory: $log_dir");
         }
-        $logEntry = $this->formatter->format(['message' => $message, 'status' => $status]);
+        if (is_null($formatter)) {
+            $formatter = $this->formatter;
+        }
+        $logEntry = $formatter->format(['message' => $message, 'status' => $status]);
 
         if (!file_put_contents($dest, $logEntry, FILE_APPEND | LOCK_EX)) {
             throw new \RuntimeException("Failed to write log file: $dest");
         }
-        
     }
 
-    public function logInfo(string $message, ?string $dest = null): void
+    public function logInfo(string $message, ?LogFormatterInterface $formatter = null, ?string $dest = null): void
     {
-        $this->log($message, LogStatus::INFO, $dest);
+        $this->log($message, LogStatus::INFO, $formatter ?? $this->info_formatter, $dest);
     }
 
-    public function logWarning(string $message, ?string $dest = null): void
+    public function logWarning(string $message, ?LogFormatterInterface $formatter = null, ?string $dest = null): void
     {
-        $this->log($message, LogStatus::WARNING, $dest);
+        $this->log($message, LogStatus::WARNING, $formatter ?? $this->warning_formatter, $dest);
     }
 
-    public function logError(string $message, ?string $dest = null): void
+    public function logError(string $message, ?LogFormatterInterface $formatter = null, ?string $dest = null): void
     {
-        $this->log($message, LogStatus::ERROR, $dest);
+        $this->log($message, LogStatus::ERROR, $formatter ?? $this->error_formatter, $dest);
     }
 }

@@ -10,7 +10,7 @@ class ErrorHandler
     use SingletonTrait;
     protected readonly bool $debug;
 
-    private function __construct()
+    protected function __construct()
     {
         $config = AppConfig::getInstance();
         $this->debug = $config->get('APP_DEBUG');
@@ -25,26 +25,28 @@ class ErrorHandler
         set_exception_handler([$this, 'exceptionHandler']);
     }
 
-    public function errorHandler($errno, $errstr, $errfile, $errline) {
+    public function errorHandler($errno, $errstr, $errfile, $errline)
+    {
         if ($errno === E_WARNING || $errno === E_NOTICE) {
             throw new \Exception("Custom Error: $errstr in $errfile on line $errline", 500);
         }
     }
 
-    public function exceptionHandler(\Throwable $e)
+    public function exceptionHandler(\Throwable $e): void
     {
         $this->logError($e->getMessage(), $e->getFile(), $e->getLine());
         $this->render($e::class, $e->getMessage(), $e->getFile(), $e->getLine(), $e->getTrace(), $e->getCode() >= 100 ? $e->getCode() : 500);
     }
 
-    private function logError(string $message = '', $file = '', $line = '')
+    protected function logError(string $message = '', $file = '', $line = ''): void
     {
-        $logger = new Logger();
-        // $logger->log()
+        $logger = Logger::getInstance();
+        $logger->logError("$message | File: $file | Line: $line");
     }
     
-    private function render($err_type, $err_message, $err_file, $err_line, $callstack, $err_response = 500)
+    protected function render($err_type, $err_message, $err_file, $err_line, $callstack, $err_response = 500): void
     {
+        $config = AppConfig::getInstance();
         if ($err_type === 'PDOException'){
             $err_response = 500;
         }
@@ -59,18 +61,27 @@ class ErrorHandler
             echo json_encode(["message" => $err_message]);
             die;
         }
+        
+        $views = null;
+        if ($config->has('APP_ERROR_VIEWS')) {
+            $views = require_once $config->get('APP_ERROR_VIEWS');
+        }
 
-        $view_path = APP . '/views/errors';
-        if (!$this->debug) {
-            switch ($err_response) {
-                case 404:
-                    require_once $view_path . "/404.php";
-                    break;
-                default:
-                    require_once $view_path . "/500.php";
-            };
-        } else {
-            require_once $view_path . "/dev.php";
+        if ($this->debug) {
+            if (!is_null($views) && isset($views['DEBUG'])) {
+                require_once $views['DEBUG'];
+            }
+            require_once FRAMEWORK . "/defaultViews/errors/dev.php";
+
+            die;
+        }
+
+        foreach($views as $code => $file) {
+            if ($code === $err_response) {
+                require_once $file;
+                die;
+            }
+            require_once FRAMEWORK . "/defaultViews/errors/500.php";
         }
     }
 }

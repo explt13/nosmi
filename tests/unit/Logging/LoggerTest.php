@@ -49,8 +49,8 @@ class LoggerTest extends TestCase
     {
         $path = __DIR__ . '/logs' . $dest;
         $logger = Logger::getInstance();
-        $logger->changeFormatter(new VerboseFormatter());
-        $logger->logInfo($message, $path);
+        $logger->setFormatter(new VerboseFormatter());
+        $logger->logInfo($message, null, $path);
         $this->assertTrue(true);
     }
 
@@ -59,7 +59,7 @@ class LoggerTest extends TestCase
     {
         $config = AppConfig::getInstance();
         $logger = Logger::getInstance();
-        $logger->changeFormatter(new DefaultFormatter());
+        $logger->setFormatter(new DefaultFormatter());
         $config->set('LOG_FOLDER', __DIR__.'/env_set_folder');
         $config->set('LOG_FILE_WARNING', 'warning.log');
         $config->set('LOG_FILE_INFO', 'warning.log');
@@ -82,5 +82,24 @@ class LoggerTest extends TestCase
         $logger->logInfo($message);
         $logger->logWarning($message);
         $logger->logError($message);
+    }
+
+    public function testChangeFormatter()
+    {
+        $message = "sample log message";
+        $path = __DIR__ . '/formatter_logs';
+        $logger = Logger::getInstance();
+        $logger->setFormatter(new DefaultFormatter());
+        $logger->setFormatter(new VerboseFormatter(), LogStatus::WARNING);
+
+        $logger->logInfo($message, null, $path . '/info.log');
+        $logger->logError($message, new VerboseFormatter(), $path . '/error.log');
+        $logger->logWarning($message, null, $path . '/warning.log');
+        $logger->logWarning($message, null, $path . '/warning.log');
+        $logger->logError($message, new VerboseFormatter(), $path . '/error.log');
+        $logger->logInfo($message, null, $path . '/info.log');
+        
+
+        $this->assertTrue(true);
     }
 }
