@@ -8,10 +8,10 @@ class ArrayNotAssocException extends BaseException
     
     public function __construct(?string $message = null)
     {
-        parent::__construct($message);
+        parent::__construct($message ?? $this->getDefaultMessage());
     }
 
-    protected function getDefaultMessage(array $context): string
+    protected function getDefaultMessage(array $context = []): string
     {
         return "Please provide an associative array";
     }

@@ -11,10 +11,10 @@ class ClassNotFoundException extends BaseException
         ?string $message = null
     )
     {
-        parent::__construct($message, compact('class_name'));
+        parent::__construct($message ?? $this->getDefaultMessage(compact('class_name')));
     }
 
-    protected function getDefaultMessage(array $context): string
+    protected function getDefaultMessage(array $context = []): string
     {
         return sprintf("Class or interface `%s` is not found.",
             $context['class_name']

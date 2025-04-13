@@ -36,37 +36,14 @@ class ConfigLoader
         $this->file_validator = new FileValidator();
     }
 
-    /**
-     * Attempts to detect a config path
-     * @return string a resolved config path
-     * @throws ResourceNotFoundException
-     */
-    private function detectConfigFile(): string
-    {
-        $assumed_root = dirname(__DIR__, 5);
-        if (!empty(glob($assumed_root . '/composer.json'))) {
-            $assumed_root .= '/config';
-            return $assumed_root;
-        }
-        throw new ResourceNotFoundException("Cannot find a config file. Set the path explicitly or set it to false if config file is not supposed to present");
-    }
 
     /**
      * Load a config in .env, .json, .ini
-     * @param null|string $config_path [optional] <p> a destination to the config file \
-     * Set to null by default which will try to autodeteced the path to the config file
-     * Pass a full path, e.g
-     * \_\_DIR\_\_ . '/config_folder/user_config.env;
-     * </p>
-     * 
+     * @param string $config_path a destination to the config file
      * @return void
-     * @throws InvalidFileExtensionException if a file has an unsupported extension
      */
-    public function loadConfig(null|string $config_path = null): void
+    public function loadConfig(string $config_path): void
     {
-        if (is_null($config_path)) {
-            $config_path = $this->detectConfigFile();
-        }
         $this->validateConfigFilePath($config_path);
         $extension = pathinfo($config_path, PATHINFO_EXTENSION);
         $config = $this->getConfig($extension, $config_path);
@@ -77,21 +54,22 @@ class ConfigLoader
      * Validate the path of the config file
      * @param string $config_path the path to the config file
      * @return void
+     * @throws InvalidFileExtensionException if a file has an unsupported extension
      */
     protected function validateConfigFilePath(string $config_path): void
     {
-        if (!$this->file_validator->fileExists($config_path)) {
+        if (!$this->file_validator->resourceExists($config_path)) {
             throw new ResourceNotFoundException('Cannot find a resource: ' . $config_path);
         }
 
         if (!$this->file_validator->isFile($config_path)) {
-            throw new InvalidResourceException('directory', 'file');
+            throw new InvalidResourceException('directory', 'file', $config_path);
         }
         if (!$this->file_validator->isReadable($config_path)) {
             throw new ResourceReadException('Cannot read a file ' . $config_path . ', please make sure the file has appropriate permissions');
         }
-        if (!$this->file_validator->isValidExtension(pathinfo($config_path, PATHINFO_EXTENSION), self::CONFIG_EXTENSTIONS)) {
-            throw new InvalidFileExtensionException(self::CONFIG_EXTENSTIONS);
+        if (!$this->file_validator->isValidExtension($config_path, self::CONFIG_EXTENSTIONS)) {
+            throw new InvalidFileExtensionException($config_path, self::CONFIG_EXTENSTIONS);
         }
     }
 

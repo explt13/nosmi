@@ -6,17 +6,13 @@ abstract class BaseException extends \Exception
 {
     protected const EXC_CODE = 1000;
     protected const CONTEXT_NOT_SET = '__CONTEXT_NOT_SET__';
-    protected ?string $custom_message = null;
-    
-    public function __construct(?string $message = null, array $context = [])
+
+    public function __construct(?string $message = null)
     {
-        parent::__construct($message ?? $this->getDefaultMessage($context), static::EXC_CODE);
+        parent::__construct($message, static::EXC_CODE);
     }
 
-    protected function getDefaultMessage(array $context): string
-    {
-        return "An exception has occurred";
-    }
+    abstract protected function getDefaultMessage(array $context = []): string;
 
     public final static function withMessage(string $custom_message): static
     {

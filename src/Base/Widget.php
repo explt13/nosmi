@@ -2,23 +2,24 @@
 
 namespace Explt13\Nosmi\Base;
 
+use Explt13\Nosmi\Exceptions\FileNotFoundException;
 use Explt13\Nosmi\Interfaces\WidgetInterface;
 
 abstract class Widget implements WidgetInterface
 {
-    protected string $tpl;
-    public function __construct(?string $tpl)
+    private ?string $tpl = null;
+    public function __construct(string $path_to_tpl)
     {
-        $widget_lowercase = strtolower(preg_replace('#.*\\\#', '', static::class));
-        $tpl_path = APP . "/widgets/{$widget_lowercase}/tpl/";
-        if (is_null($tpl)) {
-            $this->tpl = $tpl_path . $widget_lowercase . "_tpl.php";
-        } else {
-            $this->tpl = $tpl_path . $tpl . '.php';
-        }
+        $this->tpl = $path_to_tpl;
     }
-    public function render()
+
+    public function render(): string
     {
+        if (is_null($this->tpl)) {
+            throw FileNotFoundException::withMessage('Cannot find template for widget: ' . static::class);
+        }
+        ob_start();
         require_once $this->tpl;
+        return ob_get_clean();
     }
 }

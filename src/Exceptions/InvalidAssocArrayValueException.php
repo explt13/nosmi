@@ -22,10 +22,10 @@ class InvalidAssocArrayValueException extends BaseException
         ?string $message = null,
     )
     {
-        parent::__construct($message, compact('name', 'key_name', 'expected_value', 'got_value'));
+        parent::__construct($message ?? $this->getDefaultMessage(compact('name', 'key_name', 'expected_value', 'got_value')));
     }
 
-    protected function getDefaultMessage(array $context): string
+    protected function getDefaultMessage(array $context = []): string
     {
         return sprintf(
             "Cannot set the `%s` parameter: expected the `%s` attribute to have value `%s` but got `%s`",

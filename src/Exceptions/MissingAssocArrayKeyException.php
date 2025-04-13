@@ -18,10 +18,10 @@ class MissingAssocArrayKeyException extends BaseException
         ?string $message = null,
     )
     {
-        parent::__construct($message, compact('name', 'missing_key'));
+        parent::__construct($message ?? $this->getDefaultMessage(compact('name', 'missing_key')));
     }
 
-    protected function getDefaultMessage(array $context): string
+    protected function getDefaultMessage(array $context = []): string
     {
         return sprintf("Cannot set the `%s`: missing the `%s` key",
                 $context['name'], 

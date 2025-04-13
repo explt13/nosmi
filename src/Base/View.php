@@ -1,6 +1,9 @@
 <?php
 namespace Explt13\Nosmi\Base;
 
+use Explt13\Nosmi\Exceptions\FileNotFoundException;
+use Explt13\Nosmi\Exceptions\InvalidRenderOptionException;
+use Explt13\Nosmi\Interfaces\ConfigInterface;
 use Explt13\Nosmi\Routing\RouteContext;
 
 class View
@@ -20,12 +23,14 @@ class View
      */
     public const INCLUDE_LAYOUT = 4;
     
-    private RouteContext $route;
+    protected RouteContext $route;
+    protected ConfigInterface $config;
     private array $meta = ["title" => "", "description" => "", "keywords" => ""]; // src/views/layouts/meta.php
     
-    public function __construct(RouteContext $route)
+    public function __construct(RouteContext $route, ConfigInterface $config)
     {
         $this->route = $route;
+        $this->config = $config;
     }
     
     public function render(string $view, array $data, int $render_options = self::RENDER_SSR | self::INCLUDE_LAYOUT): string|null
@@ -45,31 +50,31 @@ class View
             echo $this->includeLayout($content);
             return null;
         }
-        return null;
+        throw new InvalidRenderOptionException($view, $render_options);
     }
 
     private function getContentHtml(string $view, array $data): string
     {
-        $viewFile = APP . "/views/" . $this->route->prefix .  $this->route->controller . '/' . $view . '.php';
+        $viewFile = $this->config->get('APP_VIEWS') . '/' . $this->route->prefix . '/' . $this->route->controller . '/' . $view . '.php';
         if (is_file($viewFile)) {
             extract($data, EXTR_SKIP);
             ob_start();
             require_once $viewFile;
             return ob_get_clean();
         } else {
-            throw new \Exception("View not found: {$view}", 500);
+            throw new FileNotFoundException($view);
         }
     }
 
     private function includeLayout(string $content): string
     {
-        $layoutFile = APP . "/views/layouts/" . $this->route->layout . '.php';
+        $layoutFile = $this->config->get('APP_LAYOUTS') . $this->route->layout . '.php';
         if (is_file($layoutFile)) {
             ob_start();
             require_once $layoutFile;
             return ob_get_clean();
         } else {
-            throw new \Exception("Layout not found: {$this->route->layout}", 500);
+            throw new FileNotFoundException($this->route->layout, 500);
         }
     }
 

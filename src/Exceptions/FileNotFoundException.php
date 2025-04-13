@@ -5,8 +5,9 @@ namespace Explt13\Nosmi\Exceptions;
 class FileNotFoundException extends ResourceNotFoundException
 {
     protected const EXC_CODE = 1112;
-    public function __construct(?string $message = null)
+
+    protected function getDefaultMessage(array $context = []): string
     {
-        parent::__construct($message);
+        return sprintf("Cannot find the file: %s", $context['resource']);
     }
 }

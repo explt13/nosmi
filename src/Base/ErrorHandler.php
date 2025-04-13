@@ -2,18 +2,20 @@
 namespace Explt13\Nosmi\Base;
 
 use Explt13\Nosmi\AppConfig\AppConfig;
+use Explt13\Nosmi\Interfaces\ConfigInterface;
 use Explt13\Nosmi\Logging\Logger;
 use Explt13\Nosmi\Traits\SingletonTrait;
 
 class ErrorHandler
 {
     use SingletonTrait;
+    protected ConfigInterface $config;
     protected readonly bool $debug;
 
     protected function __construct()
     {
-        $config = AppConfig::getInstance();
-        $this->debug = $config->get('APP_DEBUG');
+        $this->config = AppConfig::getInstance();
+        $this->debug = $this->config->get('APP_DEBUG');
         if ($this->debug) {
             error_reporting(E_ALL);
             set_error_handler([$this, 'errorHandler'], E_NOTICE | E_WARNING);
@@ -46,7 +48,6 @@ class ErrorHandler
     
     protected function render($err_type, $err_message, $err_file, $err_line, $callstack, $err_response = 500): void
     {
-        $config = AppConfig::getInstance();
         if ($err_type === 'PDOException'){
             $err_response = 500;
         }
@@ -59,29 +60,29 @@ class ErrorHandler
                 }
             }
             echo json_encode(["message" => $err_message]);
-            die;
+            exit;
         }
         
         $views = null;
-        if ($config->has('APP_ERROR_VIEWS')) {
-            $views = require_once $config->get('APP_ERROR_VIEWS');
+        if ($this->config->has('APP_ERROR_VIEWS')) {
+            $views = require_once $this->config->get('APP_ERROR_VIEWS');
         }
 
         if ($this->debug) {
             if (!is_null($views) && isset($views['DEBUG'])) {
                 require_once $views['DEBUG'];
+                exit;
             }
-            require_once FRAMEWORK . "/defaultViews/errors/dev.php";
-
-            die;
+            require_once FRAMEWORK . "/DefaultViews/Errors/dev.php";
+            exit;
         }
 
         foreach($views as $code => $file) {
             if ($code === $err_response) {
                 require_once $file;
-                die;
+                exit;
             }
-            require_once FRAMEWORK . "/defaultViews/errors/500.php";
+            require_once FRAMEWORK . "/DefaultViews/Errors/500.php";
         }
     }
 }

@@ -29,7 +29,7 @@ class AppConfig implements ConfigInterface, SingletonInterface
 
     public function has(string $name): bool
     {
-        return isset($name, $this->config);
+        return isset($this->config[$name]);
     }
 
     public function get(string $name, bool $getWithAttributes=false): mixed

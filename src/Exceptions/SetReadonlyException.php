@@ -11,10 +11,10 @@ class SetReadonlyException extends BaseException
         ?string $message = null
     )
     {
-        parent::__construct($message, compact('parameter'));
+        parent::__construct($message ?? $this->getDefaultMessage(compact('parameter')));
     }
 
-    protected function getDefaultMessage(array $context): string
+    protected function getDefaultMessage(array $context = []): string
     {
         return sprintf("Cannot set/modify a read-only parameter: %s", $context['parameter']);
     }

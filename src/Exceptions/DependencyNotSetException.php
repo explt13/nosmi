@@ -10,10 +10,10 @@ class DependencyNotSetException extends BaseException
         ?string $message = null
     )
     {
-        parent::__construct($message, compact('abstract'));
+        parent::__construct($message ?? $this->getDefaultMessage(compact('abstract')));
     }
 
-    protected function getDefaultMessage(array $context): string
+    protected function getDefaultMessage(array $context = []): string
     {
         return sprintf("No binding found for `%s`", $context['abstract']);
     }

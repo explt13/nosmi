@@ -15,10 +15,10 @@ class ResourceNotFoundException extends BaseException
         ?string $message = null
     )
     {
-        parent::__construct($message, compact('resource'));
+        parent::__construct($message ?? $this->getDefaultMessage(compact('resource')));
     }
 
-    protected function getDefaultMessage(array $context): string
+    protected function getDefaultMessage(array $context = []): string
     {
         return sprintf("Cannot find the resource: %s", $context['resource']);
     }

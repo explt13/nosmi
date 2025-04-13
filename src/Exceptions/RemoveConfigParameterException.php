@@ -11,10 +11,10 @@ class RemoveConfigParameterException extends BaseException
         ?string $message = null
     )
     {
-        parent::__construct($message, compact('name', 'reason'));
+        parent::__construct($message ?? $this->getDefaultMessage(compact('name', 'reason')));
     }
 
-    protected function getDefaultMessage(array $context): string
+    protected function getDefaultMessage(array $context = []): string
     {
         return sprintf('Failed to remove config parameter "%s": %s', $context['name'], $context['reason']);
     }

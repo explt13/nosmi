@@ -15,10 +15,10 @@ class ResourceUnavailableException extends BaseException
         ?string $message = null
     )
     {
-        parent::__construct($message, compact('resource'));
+        parent::__construct($message ?? $this->getDefaultMessage(compact('resource')));
     }
 
-    protected function getDefaultMessage(array $context): string
+    protected function getDefaultMessage(array $context = []): string
     {
         return sprintf("Resource is unavailable: %s", $context['resource']);
     }

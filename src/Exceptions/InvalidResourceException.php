@@ -8,15 +8,17 @@ class InvalidResourceException extends BaseException
     public function __construct(
         string $got_resource = self::CONTEXT_NOT_SET,
         string $expected_resource = self::CONTEXT_NOT_SET,
+        string $for_path = self::CONTEXT_NOT_SET,
         ?string $message = null
     )
     {
-        parent::__construct($message, compact('got_resource', 'expected_resource'));
+        parent::__construct($message ?? $this->getDefaultMessage(compact('got_resource', 'expected_resource', 'for_path')));
     }
 
-    protected function getDefaultMessage(array $context): string
+    protected function getDefaultMessage(array $context = []): string
     {
-        return sprintf("Invalid resource, got: %s, expected: %s",
+        return sprintf("Invalid resource for: , got: %s, expected: %s",
+                $context['for_path'],
                 $context['got_resource'],
                 $context['expected_resource']
         );

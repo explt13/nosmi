@@ -11,6 +11,6 @@ abstract class Model
     public function __construct()
     {
         $connection = Db::getInstance();
-        $this->pdo = $connection->getPDO();
+        $this->pdo = $connection->getConnection();
     }
 }

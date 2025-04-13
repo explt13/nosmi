@@ -25,11 +25,6 @@ class RouteContext
         if (empty($route['action'])) {
             $route['action'] = 'index';
         }
-        if (!isset($route['prefix'])) {
-            $route['prefix'] = '';
-        } else {
-            $route['prefix'] .= '\\';
-        }
         $route['controller'] = $this->upperCamelCase($route['controller']);
         return $route;
     }
