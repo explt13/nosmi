@@ -8,8 +8,8 @@ use Explt13\Nosmi\Base\Controller;
 use Explt13\Nosmi\Base\ControllerResolver;
 use Explt13\Nosmi\Base\Db;
 use Explt13\Nosmi\Base\ErrorHandler;
+use Explt13\Nosmi\Base\MiddlewareLoader;
 use Explt13\Nosmi\Base\Model;
-use Explt13\Nosmi\Base\Registry;
 use Explt13\Nosmi\Base\ServiceProviderLoader;
 use Explt13\Nosmi\Base\View;
 use Explt13\Nosmi\Base\Widget;
@@ -21,20 +21,22 @@ use Explt13\Nosmi\Interfaces\CacheInterface;
 use Explt13\Nosmi\Interfaces\ConfigInterface;
 use Explt13\Nosmi\Interfaces\ConfigValidatorInterface;
 use Explt13\Nosmi\Interfaces\ContainerInterface;
+use Explt13\Nosmi\Interfaces\DependencyManagerInterface;
 use Explt13\Nosmi\Interfaces\FileValidatorInterface;
 use Explt13\Nosmi\Interfaces\LogFormatterInterface;
 use Explt13\Nosmi\Interfaces\LoggerInterface;
 use Explt13\Nosmi\Logging\DefaultFormatter;
 use Explt13\Nosmi\Logging\Logger;
 use Explt13\Nosmi\Logging\LogStatus;
-use Explt13\Nosmi\Middlewares\MiddlewareLoader;
 use Explt13\Nosmi\Routing\Request;
 use Explt13\Nosmi\Routing\RouteContext;
 use Explt13\Nosmi\Routing\Router;
+use Explt13\Nosmi\Utils\Namespacer;
 use Explt13\Nosmi\Validators\ClassValidator;
 use Explt13\Nosmi\Validators\FileValidator;
 
 return [
+    DependencyManagerInterface::class => DependencyManager::class,
     ConfigInterface::class => AppConfig::class,
     ConfigLoader::class => ConfigLoader::class,
     ConfigValidatorInterface::class => ConfigValidator::class,
@@ -57,8 +59,14 @@ return [
     Db::class => Db::class,
     ErrorHandler::class => ErrorHandler::class,
     Model::class => Model::class,
-    Registry::class => Registry::class,
     ServiceProviderLoader::class => ServiceProviderLoader::class,
     View::class => View::class,
     Widget::class => Widget::class,
+
+    // Utils
+    Namespacer::class => Namespacer::class,
+
+    // Validators
+    FileValidatorInterface::class => FileValidator::class,
+    ClassValidator::class => ClassValidator::class,
 ];

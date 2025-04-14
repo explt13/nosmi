@@ -11,6 +11,6 @@ class ConfigParameterNotSetException extends BaseException
 
     protected function getDefaultMessage(array $context = []): string
     {
-        return "Missing config parameter: {$context['name']}";
+        return "Missing required config parameter: {$context['name']}";
     }
 }

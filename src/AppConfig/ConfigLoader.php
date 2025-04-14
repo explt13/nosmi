@@ -3,6 +3,7 @@
 namespace Explt13\Nosmi\AppConfig;
 
 use Dotenv\Dotenv;
+use Explt13\Nosmi\Exceptions\ConfigParameterNotSetException;
 use Explt13\Nosmi\Exceptions\InvalidFileExtensionException;
 use Explt13\Nosmi\Exceptions\InvalidResourceException;
 use Explt13\Nosmi\Exceptions\ResourceNotFoundException;
@@ -30,12 +31,11 @@ class ConfigLoader
     /**
      * @param ConfigInterface $app_config An app config object
      */
-    public function __construct(ConfigInterface $app_config)
+    public function __construct(ConfigInterface $app_config, FileValidatorInterface $file_validator)
     {
         $this->app_config = $app_config;
-        $this->file_validator = new FileValidator();
+        $this->file_validator = $file_validator;
     }
-
 
     /**
      * Load a config in .env, .json, .ini
@@ -45,9 +45,37 @@ class ConfigLoader
     public function loadConfig(string $config_path): void
     {
         $this->validateConfigFilePath($config_path);
-        $extension = pathinfo($config_path, PATHINFO_EXTENSION);
-        $config = $this->getConfig($extension, $config_path);
+        $config = $this->getConfig(pathinfo($config_path, PATHINFO_EXTENSION), $config_path);
         $this->app_config->bulkSet($config);
+        $this->setRequiredMissingParams();
+    }
+
+    protected function setRequiredMissingParams(): void
+    {
+        if (!$this->app_config->has('APP_ROOT')) {
+            throw new ConfigParameterNotSetException('APP_ROOT');
+        }
+        
+        if (!$this->app_config->has('APP_PSR')) {
+            throw new ConfigParameterNotSetException('APP_PSR');
+        }
+
+        $app_root = $this->app_config->get('APP_ROOT');
+        $required_dirs = [
+            'APP_SRC' => "$app_root/src",
+            'APP_PROVIDERS' => "$app_root/src/providers",
+            'APP_MIDDLEWARES' => "$app_root/src/middlewares",
+            'APP_CONFIG' => "$app_root/config",
+        ];
+
+        foreach ($required_dirs as $key => $value) {
+            if (!$this->file_validator->isReadableDir($value)) {
+                throw InvalidResourceException::withMessage('The specified providers folder is not a valid directory: ' . $value);
+            }
+            if (!$this->app_config->has($key)) {
+                $this->app_config->set($key, $value);
+            }
+        }
     }
 
     /**

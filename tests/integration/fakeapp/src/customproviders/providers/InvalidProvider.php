@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Integration\ServiceProvider\fakeapp\src\something\providers;
+namespace Tests\Integration\fakeapp\src\customproviders\providers;
 
 
 class InvalidProvider

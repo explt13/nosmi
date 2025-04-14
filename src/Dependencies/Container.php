@@ -82,6 +82,10 @@ class Container implements ContainerInterface, SingletonInterface
         $reflectorClass = new \ReflectionClass($service);
         $reflectorConstructor = $reflectorClass->getConstructor();
 
+        if ($reflectorClass->hasMethod('getInstance')) {
+            return call_user_func([$service, 'getInstance']);
+        }
+
         if (is_null($reflectorConstructor)) {
             return new $service;
         }

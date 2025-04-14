@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Integration\ServiceProvider\fakeapp\src\something\custom;
+namespace Tests\Integration\fakeapp\src\customproviders\custom;
 
 use Explt13\Nosmi\Interfaces\ServiceProviderInterface;
 
