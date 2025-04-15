@@ -2,29 +2,20 @@
 
 namespace Explt13\Nosmi\Base;
 
-use Explt13\Nosmi\Exceptions\InvalidTypeException;
-use Explt13\Nosmi\Interfaces\MiddlewareInterface;
+use Explt13\Nosmi\Traits\SingletonTrait;
 
-class MiddlewareLoader extends ModuleLoader
+class MiddlewareLoader
 {
-    private const FOLDER = 'APP_MIDDLEWARES';
-
-    protected function loadProvider(string $provider): void
+    use SingletonTrait;
+    private array $middlewares;
+    
+    public function add(callable $middleware): void
     {
-        $object = $this->dependency_manager->getDependency($this->namespace . $provider);
-
-        if (!$object instanceof MiddlewareInterface) {
-            throw new InvalidTypeException(
-                MiddlewareInterface::class,
-                $object::class
-            );
-        }
-
-        $object->run();
+        $this->middlewares[] = $middleware;
     }
 
-    protected function getFolderName(): string
+    public function run()
     {
-        return self::FOLDER;
+
     }
 }

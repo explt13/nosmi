@@ -2,7 +2,7 @@
 
 namespace Explt13\Nosmi\Routing;
 
-class RouteContext
+class Route
 {
     private array $route = [];
     private array $readOnlyProperties = [];
@@ -20,7 +20,7 @@ class RouteContext
     private function prepareRoute(array $route): array
     {
         if (!isset($route['layout'])) {
-            $route['layout'] = LAYOUT;
+            $route['layout'] = FRAMEWORK . "/Templates/Views/Errors/dev.php";
         }
         if (empty($route['action'])) {
             $route['action'] = 'index';

@@ -2,61 +2,196 @@
 
 namespace Explt13\Nosmi\Routing;
 
-class Request
+use Explt13\Nosmi\Exceptions\NotInArrayException;
+use Explt13\Nosmi\Interfaces\LightRequestInterface;
+use Nyholm\Psr7\Factory\Psr17Factory;
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\UriInterface;
+
+class Request implements LightRequestInterface
 {
-    protected array $query_params;
-    protected ?array $post_data;
-    protected array $headers;
-    public bool $isAjax;
-
-    public function __construct()
+    private const AVAILABLE_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'];
+    private RequestInterface $request;
+    public function __construct(string $method, string $uri)
     {
-        $this->headers = getallheaders();
-        $this->query_params = $_GET;
-        $this->isAjax = strtolower($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '') === 'xmlhttprequest';
+        $this->validateIsAllowedMethod($method);
+        $factory = new Psr17Factory();
+        $this->request = $factory->createRequest($method, $uri);
     }
 
-    protected function setPostData(): void
+    public function getHeader(string $name): array
     {
-        if (!isset($this->headers['Content-Type']) || $this->headers['Content-Type'] === 'application/json') {
-            $this->post_data = json_decode(file_get_contents('php://input'), true);
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                throw new \Exception("Invalid JSON received: " . json_last_error_msg(), 500);
-            }
-        } else if (($this->headers['Content-Type'] === 'application/x-www-form-urlencoded') || 
-                  (preg_match("#multipartform-data; boundary=.*#", $this->headers['Content-Type']))) {
-            $this->post_data = $_POST;
+        return $this->request->getHeader($name);
+    }
+
+    public function getHeaders(): array
+    {
+        return $this->request->getHeaders();
+    }
+
+    public function getHeaderLine(string $name): string
+    {
+        return $this->request->getHeaderLine($name);
+    }
+
+    public function getBodyContent(): string
+    {
+        return $this->request->getBody()->getContents();
+    }
+
+    public function readBody(int $length): string
+    {
+        return $this->request->getBody()->read($length);
+    }
+
+    public function getParsedBody(): array
+    {
+        $contentType = $this->getContentType();
+        $body = $this->getBodyContent();
+
+        if (str_contains($contentType, 'application/json')) {
+            return json_decode($body, true) ?? [];
         }
+
+        if (str_contains($contentType, 'application/x-www-form-urlencoded')) {
+            parse_str($body, $parsedBody);
+            return $parsedBody;
+        }
+
+        return [];
     }
 
-    /**
-     * if not Content Type header present -
-     * JSON format will be used by default.
-     */
-
-    public function getPostDataValue(string $key, $default = null): mixed
+    public function getUploadedFiles(): array
     {
-        $this->setPostData();
-        return $this->post_data[$key] ?? $default;
+        return $_FILES ?? [];
     }
 
-    public function getPostData(): array
+    public function getDetailed(): RequestInterface
     {
-        $this->setPostData();
-        return $this->post_data;
+        return $this->request;
     }
+
+    public function getUri(): UriInterface
+    {
+        return $this->request->getUri();
+    }
+
+    public function isHttps(): bool
+    {
+        return $this->getUri()->getScheme() === 'https';
+    }
+
+    public function getProtocol(): string
+    {
+        return $this->request->getProtocolVersion();
+    }
+
+    public function getMethod(): string
+    {
+        return $this->request->getMethod();
+    }
+
+    public function isGet(): bool
+    {
+        return $this->request->getMethod() === 'GET';
+    }
+
+    public function isPost(): bool
+    {
+        return $this->request->getMethod() === 'POST';
+    }
+
+    public function isPut(): bool
+    {
+        return $this->request->getMethod() === 'PUT';
+    }
+
+    public function isPatch(): bool
+    {
+        return $this->request->getMethod() === 'PATCH';
+    }
+
+    public function isDelete(): bool
+    {
+        return $this->request->getMethod() === 'DELETE';
+    }
+
+    public function isOptions(): bool
+    {
+        return $this->request->getMethod() === 'OPTIONS';
+    }
+
+    public function isAjax(): bool
+    {
+        return strtolower($this->getHeaderLine('X-Requested-With')) === 'xmlhttprequest';
+    }
+
+    public function getClientIp(): ?string
+    {
+        return $_SERVER['REMOTE_ADDR'] ?? null;
+    }
+
+    public function getReferer(): string
+    {
+        return $this->getHeaderLine('Referer');
+    }
+
+    public function getUserAgent(): string
+    {
+        return $this->getHeaderLine('User-Agent');
+    }
+
+    public function getPath(): string
+    {
+        return $this->getUri()->getPath();
+    }
+
+    public function getSession(string $key, $default = null): mixed
+    {
+        return $_SESSION[$key] ?? $default;
+    }
+
+    public function getContentType(): string
+    {
+        return $this->getHeaderLine('Content-Type');
+    }
+
+    public function getQueryParam(string $name, $default = null): string|array|null
+    {
+        parse_str($this->getUri()->getQuery(), $queryParams);
+        return $queryParams[$name] ?? $default;
+    }
+
     public function getQueryParams(): array
     {
-        return $this->query_params;
+        parse_str($this->getUri()->getQuery(), $queryParams);
+        return $queryParams;
     }
 
-    public function getQueryParam(string $key, $default = null): mixed
+    public function validate(array $rules): array
     {
-        return $this->query_params[$key] ?? $default;
+        $data = array_merge($this->getQueryParams(), $this->getParsedBody());
+        $errors = [];
+
+        foreach ($rules as $field => $rule) {
+            if ($rule === 'required' && empty($data[$field])) {
+                $errors[$field] = "$field is required.";
+            }
+            // more rules ... 
+        }
+
+        if (!empty($errors)) {
+            throw new \InvalidArgumentException(json_encode($errors));
+        }
+
+        return $data;
     }
 
-    public function getHeaders()
+    private function validateIsAllowedMethod(string $method): bool
     {
-        return $this->headers;
+        if (!in_array(strtoupper($method), self::AVAILABLE_METHODS)) {
+            throw new NotInArrayException($method, self::AVAILABLE_METHODS);
+        }
+        return true;
     }
 }

@@ -2,7 +2,8 @@
 namespace Explt13\Nosmi\Routing;
 
 use Explt13\Nosmi\Base\ControllerResolver;
-use Explt13\Nosmi\Middlewares\MiddlewareLoader;
+use Explt13\Nosmi\Base\MiddlewareLoader;
+use Explt13\Nosmi\Interfaces\ConfigInterface;
 
 class Router
 {
@@ -10,42 +11,57 @@ class Router
     private string $routes_dest;
     private MiddlewareLoader $middleware_loader;
     private ControllerResolver $controller_resolver;
-    private RouteContext $route_context;
+    private Route $route;
+    private ConfigInterface $config;
 
-    public function __construct(MiddlewareLoader $middleware_loader, ControllerResolver $controller_resolver, RouteContext $route_context)
+    public function __construct(
+        MiddlewareLoader $middleware_loader,
+        ControllerResolver $controller_resolver,
+        Route $route,
+        ConfigInterface $config
+    )
     {
-        $this->routes_dest = CONF . '/routes.php';
+        $this->routes_dest = $this->config->get("APP_CONFIG") . '/routes.php';
         $this->middleware_loader = $middleware_loader;
         $this->controller_resolver = $controller_resolver;
-        $this->route_context = $route_context;
-        $this->routes = $this->getRoutes();
-    }
-
-    public function add(string $regexp, array $route = []): self
-    {
-        $this->routes[$regexp] = $route;
-        return $this;
+        $this->route = $route;
+        $this->routes = require_once $this->routes_dest;
     }
 
     /**
-     * @param string $routes_dest a path to routes file that must return an array with routes where [pattern] => [default params, ...];
+     * Adds a middleware for request/response for __all__ routes
+     * @param callable(Psr\Http\Message\RequestInterface $request, \Psr\Http\Message\ResponseInterface $response):void $middleware the middleware to add
+     * @return void
+     */
+    public function use(callable $middleware): void
+    {
+        $this->middleware_loader->add($middleware);
+    }
+
+    /**
+     * Sets a custom dest to the routes, defualt is APP_ROOT/config/routes.php file
+     * @param string $routes_dest a path to routes file that must return an array with routes where [pattern] => [default context, ...];
+     * @return void
      */
     public function setRoutesDest(string $routes_dest): void
     {
         $this->routes_dest = $routes_dest;
     }
 
-    private function getRoutes(): array
+    /**
+     * Returns all routes
+     * @return array the array of routes
+     */
+    public function getRoutes(): array
     {   
-        return require_once $this->routes_dest;
+        return $this->routes;
     }
     
     public function dispatch(string $url): void
     {
         $route = $this->extractRouteFromQueryString($url);
         $route_params = $this->getRouteParams($route);
-        $this->route_context->setRoute($route_params);
-        $this->middleware_loader->run();
+        $this->route->setRoute($route_params);
         $this->controller_resolver->resolve();
     }
 

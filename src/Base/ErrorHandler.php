@@ -73,7 +73,7 @@ class ErrorHandler
                 require_once $views['DEBUG'];
                 exit;
             }
-            require_once FRAMEWORK . "/DefaultViews/Errors/dev.php";
+            require_once FRAMEWORK . "/Templates/Views/Errors/dev.php";
             exit;
         }
 
@@ -82,7 +82,7 @@ class ErrorHandler
                 require_once $file;
                 exit;
             }
-            require_once FRAMEWORK . "/DefaultViews/Errors/500.php";
+            require_once FRAMEWORK . "/Templates/Views/Errors/500.php";
         }
     }
 }

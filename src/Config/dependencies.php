@@ -29,7 +29,7 @@ use Explt13\Nosmi\Logging\DefaultFormatter;
 use Explt13\Nosmi\Logging\Logger;
 use Explt13\Nosmi\Logging\LogStatus;
 use Explt13\Nosmi\Routing\Request;
-use Explt13\Nosmi\Routing\RouteContext;
+use Explt13\Nosmi\Routing\Route;
 use Explt13\Nosmi\Routing\Router;
 use Explt13\Nosmi\Utils\Namespacer;
 use Explt13\Nosmi\Validators\ClassValidator;
@@ -52,7 +52,7 @@ return [
     CacheInterface::class => Cache::class,
     MiddlewareLoader::class => MiddlewareLoader::class,
     Request::class => Request::class,
-    RouteContext::class => RouteContext::class,
+    Route::class => Route::class,
     Router::class => Router::class,
     Controller::class => Controller::class,
     ControllerResolver::class => ControllerResolver::class,
