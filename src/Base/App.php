@@ -7,6 +7,7 @@ use Explt13\Nosmi\Dependencies\Container;
 use Explt13\Nosmi\Interfaces\ConfigInterface;
 use Explt13\Nosmi\Interfaces\ContainerInterface;
 use Explt13\Nosmi\Interfaces\DependencyManagerInterface;
+use Explt13\Nosmi\Routing\Request;
 use Explt13\Nosmi\Routing\Router;
 
 class App
@@ -27,11 +28,11 @@ class App
         $this->config_loader = $config_loader;
     }
 
-    public function bootstrap(): void
+    private function bootstrap(): void
     {
         
-        $this->config_loader->loadConfig($this->config_loader::DEFAULT_FRAMEWORK_CONFIG_PATH);
         define('FRAMEWORK', dirname(__DIR__));
+        $this->config_loader->loadConfig($this->config_loader::DEFAULT_FRAMEWORK_CONFIG_PATH);
         $this->dependency_manager->loadDependencies(FRAMEWORK . '/Config/dependencies.php');
         // ErrorHandler::getInstance();
         // $serviceLoader = $this->dependency_manager->getDependency(ServiceProviderLoader::class);
@@ -46,6 +47,6 @@ class App
         }
         session_start();
         $router = $this->dependency_manager->getDependency(Router::class);
-        $router->dispatch($_SERVER['QUERY_STRING']);
+        $router->dispatch(Request::init());
     }
 }

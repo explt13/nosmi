@@ -2,11 +2,19 @@
 
 namespace Explt13\Nosmi\Routing;
 
+use Explt13\Nosmi\Base\Controller;
+
 class Route
 {
     private array $route = [];
+    private static array $routes = [];
     private array $readOnlyProperties = [];
     private bool $canOverwrite = false;
+
+    public function __construct(string $name)
+    {
+        $this->parseRoute($name);
+    }
 
     public function setRoute(array $route): void
     {
@@ -15,6 +23,21 @@ class Route
             $this->route[$key] = $value;
             $this->readOnlyProperties[] = $key;
         }
+    }
+
+    public static function add(string $name, string $controller): void
+    {
+        self::$routes[$name] = $controller;
+    }
+
+    public function getRoute($name)
+    {
+        return self::$routes[$name];
+    }
+
+    private function parseRoute($name)
+    {
+        
     }
 
     private function prepareRoute(array $route): array

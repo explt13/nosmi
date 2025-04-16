@@ -12,11 +12,22 @@ class Request implements LightRequestInterface
 {
     private const AVAILABLE_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'];
     private RequestInterface $request;
+
     public function __construct(string $method, string $uri)
     {
         $this->validateIsAllowedMethod($method);
         $factory = new Psr17Factory();
         $this->request = $factory->createRequest($method, $uri);
+    }
+
+    public static function init()
+    {
+        $method = $_SERVER['REQUEST_METHOD'];
+        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        $hostname = $_SERVER['SERVER_NAME'];
+        $port = $_SERVER['SERVER_PORT'];
+        $url = $_SERVER['REQUEST_URI'];
+        return new Request($method, "$scheme://$hostname:$port$url");
     }
 
     public function getHeader(string $name): array

@@ -4,6 +4,7 @@ namespace Explt13\Nosmi\Routing;
 use Explt13\Nosmi\Base\ControllerResolver;
 use Explt13\Nosmi\Base\MiddlewareLoader;
 use Explt13\Nosmi\Interfaces\ConfigInterface;
+use Explt13\Nosmi\Interfaces\LightRequestInterface;
 
 class Router
 {
@@ -30,7 +31,7 @@ class Router
 
     /**
      * Adds a middleware for request/response for __all__ routes
-     * @param callable(Psr\Http\Message\RequestInterface $request, \Psr\Http\Message\ResponseInterface $response):void $middleware the middleware to add
+     * @param callable(Psr\Http\Message\LightRequestInterface $request, \Psr\Http\Message\LightResponseInterface $response):void $middleware the middleware to add
      * @return void
      */
     public function use(callable $middleware): void
@@ -57,7 +58,7 @@ class Router
         return $this->routes;
     }
     
-    public function dispatch(string $url): void
+    public function dispatch(LightRequestInterface $request): void
     {
         $route = $this->extractRouteFromQueryString($url);
         $route_params = $this->getRouteParams($route);
