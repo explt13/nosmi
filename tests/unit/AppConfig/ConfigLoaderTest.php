@@ -24,10 +24,13 @@ class ConfigLoaderTest extends TestCase
     {
         IncludeFiles::includeUtilFunctions();
     }
+
     public function setUp(): void
     {
         $this->mock_app_config = $this->createMock(ConfigInterface::class);
-        $this->config_loader = new ConfigLoader($this->mock_app_config);
+        $this->mock_app_config->method('HAS')->willReturn(true);
+        $this->mock_app_config->method('GET')->with('APP_ROOT')->willReturn(dirname(__DIR__, 2) . '/integration/fakeapp');
+        $this->config_loader = new ConfigLoader($this->mock_app_config, new FileValidator());
     }
 
     public function tearDown(): void
@@ -36,18 +39,7 @@ class ConfigLoaderTest extends TestCase
         $this->config_loader = null;
     }
 
-    public function testLoadFrameworkConfig()
-    {
-        Dotenv::createImmutable(dirname(__FILE__, 4) . '/src/Config')->load();
-        $this->mock_app_config
-             ->expects(($this->once()))
-             ->method('bulkSet')
-             ->with($_ENV);
-
-        $this->config_loader->loadConfig(dirname(__FILE__, 4) . '/src/Config/.env');
-    }
-
-    public static function loadUserConfigProvider()
+    public static function loadConfigProvider()
     {
         return [
             "json config" => [
@@ -85,7 +77,7 @@ class ConfigLoaderTest extends TestCase
         ];
     }
 
-    #[DataProvider('loadUserConfigProvider')]
+    #[DataProvider('loadConfigProvider')]
     public function testLoadUserConfig($ext, $path, $fail = null)
     {
         if (is_null($fail)) {

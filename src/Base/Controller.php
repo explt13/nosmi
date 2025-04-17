@@ -3,16 +3,17 @@ namespace Explt13\Nosmi\Base;
 
 use Explt13\Nosmi\Interfaces\CacheInterface;
 use Explt13\Nosmi\Routing\Request;
-use Explt13\Nosmi\Routing\RouteContext;
+use Explt13\Nosmi\Routing\Route;
 
 abstract class Controller
 {
-    protected RouteContext $route;
+    protected Route $route;
     protected CacheInterface $cache;
     private View $view;
     protected Request $request;
 
-    public final function init(RouteContext $route, Request $request, View $view): void
+
+    public final function init(Route $route, Request $request, View $view): void
     {
         $this->route = $route;
         $this->request = $request;

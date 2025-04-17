@@ -21,8 +21,6 @@ class ConfigLoader
 
     protected FileValidatorInterface $file_validator;
 
-    public const DEFAULT_FRAMEWORK_CONFIG_PATH = __DIR__ . '/../Config/.env';
-
     /**
      * @var array{0: 'env', 1: 'json', 2: 'ini'} CONFIG_EXTENSTIONS available extensions for the config file
      */
@@ -42,8 +40,12 @@ class ConfigLoader
      * @param string $config_path a destination to the config file
      * @return void
      */
-    public function loadConfig(string $config_path): void
+    public function loadConfig(?string $config_path = null): void
     {
+        if (is_null($config_path)) {
+            // LOG
+            return;
+        }
         $this->validateConfigFilePath($config_path);
         $config = $this->getConfig(pathinfo($config_path, PATHINFO_EXTENSION), $config_path);
         $this->app_config->bulkSet($config);
@@ -69,10 +71,10 @@ class ConfigLoader
         ];
 
         foreach ($required_dirs as $key => $value) {
-            if (!$this->file_validator->isReadableDir($value)) {
-                throw InvalidResourceException::withMessage('The specified providers folder is not a valid directory: ' . $value);
-            }
             if (!$this->app_config->has($key)) {
+                if (!$this->file_validator->isReadableDir($value)) {
+                    throw InvalidResourceException::withMessage('The specified folder is not a valid directory: ' . $value);
+                }
                 $this->app_config->set($key, $value);
             }
         }

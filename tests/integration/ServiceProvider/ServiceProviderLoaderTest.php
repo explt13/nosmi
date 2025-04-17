@@ -30,7 +30,6 @@ class ServiceProviderLoaderTest extends TestCase
     public static function setUpBeforeClass(): void
     {
         $dm = new DependencyManager(Container::getInstance());
-        $dm->loadDependencies('/var/www/packages/nosmi/src/Config/dependencies.php');
         $dm->addDependency(FileValidatorInterface::class, FileValidator::class, true);
     }
     
@@ -38,6 +37,7 @@ class ServiceProviderLoaderTest extends TestCase
     {
         $this->dep_manager = new DependencyManager(Container::getInstance());
         $this->config = AppConfig::getInstance();
+        // $this->config->set('APP_ROOT')
         $fv1 = $this->dep_manager->getDependency(FileValidatorInterface::class);
         $loader = new ConfigLoader($this->config, $fv1);
         $loader->loadConfig(dirname(__DIR__) .'/fakeapp/config/.env');

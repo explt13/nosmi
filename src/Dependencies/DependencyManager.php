@@ -2,6 +2,8 @@
 
 namespace Explt13\Nosmi\Dependencies;
 
+use Explt13\Nosmi\Exceptions\FileNotFoundException;
+use Explt13\Nosmi\Exceptions\InvalidFileExtensionException;
 use Explt13\Nosmi\Exceptions\MissingAssocArrayKeyException;
 use Explt13\Nosmi\Interfaces\ContainerInterface;
 use Explt13\Nosmi\Interfaces\DependencyManagerInterface;
@@ -25,8 +27,19 @@ final class DependencyManager implements DependencyManagerInterface
      * @param string $path the path to the dependencies
      * @note dependencies structure array<string, string|array{concrete: string, singleton: bool}> 
      */
-    public function loadDependencies(string $path): void
+    public function loadDependencies(?string $path): void
     {
+        if (is_null($path)) {
+            // LOG
+            return;
+        }
+        if (!is_file($path)) {
+            throw new FileNotFoundException($path);
+        }
+        if (pathinfo($path, PATHINFO_EXTENSION) !== 'php') {
+            throw new InvalidFileExtensionException($path, ['php']);
+        }
+
         $dependencies = require_once $path;
         foreach ($dependencies as $abstract => $dependency)
         {

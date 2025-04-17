@@ -60,36 +60,7 @@ class Router
     
     public function dispatch(LightRequestInterface $request): void
     {
-        $route = $this->extractRouteFromQueryString($url);
-        $route_params = $this->getRouteParams($route);
-        $this->route->setRoute($route_params);
+        $route = $this->route->setRoute($request->getUri()->getPath());
         $this->controller_resolver->resolve();
-    }
-
-    /**
-     * @var string $route
-     * @return array route params [...default_params, ...$concrete_params];
-     * @throws \Exception
-     */
-    private function getRouteParams(string $route): array
-    {
-        foreach ($this->routes as $pattern => $default_params) {
-            if (preg_match("#{$pattern}#", $route, $matches)) {
-                $matches = array_filter($matches, fn($key) => !is_int($key), ARRAY_FILTER_USE_KEY);
-                return [...$default_params, ...$matches];
-            }
-        }
-        throw new \Exception("Route `$route` is not found", 404);
-    }
-
-    private function extractRouteFromQueryString(string $url): string
-    {
-        if ($url) {
-            $route = explode("&", $url, 2)[0];
-            if (strpos($route, "=") === false) {
-                return rtrim($route, '/');
-            }
-        }
-        return '';
     }
 }
