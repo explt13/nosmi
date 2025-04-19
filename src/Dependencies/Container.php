@@ -54,7 +54,7 @@ class Container implements ContainerInterface, SingletonInterface
     }
 
 
-    public function get(string $abstract, bool $getNew = false): object
+    public function get(string $abstract, bool $getNew = false, bool $cacheNew = false): object
     {
         if (!$getNew && $this->container_validator->isDependencyInServices($this->services, $abstract)) {
             return $this->services[$abstract];
@@ -66,7 +66,9 @@ class Container implements ContainerInterface, SingletonInterface
 
         $concrete = $this->autowire($this->bindings[$abstract]["dependency"]);
         if ($this->bindings[$abstract]["singleton"] ?? false) {
-            $this->cacheService($abstract, $concrete);
+            if (!$getNew || ($getNew && $cacheNew)) {
+                $this->cacheService($abstract, $concrete);
+            }
         }
         return $concrete;
     }

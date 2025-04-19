@@ -9,7 +9,7 @@ use Explt13\Nosmi\Interfaces\ConfigInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Tests\Unit\helpers\IncludeFiles;
-use Tests\Unit\helpers\SingletonReset;
+use Tests\Unit\helpers\Reset;
 
 class AppConfigTest extends TestCase
 {
@@ -22,7 +22,7 @@ class AppConfigTest extends TestCase
 
     public function tearDown(): void
     {
-        SingletonReset::reset($this->app_config::class);
+        Reset::resetSingleton($this->app_config::class);
     }
 
     public static function setUpBeforeClass(): void

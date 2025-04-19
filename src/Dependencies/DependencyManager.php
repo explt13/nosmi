@@ -18,9 +18,9 @@ final class DependencyManager implements DependencyManagerInterface
         $this->container = $container;
     }
 
-    public function getDependency(string $abstract, bool $getNew = false): object
+    public function getDependency(string $abstract, bool $getNew = false, bool $cacheNew = false): object
     {
-        return $this->container->get($abstract, $getNew);
+        return $this->container->get($abstract, $getNew, $cacheNew);
     }
 
     /**

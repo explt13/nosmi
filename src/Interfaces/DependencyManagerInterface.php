@@ -10,9 +10,12 @@ interface DependencyManagerInterface
      * @param bool $getNew [optional] <p>
      * force to get the new instance of the abstract, has an effect only if the abstract has a singleton realization
      * </p>
+     * @param bool $cacheNew [optional] <p>
+     * __cache__ a new instance of singleton dependency, only __have an effect__ if a __$getNew__ parameter set to __true__
+     * </p>
      * @return T
      */
-    public function getDependency(string $abstract, bool $getNew = false): object;
+    public function getDependency(string $abstract, bool $getNew = false, bool $cacheNew = false): object;
     
     /**
      * Load an array of dependencies

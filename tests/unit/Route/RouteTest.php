@@ -5,8 +5,10 @@ namespace Tests\Unit\Route;
 use Explt13\Nosmi\Exceptions\InvalidAssocArrayValueException;
 use Explt13\Nosmi\Routing\Route;
 use LogicException;
+use Nyholm\Psr7\Uri;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use Tests\Unit\helpers\Reset;
 
 class RouteTest extends TestCase
 {
@@ -18,12 +20,24 @@ class RouteTest extends TestCase
         Route::add('/order/add/:alias', "OrderController");
         Route::add('/user/<string>:id', "UserController");
         Route::add('/:id', "ArticleController");
-
     }
+
+    protected function tearDown(): void
+    {
+        Reset::resetStaticProp(Route::class, 'routes');
+        Reset::resetStaticProp(Route::class, 'patterns_map');
+    }
+
 
     protected function setUp(): void
     {
+        Route::add('/order/new/<slug>:product/<int>:id', 'OrderController');
+        Route::add('/first/pattern/:id', 'FirstController');
+        Route::add('/second/pattern/<string>:name', 'SecondController');
         $this->route = new Route();
+        $uri = new Uri('https://example.com/order/new/dsda-09/213/?address=Baker-av3-street&quantity=4');
+        $this->route->setRoute($uri->getPath());
+        
     }
 
     public static function pathAndPatternsProvider(): array
@@ -105,6 +119,87 @@ class RouteTest extends TestCase
             $this->expectException($fail["class"]);
         }
         Route::add($path_pattern, 'SomeController');
-        $this->assertSame($regexp, $this->route->getRegexpByPathPattern($path_pattern));
+        $this->assertSame($regexp, Route::getRegexpByPathPattern($path_pattern));
+    }
+
+    public function testGetRequestController()
+    {
+        $this->assertSame('OrderController', $this->route->getController());
+    }
+
+    public function testGetRequestPathPattern()
+    {
+        $this->assertSame('/order/new/<slug>:product/<int>:id', $this->route->getPathPattern());
+    }
+
+    public function testGetRequestPathRegexp()
+    {
+        $this->assertSame('/order/new/(?P<product>[a-zA-Z0-9-]+)/(?P<id>[0-9]+)', $this->route->getPathRegexp());
+    }
+
+    public function testGetRequestParams()
+    {
+        $this->assertSame(['product' => 'dsda-09', 'id' => '213'], $this->route->getParams());
+    }
+
+    public function testGetRequestParam()
+    {
+        $this->assertSame('dsda-09', $this->route->getParam('product'));
+        $this->assertSame(null, $this->route->getParam('notexisted'));
+    }
+
+    public function testRoutesAddAndRoutesMapsMethods()
+    {
+        Reset::resetStaticProp(Route::class, 'routes');
+        Reset::resetStaticProp(Route::class, 'patterns_map');
+
+        Route::add('/first/pattern/:id', 'FirstController');
+        Route::add('/second/pattern/<string>:name', 'SecondController');
+        $this->assertSame(['/first/pattern/:id', '/second/pattern/<string>:name'], Route::getPathPatterns());
+        $this->assertSame([
+                '/first/pattern/:id' => '/first/pattern/(?P<id>[a-zA-Z0-9-]+)', 
+                '/second/pattern/<string>:name' => '/second/pattern/(?P<name>[a-zA-Z]+)'
+            ], 
+            Route::getPatternToRegexMap()
+        );
+        $this->assertSame(['/first/pattern/(?P<id>[a-zA-Z0-9-]+)', '/second/pattern/(?P<name>[a-zA-Z]+)'], Route::getPathRegexps());
+        $this->assertSame([
+                '/first/pattern/(?P<id>[a-zA-Z0-9-]+)' => 'FirstController',
+                '/second/pattern/(?P<name>[a-zA-Z]+)' => 'SecondController'
+            ],
+            Route::getRoutes()
+        );
+    }
+
+    public function testGetRegexpByPathPattern()
+    {
+        $this->assertSame('/second/pattern/(?P<name>[a-zA-Z]+)', Route::getRegexpByPathPattern('/second/pattern/<string>:name'));
+        $this->assertSame(null, Route::getRegexpByPathPattern('/not_existed/pattern/<string>:name'));
+    }
+
+    public function testGetControllerByPathPattern()
+    {
+        $this->assertSame('FirstController', Route::getControllerByPathPattern('/first/pattern/:id'));
+        $this->assertSame('SecondController', Route::getControllerByPathPattern('/second/pattern/<string>:name'));
+        $this->assertSame(null, Route::getControllerByPathPattern('/not_existed/pattern/<string>:name'));
+    }
+
+    public function testGetControllerByRegexp()
+    {
+        $this->assertSame('FirstController', Route::getControllerByRegexp('/first/pattern/(?P<id>[a-zA-Z0-9-]+)'));
+        $this->assertSame('SecondController', Route::getControllerByRegexp('/second/pattern/(?P<name>[a-zA-Z]+)'));
+        $this->assertSame(null, Route::getControllerByRegexp('/not_existed/pattern/<string>:name'));
+    }
+
+    public function testGetControllerPatternPaths()
+    {
+        Route::add('/another/pattern', 'FirstController');
+        $this->assertSame(['/first/pattern/:id', '/another/pattern'], Route::getControllerPatternPaths('FirstController'));
+    }
+
+    public function testgetControllerRegexps()
+    {
+        Route::add('/another/pattern', 'FirstController');
+        $this->assertSame(['/first/pattern/(?P<id>[a-zA-Z0-9-]+)', '/another/pattern'], Route::getControllerRegexps('FirstController'));
     }
 }

@@ -19,7 +19,7 @@ use Tests\Unit\Dependencies\mockdata\FakeClassPDynS;
 use Tests\Unit\Dependencies\mockdata\FakeClassR;
 use Tests\Unit\Dependencies\mockdata\IFakeClassKDynNotS;
 use Tests\Unit\Dependencies\mockdata\IFakeClassPDynS;
-use Tests\Unit\helpers\SingletonReset;
+use Tests\Unit\helpers\Reset;
 
 class ContainerTest extends TestCase
 {
@@ -34,7 +34,7 @@ class ContainerTest extends TestCase
     }
     public function tearDown(): void
     {
-        SingletonReset::reset(Container::class);
+        Reset::resetSingleton(Container::class);
     }
 
     public static function depsProvider()
@@ -166,7 +166,7 @@ class ContainerTest extends TestCase
     {
         $class_a0 = $this->container->get(FakeClassA::class);
         $class_a1 = $this->container->get(FakeClassA::class);
-        $class_a2 = $this->container->get(FakeClassA::class, true);
+        $class_a2 = $this->container->get(FakeClassA::class, true, true);
 
         // class_a3 should be the same as class_a2
         $class_a3 = $this->container->get(FakeClassA::class);

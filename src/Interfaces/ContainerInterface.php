@@ -28,12 +28,15 @@ interface ContainerInterface
      * @template T
      * @param class-string<T> $abstract the classname of the interface or class
      * @param bool $getNew [optional] <p>
-     * force to get the new instance of the abstract, has an effect only if the abstract has a singleton realization
+     * force to get the new instance of the singleton abstract, __does NOT cache__ a new abstract by default
+     * </p>
+     * @param bool $cacheNew [optional] <p>
+     * __cache__ a new instance of singleton dependency, only __have an effect__ if a __$getNew__ parameter set to __true__
      * </p>
      * @return T
      * @throws DependencyNotSetException if the $abstract is not set
      */
-    public function get(string $abstract, bool $getNew = false): object;
+    public function get(string $abstract, bool $getNew = false, bool $cacheNew = false): object;
 
     /**
      * Removes abstract from the bindings and services

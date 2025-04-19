@@ -7,6 +7,9 @@ use Explt13\Nosmi\Exceptions\InvalidAssocArrayValueException;
 
 class Route
 {
+    /**
+     * @var string[] $params route parameters array
+     */
     private array $params = [];
     private string $controller;
     private string $regexp;
@@ -30,6 +33,11 @@ class Route
     public function getParams(): array
     {
         return $this->params;
+    }
+
+    public function getParam(string $param): ?string
+    {
+        return $this->params[$param] ?? null;
     }
     
     public function getPathRegexp(): string
@@ -69,20 +77,21 @@ class Route
         return self::$routes;
     }
 
-    public static function getRegexpByPathPattern(string $path_pattern): string
+    public static function getRegexpByPathPattern(string $path_pattern): ?string
     {
-        return self::$patterns_map[$path_pattern];
+        return isset(self::$patterns_map[$path_pattern]) ? self::$patterns_map[$path_pattern] : null;
     }
 
-    public static function getControllerByPathPattern(string $path_pattern): string
+    public static function getControllerByPathPattern(string $path_pattern): ?string
     {
-        $regexp = self::$patterns_map[$path_pattern];
+        $regexp = self::getRegexpByPathPattern($path_pattern);
+        if (is_null($regexp)) return null;
         return self::$routes[$regexp];
     }
 
-    public static function getControllerByRegexp(string $regexp): string
+    public static function getControllerByRegexp(string $regexp): ?string
     {
-        return self::$routes[$regexp];
+        return isset(self::$routes[$regexp]) ? self::$routes[$regexp] : null;
     }
 
     public static function getControllerPatternPaths(string $controller): array
@@ -163,9 +172,10 @@ class Route
                 $this->controller = $controller;
                 $parameters = array_filter($parameters, fn($key) => !is_int($key), ARRAY_FILTER_USE_KEY);
                 $this->setPathParams($parameters);
+                return;
             }
-            throw new \Exception("Route `$path` is not found", 404);
         }
+        throw new \Exception("Route `$path` is not found", 404);
     }
 
     private function setPathParams(array $parameters): void
