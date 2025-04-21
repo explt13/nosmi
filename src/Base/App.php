@@ -15,15 +15,30 @@ class App
     private DependencyManagerInterface $dependency_manager;
     private ConfigLoader $config_loader;
     private bool $bootstrapped = false;
+    private MiddlewareLoader $middleware_loader;
+
 
     public function __construct(
+        MiddlewareLoader $middleware_loader,
         DependencyManagerInterface $dependency_manager,
         ConfigLoader $config_loader
     )
     {
+        $this->middleware_loader = $middleware_loader;
         $this->dependency_manager = $dependency_manager;
         $this->config_loader = $config_loader;
     }
+
+    /**
+     * Adds a middleware for request/response for __all__ routes
+     * @param callable(Psr\Http\Message\LightRequestInterface $request, \Psr\Http\Message\LightResponseInterface $response):void $middleware the middleware to add
+     * @return void
+     */
+    public function use(callable $middleware): void
+    {
+        $this->middleware_loader->add($middleware);
+    }
+
 
     public function bootstrap(
         ?string $config_path = null,

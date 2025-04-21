@@ -4,8 +4,9 @@ namespace Explt13\Nosmi\Routing;
 
 use Explt13\Nosmi\Base\Controller;
 use Explt13\Nosmi\Exceptions\InvalidAssocArrayValueException;
+use Explt13\Nosmi\Interfaces\LightRouteInterface;
 
-class Route
+class Route implements LightRouteInterface
 {
     /**
      * @var string[] $params route parameters array
@@ -13,16 +14,24 @@ class Route
     private array $params = [];
     private string $controller;
     private string $regexp;
+    private string $path;
     private static array $routes = [];
     private static array $patterns_map = [];
     private const PATH_PARAMETERS_TYPES = ['<string>' => '[a-zA-Z]+', '<int>' => '[0-9]+', '<slug>' => '[a-zA-Z0-9-]+'];
 
-    public function setRoute(string $path): void
+    public function resolvePath(string $path): bool
     {
-        if (empty(self::$routes)) {
-            throw new \LogicException('No routes found, make sure you added them correctly.');
+        foreach (self::$routes as $regexp => $controller) {
+            if (preg_match("#$regexp#", $path, $parameters)) {
+                $this->path = $path;
+                $this->regexp = $regexp;
+                $this->controller = $controller;
+                $parameters = array_filter($parameters, fn($key) => !is_int($key), ARRAY_FILTER_USE_KEY);
+                $this->setPathParams($parameters);
+                return true;
+            }
         }
-        $this->resolvePath($path);
+        return false;
     }
 
     public function getController(): string
@@ -45,9 +54,9 @@ class Route
         return $this->regexp;
     }
 
-    public function getPathPattern(): string
+    public function getPath(): string
     {
-        return array_search($this->regexp, self::$patterns_map);
+        return $this->path;
     }
 
     public static function add(string $path_pattern, string $controller): void
@@ -162,20 +171,6 @@ class Route
         if (!in_array($type, array_keys(self::PATH_PARAMETERS_TYPES))) {
             throw new InvalidAssocArrayValueException('type', array_keys(self::PATH_PARAMETERS_TYPES), $type);
         }
-    }
-
-    private function resolvePath(string $path): void
-    {
-        foreach (self::$routes as $regexp => $controller) {
-            if (preg_match("#$regexp#", $path, $parameters)) {
-                $this->regexp = $regexp;
-                $this->controller = $controller;
-                $parameters = array_filter($parameters, fn($key) => !is_int($key), ARRAY_FILTER_USE_KEY);
-                $this->setPathParams($parameters);
-                return;
-            }
-        }
-        throw new \Exception("Route `$path` is not found", 404);
     }
 
     private function setPathParams(array $parameters): void

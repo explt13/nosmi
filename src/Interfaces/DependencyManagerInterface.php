@@ -30,10 +30,34 @@ interface DependencyManagerInterface
      * ]
      */
     public function loadDependencies(string $path): void;
-    
+
+    /**
+     * Adds a dependency to the container.
+     *
+     * @param string $abstract The abstract type or identifier of the dependency.
+     * @param string $concrete The concrete implementation or class name of the dependency.
+     * @param bool $singleton Whether the dependency should be treated as a singleton. Defaults to false.
+     *
+     * @return void
+     */
     public function addDependency(string $abstract, string $concrete, bool $singleton = false): void;
-    
+
+
+    /**
+     * Removes a dependency from the container.
+     *
+     * @param string $abstract The abstract type or identifier of the dependency to remove.
+     *
+     * @return void
+     */
     public function removeDependency(string $abstract);
 
+    /**
+     * Checks if a dependency exists in the container.
+     *
+     * @param string $abstract The abstract type or identifier of the dependency.
+     *
+     * @return bool True if the dependency exists, false otherwise.
+     */
     public function hasDependency(string $abstract);
 }

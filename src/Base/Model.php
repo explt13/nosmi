@@ -1,7 +1,9 @@
 <?php
 namespace Explt13\Nosmi\Base;
 
-abstract class Model
+use Explt13\Nosmi\Interfaces\ModelInterface;
+
+abstract class Model implements ModelInterface
 {
     protected array $attributes = [];
     protected array $errors = [];

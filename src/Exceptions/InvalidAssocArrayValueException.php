@@ -12,7 +12,7 @@ class InvalidAssocArrayValueException extends BaseException
      * @param string $key_name The name of the problematic key
      * @param string|array $expected_value(s) The expected value for the key
      * @param string $got_value The actual value provided for the key
-     * @param ?string $message Optional custom message, __should not__ be set via constructor if a custom message needed, use: ::withMessage() method
+     * @param ?string $message Optional custom message, __should not__ be set via constructor if a custom message needed, use: ::withMessage() method instead.
      */
     public function __construct(
         string $key_name = self::CONTEXT_NOT_SET,

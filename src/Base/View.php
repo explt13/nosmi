@@ -1,36 +1,57 @@
 <?php
 namespace Explt13\Nosmi\Base;
 
+use Explt13\Nosmi\Exceptions\ArrayNotAssocException;
 use Explt13\Nosmi\Exceptions\FileNotFoundException;
 use Explt13\Nosmi\Exceptions\InvalidRenderOptionException;
 use Explt13\Nosmi\Interfaces\ConfigInterface;
+use Explt13\Nosmi\Interfaces\LightRouteInterface;
+use Explt13\Nosmi\Interfaces\ViewInterface;
 use Explt13\Nosmi\Routing\RouteContext;
+use Explt13\Nosmi\Utils\Types;
 
-class View
+class View implements ViewInterface
 {
-    /**
-     * RENDER_AJAX return *content html* as a string, so it can be passed to the frontend
-     */
-    public const RENDER_AJAX = 1;
+    private ConfigInterface $config;
+    private LightRouteInterface $route;
+    private string $layout_file;
+    private array $meta;
     
-    /**
-     * RENDER_SSR return null, echoes *content html* to the browser
-     */
-    public const RENDER_SSR = 2;
+    public function __construct(ConfigInterface $config)
+    {
+        $this->config = $config;
+    }
+
+    public function withLayout(string $layout_file): static
+    {
+        $this->layout_file = $layout_file;
+        return $this;
+    }
+
+    public function withMeta(string $name, string $value): static
+    {
+        $this->meta[$name] = $value;
+        return $this;
+    }
 
     /**
-     * INCLUDE_LAYOUT includes layout, by default is enabled for RENDER_SSR
+     * @param array{string: $name, string: $value} $meta_array
      */
-    public const INCLUDE_LAYOUT = 4;
-    
-    protected RouteContext $route;
-    protected ConfigInterface $config;
-    private array $meta = ["title" => "", "description" => "", "keywords" => ""]; // src/views/layouts/meta.php
-    
-    public function __construct(RouteContext $route, ConfigInterface $config)
+    public function withMetaArray(array $meta_array): static
+    {
+        if (!Types::array_is_assoc($meta_array)) {
+            throw new ArrayNotAssocException();
+        }
+        foreach($meta_array as $name => $value) {
+            $this->meta[$name] = $value;
+        }
+        return $this;
+    }
+
+    public function withRoute(LightRouteInterface $route): static
     {
         $this->route = $route;
-        $this->config = $config;
+        return $this;
     }
     
     public function render(string $view, array $data, int $render_options = self::RENDER_SSR | self::INCLUDE_LAYOUT): string|null
@@ -55,9 +76,8 @@ class View
 
     private function getContentHtml(string $view, array $data): string
     {
-        $viewFile = $this->config->get('APP_VIEWS') . '/' . $this->route->prefix . '/' . $this->route->controller . '/' . $view . '.php';
+        $viewFile = $this->config->get('APP_VIEWS') . '/' . $this->route->controller . '/' . $view . '.php';
         if (is_file($viewFile)) {
-            extract($data, EXTR_SKIP);
             ob_start();
             require_once $viewFile;
             return ob_get_clean();
@@ -68,7 +88,11 @@ class View
 
     private function includeLayout(string $content): string
     {
-        $layoutFile = $this->config->get('APP_LAYOUTS') . $this->route->layout . '.php';
+        $layout = $this->config->get('DEFAULT_LAYOUT_FILE') ?? $this->layout_file;
+        if (is_null($layout)) {
+            throw FileNotFoundException::withMessage('Layout file is not set');
+        }
+        $layoutFile = $this->config->get('APP_LAYOUTS') . '/' . $layout . '.php';
         if (is_file($layoutFile)) {
             ob_start();
             require_once $layoutFile;
@@ -76,12 +100,5 @@ class View
         } else {
             throw new FileNotFoundException($this->route->layout, 500);
         }
-    }
-
-    public function setMeta(?string $title, ?string $description = null, ?string $keywords = null): void
-    {
-        $this->meta['title'] = $title;
-        $this->meta['description'] = $description;
-        $this->meta['keywords'] = $keywords;
     }
 }
