@@ -61,5 +61,5 @@ interface LightRequestInterface
     
     public function getQueryParams(): array;
     
-    public function validate(array $rules): array;
+    public function validate(array $data, array $rules): array;
 }

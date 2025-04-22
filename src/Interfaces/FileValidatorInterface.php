@@ -47,6 +47,15 @@ interface FileValidatorInterface
     public function isReadableDir(string $path): bool;
 
     /**
+     * Checks if the file of the given path is readable and a directory.
+     *
+     * @param string $path The path to the resource.
+     * @return void
+     * @throws InvalidResourceException
+     */
+    public function validateDirIsReadable(string $path): void;
+
+    /**
      * Checks if the file of the given path is readable and a file.
      *
      * @param string $path The path to the resource.

@@ -1,6 +1,7 @@
 <?php
 namespace Explt13\Nosmi\Validators;
 
+use Explt13\Nosmi\Exceptions\InvalidResourceException;
 use Explt13\Nosmi\Interfaces\FileValidatorInterface;
 
 class FileValidator implements FileValidatorInterface
@@ -30,6 +31,12 @@ class FileValidator implements FileValidatorInterface
         return $this->isDir($path) && $this->isReadable($path);
     }
 
+    public function validateDirIsReadable(string $path): void
+    {
+        if (!$this->isReadableDir($path)) {
+            throw InvalidResourceException::withMessage('The specified folder is not a valid directory: ' . $path);
+        }
+    }
 
     public function isReadableFile(string $path): bool
     {

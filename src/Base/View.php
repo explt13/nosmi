@@ -1,49 +1,62 @@
 <?php
 namespace Explt13\Nosmi\Base;
 
-use Explt13\Nosmi\Exceptions\ArrayNotAssocException;
 use Explt13\Nosmi\Exceptions\FileNotFoundException;
-use Explt13\Nosmi\Exceptions\InvalidRenderOptionException;
 use Explt13\Nosmi\Interfaces\ConfigInterface;
 use Explt13\Nosmi\Interfaces\LightRouteInterface;
 use Explt13\Nosmi\Interfaces\ViewInterface;
-use Explt13\Nosmi\Routing\RouteContext;
-use Explt13\Nosmi\Utils\Types;
 
 class View implements ViewInterface
 {
     private ConfigInterface $config;
     private LightRouteInterface $route;
-    private string $layout_file;
-    private array $meta;
-    
+    private ?string $layout_filename = null;
+    private array $meta = [];
+    private array $data = [];
+    private bool $include_layout;
+    private bool $return = false;
+
     public function __construct(ConfigInterface $config)
     {
         $this->config = $config;
+        $this->include_layout = $this->config->get('INCLUDE_LAYOUT_BY_DEFAULT') ?? false;
+        $this->layout_filename = $this->config->get('DEFAULT_LAYOUT_FILENAME');
     }
 
-    public function withLayout(string $layout_file): static
+    public function withLayout(string $layout_filename): static
     {
-        $this->layout_file = $layout_file;
+        $this->layout_filename = $layout_filename;
+        $this->include_layout = true;
         return $this;
     }
 
     public function withMeta(string $name, string $value): static
     {
-        $this->meta[$name] = $value;
+        if (is_null($name)) {
+            $this->meta[] = $value;
+        } else {
+            $this->meta[$name] = $value;
+        }
+        return $this;
+    }
+    public function withMetaArray(array $meta_array): static
+    {
+        foreach($meta_array as $name => $value) {
+            $this->meta[$name] = $value;
+        }
         return $this;
     }
 
-    /**
-     * @param array{string: $name, string: $value} $meta_array
-     */
-    public function withMetaArray(array $meta_array): static
+    public function withData(string $name, mixed $value): static
     {
-        if (!Types::array_is_assoc($meta_array)) {
-            throw new ArrayNotAssocException();
-        }
-        foreach($meta_array as $name => $value) {
-            $this->meta[$name] = $value;
+        $this->data[$name] = $value;
+        return $this;
+    }
+
+    public function withDataArray(array $data_array): static
+    {
+        foreach($data_array as $name => $value) {
+            $this->data[$name] = $value;
         }
         return $this;
     }
@@ -53,52 +66,60 @@ class View implements ViewInterface
         $this->route = $route;
         return $this;
     }
-    
-    public function render(string $view, array $data, int $render_options = self::RENDER_SSR | self::INCLUDE_LAYOUT): string|null
+
+    public function withReturn()
     {
-        $content = $this->getContentHtml($view, $data);
-        if ($render_options === self::RENDER_AJAX) {
-            return $content;
-        }
-        if ($render_options === (self::RENDER_AJAX | self::INCLUDE_LAYOUT)){
-            return $this->includeLayout($content);
-        }
-        if ($render_options === self::RENDER_SSR) {
-            echo $content;
-            return null;
-        }
-        if ($render_options === (self::RENDER_SSR | self::INCLUDE_LAYOUT)) {
-            echo $this->includeLayout($content);
-            return null;
-        }
-        throw new InvalidRenderOptionException($view, $render_options);
+        $this->return = true;
+        return $this;
     }
 
-    private function getContentHtml(string $view, array $data): string
+    public function render(string $view, ?array $data = null): ?string
     {
-        $viewFile = $this->config->get('APP_VIEWS') . '/' . $this->route->controller . '/' . $view . '.php';
-        if (is_file($viewFile)) {
+        if (!is_null($data)) {
+            $this->data = $data;
+        }
+        if ($this->return) {
             ob_start();
-            require_once $viewFile;
+            $this->getView($view);
             return ob_get_clean();
+        }
+        $this->getView($view);
+        return null;
+    }
+
+    private function getView($view)
+    {
+        if ($this->include_layout) {
+            $this->includeLayout(function() use ($view) {
+                $this->getContentHtml($view);
+            });
+            return null;
+        } else {
+            $this->getContentHtml($view);
+            return null;
+        }
+    }
+
+    private function getContentHtml(string $view): void
+    {
+        $viewFile = $this->config->get('APP_VIEWS') . '/' . $this->route->getController() . '/' . $view . '.php';
+        if (is_file($viewFile)) {
+            require_once $viewFile;
         } else {
             throw new FileNotFoundException($view);
         }
     }
 
-    private function includeLayout(string $content): string
+    private function includeLayout(callable $contentCallback): void
     {
-        $layout = $this->config->get('DEFAULT_LAYOUT_FILE') ?? $this->layout_file;
-        if (is_null($layout)) {
+        if (is_null($this->layout_filename)) {
             throw FileNotFoundException::withMessage('Layout file is not set');
         }
-        $layoutFile = $this->config->get('APP_LAYOUTS') . '/' . $layout . '.php';
+        $layoutFile = $this->config->get('APP_LAYOUTS') . '/' . $this->layout_filename . '.php';
         if (is_file($layoutFile)) {
-            ob_start();
             require_once $layoutFile;
-            return ob_get_clean();
         } else {
-            throw new FileNotFoundException($this->route->layout, 500);
+            throw new FileNotFoundException($layoutFile, 500);
         }
     }
 }

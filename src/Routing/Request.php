@@ -18,6 +18,9 @@ class Request implements LightRequestInterface
         $this->validateIsAllowedMethod($method);
         $factory = new Psr17Factory();
         $this->request = $factory->createRequest($method, $uri);
+        foreach ($this->getHeadersFromServer() as $name => $value) {
+            $this->request = $this->request->withHeader($name, $value);
+        }
     }
 
     public static function init()
@@ -47,28 +50,40 @@ class Request implements LightRequestInterface
 
     public function getBodyContent(): string
     {
-        return $this->request->getBody()->getContents();
+        $body = $this->request->getBody();
+        $body->rewind();
+        return $body->getContents();
     }
 
     public function readBody(int $length): string
     {
-        return $this->request->getBody()->read($length);
+        $body = $this->request->getBody();
+        if ($body->eof()) {
+            $body->rewind(); // Optionally rewind the stream
+        }
+        return $body->read($length);
     }
 
     public function getParsedBody(): array
     {
         $contentType = $this->getContentType();
-        $body = $this->getBodyContent();
+        $body = $this->request->getBody();
+        $body->rewind(); // Ensure the stream is at the beginning
+        $bodyContent = $body->getContents();
+
 
         if (str_contains($contentType, 'application/json')) {
-            return json_decode($body, true) ?? [];
+            $parsed = json_decode($bodyContent, true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                throw new \InvalidArgumentException('Invalid JSON body: ' . json_last_error_msg());
+            }
+            return $parsed ?? [];
         }
 
         if (str_contains($contentType, 'application/x-www-form-urlencoded')) {
-            parse_str($body, $parsedBody);
+            parse_str($bodyContent, $parsedBody);
             return $parsedBody;
         }
-
         return [];
     }
 
@@ -179,9 +194,8 @@ class Request implements LightRequestInterface
         return $queryParams;
     }
 
-    public function validate(array $rules): array
+    public function validate(array $data, array $rules): array
     {
-        $data = array_merge($this->getQueryParams(), $this->getParsedBody());
         $errors = [];
 
         foreach ($rules as $field => $rule) {
@@ -205,4 +219,17 @@ class Request implements LightRequestInterface
         }
         return true;
     }
+
+    private function getHeadersFromServer(): array
+    {
+        $headers = [];
+        foreach ($_SERVER as $key => $value) {
+            if (strpos($key, 'HTTP_') === 0) {
+                $headerName = str_replace('_', '-', substr($key, 5));
+                $headers[$headerName] = $value;
+            }
+        }
+        return $headers;
+    }
+
 }

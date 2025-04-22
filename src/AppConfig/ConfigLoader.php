@@ -63,20 +63,23 @@ class ConfigLoader
         }
 
         $app_root = $this->app_config->get('APP_ROOT');
+        $this->file_validator->validateDirIsReadable($app_root);
         $required_dirs = [
             'APP_SRC' => "$app_root/src",
+            'APP_VIEWS' => "$app_root/src/views",
             'APP_PROVIDERS' => "$app_root/src/providers",
+            'APP_LAYOUTS' => "$app_root/src/layouts",
             'APP_MIDDLEWARES' => "$app_root/src/middlewares",
             'APP_CONFIG' => "$app_root/config",
         ];
 
         foreach ($required_dirs as $key => $value) {
-            if (!$this->app_config->has($key)) {
-                if (!$this->file_validator->isReadableDir($value)) {
-                    throw InvalidResourceException::withMessage('The specified folder is not a valid directory: ' . $value);
-                }
-                $this->app_config->set($key, $value);
+            if ($this->app_config->has($key)) {
+                $this->file_validator->validateDirIsReadable($this->app_config->get($key));
+                continue;
             }
+            $this->file_validator->validateDirIsReadable($value);
+            $this->app_config->set($key, $value);
         }
     }
 

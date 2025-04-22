@@ -4,20 +4,27 @@ namespace Explt13\Nosmi\Interfaces;
 
 interface ViewInterface
 {
+
+    public function withLayout(string $layout_file): static;
+
     /**
-     * RENDER_AJAX return *content html* as a string, so it can be passed to the frontend
+     * @param string $name - the key name of the meta attribute.
      */
-    public const RENDER_AJAX = 1;
+    public function withMeta(string $name, string $value): static;
+
+    /**
+     * @param array{string: $name, string: $value}|string[] $meta_array
+     */
+    public function withMetaArray(array $meta_array): static;
+
+    public function withData(string $name, mixed $value): static;
+    /**
+     * @param array{string: $name, mixed: $value}|mixed[] $data_array
+     */
+    public function withDataArray(array $data_array): static;
+
+    public function withRoute(LightRouteInterface $route): static;
     
-    /**
-     * RENDER_SSR return null, echoes *content html* to the browser
-     */
-    public const RENDER_SSR = 2;
+    public function render(string $view, ?array $data = null): ?string;
 
-    /**
-     * INCLUDE_LAYOUT includes layout, by default is enabled for RENDER_SSR
-     */
-    public const INCLUDE_LAYOUT = 4;
-
-    public function render(string $view, array $data, int $render_options = self::RENDER_SSR | self::INCLUDE_LAYOUT): string|null;
 }
