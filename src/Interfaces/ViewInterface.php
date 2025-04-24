@@ -4,27 +4,71 @@ namespace Explt13\Nosmi\Interfaces;
 
 interface ViewInterface
 {
-
-    public function withLayout(string $layout_file): static;
+    /**
+     * Sets the layout file to be used for rendering the view. DEFAULT_LAYOUT_FILENAME will be used by default if set in config 
+     *
+     * @param string $layout_filename The filename of the layout.
+     * @return static
+     */
+    public function withLayout(string $layout_filename): static;
 
     /**
-     * @param string $name - the key name of the meta attribute.
+     * Adds a meta tag to the view.
+     *
+     * @param string $name The name of the meta tag.
+     * @param string $value The value of the meta tag.
+     * @return static
      */
     public function withMeta(string $name, string $value): static;
 
     /**
-     * @param array{string: $name, string: $value}|string[] $meta_array
+     * Adds multiple meta tags to the view.
+     *
+     * @param array $meta_array An associative array of meta tags where the key is the name and the value is the content.
+     * @return static
      */
     public function withMetaArray(array $meta_array): static;
 
-    public function withData(string $name, mixed $value): static;
     /**
-     * @param array{string: $name, mixed: $value}|mixed[] $data_array
+     * Adds a single data variable to the view.
+     *
+     * @param string $name The name of the data variable.
+     * @param mixed $value The value of the data variable.
+     * @return static
+     */
+    public function withData(string $name, mixed $value): static;
+
+    /**
+     * Adds multiple data variables to the view.
+     *
+     * @param array $data_array An associative array of data variables where the key is the name and the value is the content.
+     * @return static
      */
     public function withDataArray(array $data_array): static;
 
+    /**
+     * Associates a route with the view. By default the current server request route will be set
+     *
+     * @param LightRouteInterface $route The route to associate with the view.
+     * @return static
+     */
     public function withRoute(LightRouteInterface $route): static;
-    
-    public function render(string $view, ?array $data = null): ?string;
 
+    /**
+     * Sets return option for rendering, if called a rendered content will be buffered and returned
+     * 
+     * @return static
+     */
+    public function withReturn(): static;
+
+    /**
+     * Renders the specified view with optional data. \
+     * The data for the view can be set with this method or with setData, setDataArray methods \
+     * Provided data will overwrite existing value if key already presents 
+     * 
+     * @param string $view The name of the view to render.
+     * @param array|null $data Optional data to pass to the view.
+     * @return string|null The rendered view as a string, or null if withReturn() hasn't been called
+     */
+    public function render(string $view, ?array $data = null): ?string;
 }

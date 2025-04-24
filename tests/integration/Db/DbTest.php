@@ -5,7 +5,7 @@ use PHPUnit\Framework\TestCase;
 use Explt13\Nosmi\Base\Db;
 use Explt13\Nosmi\AppConfig\AppConfig;
 use Explt13\Nosmi\Exceptions\DatabaseConnectionException;
-
+use Tests\Unit\helpers\Reset;
 
 class DbTest extends TestCase
 {
@@ -22,6 +22,11 @@ class DbTest extends TestCase
         $config->set('DB_USERNAME', 'root');
         $config->set('DB_PASSWORD', '123');
     }
+    
+    // public static function tearDownAfterClass(): void
+    // {
+    //     Reset::resetSingleton(AppConfig::class);
+    // }
 
     public function testDbConnectionSuccess(): void
     {

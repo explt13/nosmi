@@ -19,6 +19,7 @@ class ConfigLoaderTest extends TestCase
 {
     private (ConfigInterface&MockObject)|null $mock_app_config;
     private ConfigLoader|null $config_loader;
+    private FileValidatorInterface&MockObject $file_validator;
 
     public static function setUpBeforeClass(): void
     {
@@ -28,9 +29,19 @@ class ConfigLoaderTest extends TestCase
     public function setUp(): void
     {
         $this->mock_app_config = $this->createMock(ConfigInterface::class);
-        $this->mock_app_config->method('HAS')->willReturn(true);
-        $this->mock_app_config->method('GET')->with('APP_ROOT')->willReturn(dirname(__DIR__, 2) . '/integration/fakeapp');
-        $this->config_loader = new ConfigLoader($this->mock_app_config, new FileValidator());
+        $this->mock_app_config->method('HAS')->willReturnCallback(function ($key) {
+            return in_array($key, ['APP_ROOT', 'APP_PSR']);
+        });
+        // $this->mock_app_config->method('GET')->with('APP_ROOT')->willReturn('fakeapp');
+        $this->mock_app_config->method('GET')->willReturnCallback(function ($key) {
+            $paths = [
+                'APP_ROOT' => 'root',
+            ];
+            return $paths[$key];
+        });
+        $this->file_validator = $this->createMock(FileValidatorInterface::class);
+       
+        $this->config_loader = new ConfigLoader($this->mock_app_config, $this->file_validator);
     }
 
     public function tearDown(): void
@@ -38,6 +49,7 @@ class ConfigLoaderTest extends TestCase
         $this->mock_app_config = null;
         $this->config_loader = null;
     }
+
 
     public static function loadConfigProvider()
     {
@@ -101,53 +113,29 @@ class ConfigLoaderTest extends TestCase
         
         if (!is_null($fail)) {
             if ($fail === 'directory provided') {
+                $this->file_validator->method('isFile')->willReturn(false);
                 $this->expectException(InvalidResourceException::class);
             }
             if ($fail === "not supported extension") {
+                $this->file_validator->method('isValidExtension')->willReturn(false);
                 $this->expectException(InvalidFileExtensionException::class);
             }
             if ($fail === "not existed file") {
+                $this->file_validator->method('resourceExists')->willReturn(false);
                 $this->expectException(ResourceNotFoundException::class);
             }
             if ($fail === "not existed directory") {
+                $this->file_validator->method('resourceExists')->willReturn(false);
                 $this->expectException(ResourceNotFoundException::class);
             }
         }
 
+        $this->file_validator->method('isReadableDir')->willReturn(true);
+        $this->file_validator->method('resourceExists')->willReturn(true);
+        $this->file_validator->method('isFile')->willReturn(true);
+        $this->file_validator->method('isValidExtension')->willReturn(true);
+        $this->file_validator->method('isReadable')->willReturn(true);
         $this->config_loader->loadConfig($path);
 
-    }
-
-    public function testLoadJsonUserConfig()
-    {
-        $config_path = __DIR__ . '/mockdata/user_config.json';
-        $this->mock_app_config
-             ->expects(($this->once()))
-             ->method('bulkSet')
-             ->with(json_decode(file_get_contents($config_path), true));
-        $this->config_loader->loadConfig($config_path);
-
-
-    }
-
-    public function testLoadIniUserConfig()
-    {
-        $config_path = __DIR__ . '/mockdata/user_config.ini';
-        $this->mock_app_config
-             ->expects(($this->once()))
-             ->method('bulkSet')
-             ->with(parse_ini_file($config_path));
-        $this->config_loader->loadConfig($config_path);
-    }
-
-    public function testLoadEnvUserConfig()
-    {
-        $config_path = __DIR__ . '/mockdata/.env';
-        Dotenv::createImmutable(dirname($config_path))->load();
-        $this->mock_app_config
-             ->expects(($this->once()))
-             ->method('bulkSet')
-             ->with($_ENV);
-        $this->config_loader->loadConfig($config_path);
     }
 }

@@ -19,7 +19,7 @@ abstract class Widget implements WidgetInterface
             throw FileNotFoundException::withMessage('Cannot find template for widget: ' . static::class);
         }
         ob_start();
-        require_once $this->tpl;
+        require $this->tpl;
         return ob_get_clean();
     }
 }

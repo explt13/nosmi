@@ -59,6 +59,11 @@ class Route implements LightRouteInterface
         return $this->path;
     }
 
+    public function getPathPattern(): string
+    {
+        return array_search($this->regexp, self::$patterns_map);
+    }
+
     public static function add(string $path_pattern, string $controller): void
     {
         $regexp = self::convertPathPatternToRegexp($path_pattern);

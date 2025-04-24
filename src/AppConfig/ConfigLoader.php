@@ -94,7 +94,6 @@ class ConfigLoader
         if (!$this->file_validator->resourceExists($config_path)) {
             throw new ResourceNotFoundException('Cannot find a resource: ' . $config_path);
         }
-
         if (!$this->file_validator->isFile($config_path)) {
             throw new InvalidResourceException('directory', 'file', $config_path);
         }

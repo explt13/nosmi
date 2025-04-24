@@ -20,6 +20,7 @@ use PHPUnit\Framework\TestCase;
 use Tests\Integration\fakeapp\src\providers\FakeProvider;
 use Tests\Integration\fakeapp\src\customproviders\custom\CustomFakeProvider;
 use Tests\Integration\fakeapp\src\customproviders\providers\InvalidProvider;
+use Tests\Unit\helpers\Reset;
 
 class ServiceProviderLoaderTest extends TestCase
 {
@@ -49,6 +50,12 @@ class ServiceProviderLoaderTest extends TestCase
         $this->spl = $this->dep_manager->getDependency(ServiceProviderLoader::class);
     }
 
+    // public static function tearDownAfterClass(): void
+    // {
+    //     Reset::resetSingleton(Container::class);
+    //     Reset::resetSingleton(AppConfig::class);
+    // }
+
     public static function loadProvider(): array
     {
         return [
@@ -73,15 +80,15 @@ class ServiceProviderLoaderTest extends TestCase
     #[DataProvider('loadProvider')]
     public function testLoad($expected_message, $app_providers = null, $exception = false)
     {
-        if ($exception) {
-            $this->expectException($exception);
-            $this->expectExceptionMessage($expected_message);
-            $this->config->set('APP_PROVIDERS', $app_providers);
-            $this->spl->load();
-        }
         if (!is_null($app_providers)) {
             $this->config->set('APP_PROVIDERS', $app_providers);
         }
+        if ($exception) {
+            $this->expectException($exception);
+            $this->expectExceptionMessage($expected_message);
+            $this->spl->load();
+        }
+       
         $this->expectOutputString($expected_message);
         $this->spl->load();
     }

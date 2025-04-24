@@ -5,6 +5,7 @@ use Explt13\Nosmi\Base\View;
 use Explt13\Nosmi\Interfaces\ConfigInterface;
 use Explt13\Nosmi\Interfaces\LightRouteInterface;
 use Explt13\Nosmi\Exceptions\FileNotFoundException;
+use Explt13\Nosmi\Interfaces\ViewInterface;
 use Explt13\Nosmi\Routing\Route;
 use PHPUnit\Framework\MockObject\MockObject;
 
@@ -12,7 +13,7 @@ class ViewTest extends TestCase
 {
     private ConfigInterface&MockObject $configMock;
     private LightRouteInterface&MockObject $routeMock;
-    private View $view;
+    private ViewInterface $view;
 
     protected function setUp(): void
     {
@@ -90,6 +91,33 @@ class ViewTest extends TestCase
         $this->assertSame('Test Content', $output);
 
         unlink($viewFile);
+    }
+
+    public function testRenderReturnsContentWhenWithEchoImmediately(): void
+    {
+        $this->routeMock->method('getController')->willReturn('SomeController');
+        $this->view->withRoute($this->routeMock);
+        $this->expectOutputString('there is some content' . PHP_EOL);
+        $this->view->render('test-view');
+
+    }
+
+    public function testRenderReturnsContentWithLayout(): void
+    {
+        $this->routeMock->method('getController')->willReturn('SomeController');
+        $this->view->withRoute($this->routeMock);
+        $output = $this->view->withReturn()->withLayout('default_layout')->render('test-view');
+        $this->assertSame('<div>
+    <h1>
+        Some header
+    </h1>
+    there is some content
+    <div>
+        End of the layout
+    </div>
+</div>',
+        $output);
+
     }
 
     private function getPrivateProperty(object $object, string $property)

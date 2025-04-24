@@ -2,33 +2,71 @@
 namespace Explt13\Nosmi\Routing;
 
 use Explt13\Nosmi\Interfaces\LightResponseInterface;
+use Explt13\Nosmi\Traits\ExchangeTrait;
 use Psr\Http\Message\ResponseInterface;
 use Nyholm\Psr7\Factory\Psr17Factory;
+use Psr\Http\Message\MessageInterface;
+use Psr\Http\Message\ResponseFactoryInterface;
+use Psr\Http\Message\StreamFactoryInterface;
+use Psr\Http\Message\StreamInterface;
 
 class Response implements LightResponseInterface
 {
-    private ResponseInterface $response;
-    private Psr17Factory $factory;
+    use ExchangeTrait;
+
+    private ResponseInterface $exchange;
+    private ResponseFactoryInterface&StreamFactoryInterface $factory;
+
 
     public function __construct(int $status = 200)
     {
         $this->factory = new Psr17Factory();
-        $this->response = $this->factory->createResponse($status);
+        $this->exchange = $this->factory->createResponse($status);
     }
 
-    public function withHeader(string $name, string $value): self
+    public function getStatusCode(): int
     {
-        $this->response = $this->response->withHeader($name, $value);
-        return $this;
+        return $this->exchange->getStatusCode();
     }
 
-    public function withStatus(int $code): self
+    public function withStatus(int $code, string $reasonPhrase = ''): LightResponseInterface
     {
-        $this->response = $this->response->withStatus($code);
-        return $this;
+        $clone = clone $this;
+        $clone->exchange = $this->exchange->withStatus($code, $reasonPhrase);
+        return $clone;
     }
 
-    public function withCookie(string $name, string $value, array $options = []): self
+    public function getReasonPhrase(): string
+    {
+        return $this->exchange->getReasonPhrase();
+    }
+
+    public function withJson(array $data): LightResponseInterface
+    {
+        $body = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+        $stream = $this->factory->createStream($body);
+        return $this->withHeader('Content-Type', 'application/json')->withBody($stream);
+    }
+
+    public function withXml(string $xml): LightResponseInterface
+    {
+        $stream = $this->factory->createStream($xml);
+        return $this->withHeader('Content-Type', 'application/xml; charset=utf-8')->withBody($stream);
+    }
+
+    public function withHtml(string $html): LightResponseInterface
+    {
+        $stream = $this->factory->createStream($html);
+        return $this->exchange->withHeader('Content-Type', 'text/html; charset=utf-8')->withBody($stream);
+    }
+
+    public function withText(string $text): LightResponseInterface
+    {
+        $stream = $this->factory->createStream($text);
+        return $this->exchange->withHeader('Content-Type', 'text/plain; charset=utf-8')->withBody($stream);
+    }
+
+    public function withCookieHeader(string $name, string $value, array $options = []): self
     {
         $cookie = sprintf('%s=%s', $name, urlencode($value));
         if (isset($options['expires'])) {
@@ -46,11 +84,11 @@ class Response implements LightResponseInterface
         if (!empty($options['httponly'])) {
             $cookie .= '; HttpOnly';
         }
-        $this->withHeader('Set-Cookie', $cookie);
-        return $this;
+        
+        return $this->withHeader('Set-Cookie', $cookie);
     }
 
-    public function withCors(string $origin = '*'): self
+    public function withCorsHeader(string $origin = '*'): self
     {
         return $this
             ->withHeader('Access-Control-Allow-Origin', $origin)
@@ -59,110 +97,71 @@ class Response implements LightResponseInterface
             ->withHeader('Access-Control-Allow-Credentials', 'true');
     }
 
-    public function json(array $data): self
-    {
-        $this->withHeader('Content-Type', 'application/json');
-        $body = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
-        $this->response->getBody()->write($body);
-        return $this;
-    }
-
-    public function html(string $html): self
-    {
-        $this->withHeader('Content-Type', 'text/html; charset=utf-8');
-        $this->response->getBody()->write($html);
-        return $this;
-    }
-
-    public function text(string $text): self
-    {
-        $this->withHeader('Content-Type', 'text/plain; charset=utf-8');
-        $this->response->getBody()->write($text);
-        return $this;
-    }
-
-    public function download(string $filePath, ?string $fileName = null): self
+    public function withDownload(string $filePath, ?string $fileName = null): LightResponseInterface
     {
         if (!file_exists($filePath)) {
-            return $this->error(404, "File not found");
+            return $this->withError(404, "File not found");
         }
-
         $fileName = $fileName ?? basename($filePath);
-        $this->withHeader('Content-Type', mime_content_type($filePath))
-            ->withHeader('Content-Disposition', 'attachment; filename="' . $fileName . '"')
-            ->withHeader('Content-Length', (string) filesize($filePath));
-
-        $this->response->getBody()->write(file_get_contents($filePath));
-        return $this;
+    
+        $stream = $this->factory->createStream(file_get_contents($fileName));
+        return $this->withHeader('Content-Type', mime_content_type($filePath))
+                    ->withHeader('Content-Disposition', 'attachment; filename="' . $fileName . '"')
+                    ->withHeader('Content-Length', (string) filesize($filePath))
+                    ->withBody($stream);
     }
 
-    public function redirect(string $url, int $status = 302): self
+    public function withRedirectHeader(string $url, int $status = 302): LightResponseInterface
     {
-        $this->response = $this->response
-            ->withHeader('Location', $url)
-            ->withStatus($status);
-        return $this;
+        return $this->withHeader('Location', $url)
+                    ->withStatus($status);
     }
 
-    public function xml(string $xml): self
-    {
-        $this->withHeader('Content-Type', 'application/xml; charset=utf-8');
-        $this->response->getBody()->write($xml);
-        return $this;
-    }
 
-    public function error(int $code = 400, ?string $message = null, array $additionalData = []): self
+    public function withError(int $code = 400, ?string $message = null, array $additionalData = []): LightResponseInterface
     {
-        $this->withStatus($code);
         $data = array_merge([
             'error' => true,
-            'message' => $message ?? $this->response->getReasonPhrase() ?? 'Unknown error'
+            'message' => $message ?? $this->exchange->getReasonPhrase() ?? 'Unknown error'
         ], $additionalData);
 
-        return $this->json($data);
+        return $this->withStatus($code)->withJson($data);
     }
 
-    public function stream(callable $streamCallback): self
+    public function withStream(callable $streamCallback): LightResponseInterface
     {
-        $this->withHeader('Content-Type', 'application/octet-stream');
         ob_start();
         $streamCallback();
-        $this->response->getBody()->write(ob_get_clean());
-        return $this;
+        $data = ob_get_clean();
+        $stream = $this->factory->createStream($data);
+        return $this->exchange->withHeader('Content-Type', 'application/octet-stream')->withBody($stream);
     }
 
-    public function streamFile(string $filePath, ?string $fileName = null): self
+    public function withStreamFile(string $filePath, ?string $fileName = null): LightResponseInterface
     {
-        if (!file_exists($filePath)) {
-            return $this->error(404, "File not found");
+        if (!file_exists($filePath) || !is_readable($filePath)) {
+            return $this->withError(404, "File not found or not readable");
         }
 
         $fileName = $fileName ?? basename($filePath);
-        $this->withHeader('Content-Type', mime_content_type($filePath))
-            ->withHeader('Content-Disposition', 'attachment; filename="' . $fileName . '"')
-            ->withHeader('Content-Length', (string) filesize($filePath));
+        $stream = $this->factory->createStreamFromFile($filePath, 'rb');
 
-        $stream = fopen($filePath, 'rb');
-        if ($stream) {
-            while (!feof($stream)) {
-                echo fread($stream, 8192);
-                flush();
-            }
-            fclose($stream);
-        }
-        return $this;
+        return $this->withHeader('Content-Type', mime_content_type($filePath))
+                    ->withHeader('Content-Disposition', 'attachment; filename="' . $fileName . '"')
+                    ->withHeader('Content-Length', (string) filesize($filePath))
+                    ->withBody($stream);
     }
 
-    public function empty(int $status = 204): self
+    public function withEmpty(int $status = 204): LightResponseInterface
     {
         return $this->withStatus($status);
     }
 
     public function send(array $additionalHeaders = []): void
     {
-        http_response_code($this->response->getStatusCode());
+        http_response_code($this->exchange->getStatusCode());
 
-        foreach ($this->response->getHeaders() as $name => $values) {
+        foreach ($this->exchange->getHeaders() as $name => $values) {
             foreach ($values as $value) {
                 header(sprintf('%s: %s', $name, $value), false);
             }
@@ -172,11 +171,6 @@ class Response implements LightResponseInterface
             header(sprintf('%s: %s', $name, $value), false);
         }
 
-        echo $this->response->getBody();
-    }
-
-    public function get(): ResponseInterface
-    {
-        return $this->response;
+        echo $this->exchange->getBody();
     }
 }

@@ -17,10 +17,10 @@ class InvalidResourceException extends BaseException
 
     protected function getDefaultMessage(array $context = []): string
     {
-        return sprintf("Invalid resource for: , got: %s, expected: %s",
+        return sprintf("Invalid resource for: %s, got: %s, expected: %s",
                 $context['for_path'],
                 $context['got_resource'],
-                $context['expected_resource']
+                $context['expected_resource'],
         );
     }
 }

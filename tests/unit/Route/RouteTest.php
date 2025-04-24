@@ -3,6 +3,7 @@
 namespace Tests\Unit\Route;
 
 use Explt13\Nosmi\Exceptions\InvalidAssocArrayValueException;
+use Explt13\Nosmi\Interfaces\LightRouteInterface;
 use Explt13\Nosmi\Routing\Route;
 use LogicException;
 use Nyholm\Psr7\Uri;
@@ -12,7 +13,7 @@ use Tests\Unit\helpers\Reset;
 
 class RouteTest extends TestCase
 {
-    private Route $route;
+    private LightRouteInterface $route;
 
     public static function setUpBeforeClass(): void
     {
@@ -36,7 +37,7 @@ class RouteTest extends TestCase
         Route::add('/second/pattern/<string>:name', 'SecondController');
         $this->route = new Route();
         $uri = new Uri('https://example.com/order/new/dsda-09/213/?address=Baker-av3-street&quantity=4');
-        $this->route->setRoute($uri->getPath());
+        $this->route->resolvePath($uri->getPath());
         
     }
 

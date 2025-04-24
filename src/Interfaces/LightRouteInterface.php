@@ -42,11 +42,18 @@ interface LightRouteInterface
     public function getPathRegexp(): string;
 
     /**
-     * Retrieves the original path pattern for the route.
+     * Retrieves the original path for the route.
      *
      * @return string The path pattern.
      */
     public function getPath(): string;
+
+     /**
+     * Retrieves the route path pattern.
+     *
+     * @return string The path pattern.
+     */
+    public function getPathPattern(): string;
 
     /**
      * Adds a new route with a path pattern and associated controller.

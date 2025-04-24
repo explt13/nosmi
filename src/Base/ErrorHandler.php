@@ -65,7 +65,7 @@ class ErrorHandler
         
         $views = null;
         if ($this->config->has('APP_ERROR_VIEWS')) {
-            $views = require_once $this->config->get('APP_ERROR_VIEWS');
+            $views = require $this->config->get('APP_ERROR_VIEWS');
         }
 
         if ($this->debug) {

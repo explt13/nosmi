@@ -31,10 +31,11 @@ class App
 
     /**
      * Adds a middleware for request/response for __all__ routes
-     * @param callable(Psr\Http\Message\LightRequestInterface $request, \Psr\Http\Message\LightResponseInterface $response):void $middleware the middleware to add
+     * @param string $middleware
+     * Middleware to add, if string provided the name of the middleware __(not ::class)__ will be used and searched in specified __APP_MIDDLEWARES__ folder. \
      * @return void
      */
-    public function use(callable $middleware): void
+    public function use(string $middleware): void
     {
         $this->middleware_loader->add($middleware);
     }

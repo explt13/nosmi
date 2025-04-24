@@ -67,7 +67,7 @@ class View implements ViewInterface
         return $this;
     }
 
-    public function withReturn()
+    public function withReturn(): static
     {
         $this->return = true;
         return $this;
@@ -76,27 +76,27 @@ class View implements ViewInterface
     public function render(string $view, ?array $data = null): ?string
     {
         if (!is_null($data)) {
-            $this->data = $data;
+            foreach($data as $name => $value) {
+                $this->data[$name] = $value;
+            }
         }
         if ($this->return) {
             ob_start();
             $this->getView($view);
             return ob_get_clean();
         }
-        $this->getView($view);
+        echo $this->getView($view);
         return null;
     }
 
-    private function getView($view)
+    private function getView($view):void
     {
         if ($this->include_layout) {
             $this->includeLayout(function() use ($view) {
                 $this->getContentHtml($view);
             });
-            return null;
         } else {
             $this->getContentHtml($view);
-            return null;
         }
     }
 
@@ -104,7 +104,7 @@ class View implements ViewInterface
     {
         $viewFile = $this->config->get('APP_VIEWS') . '/' . $this->route->getController() . '/' . $view . '.php';
         if (is_file($viewFile)) {
-            require_once $viewFile;
+            require $viewFile;
         } else {
             throw new FileNotFoundException($view);
         }
@@ -117,7 +117,7 @@ class View implements ViewInterface
         }
         $layoutFile = $this->config->get('APP_LAYOUTS') . '/' . $this->layout_filename . '.php';
         if (is_file($layoutFile)) {
-            require_once $layoutFile;
+            require $layoutFile;
         } else {
             throw new FileNotFoundException($layoutFile, 500);
         }

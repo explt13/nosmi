@@ -15,6 +15,7 @@ use Tests\Unit\Dependencies\mockdata\FakeClassKDynNotS;
 use Tests\Unit\Dependencies\mockdata\FakeClassPDynS;
 use Tests\Unit\Dependencies\mockdata\IFakeClassKDynNotS;
 use Tests\Unit\Dependencies\mockdata\IFakeClassPDynS;
+use Tests\Unit\helpers\IncludeFiles;
 
 class DependencyManagerTest extends TestCase
 {
@@ -23,7 +24,7 @@ class DependencyManagerTest extends TestCase
 
     public static function setUpBeforeClass(): void
     {
-        require_once dirname(__DIR__, 3) . '/src/Utils/functions.php';
+        IncludeFiles::includeUtilFunctions();
     }
 
     public function setUp(): void
