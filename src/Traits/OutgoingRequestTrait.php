@@ -7,20 +7,20 @@ trait OutgoingRequestTrait
     public function withJson(array $data): static
     {
         $body = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
-        $stream = $this->factory->createStream($body);
+        $stream = $this->psrFactory->createStream($body);
         return $this->withHeader('Content-Type', 'application/json')->withBody($stream);
     }
 
     public function withXml(string $xml): static
     {
-        $stream = $this->factory->createStream($xml);
+        $stream = $this->psrFactory->createStream($xml);
         return $this->withHeader('Content-Type', 'application/xml; charset=utf-8')->withBody($stream);
     }
 
     public function withFormBody(array $data): static
     {
         $formBody = http_build_query($data);
-        $stream = $this->factory->createStream($formBody);
+        $stream = $this->psrFactory->createStream($formBody);
         return  $this->exchange->withBody($stream)
                               ->withHeader('Content-Type', 'application/x-www-form-urlencoded');
     }
@@ -48,7 +48,7 @@ trait OutgoingRequestTrait
         $body .= "--$boundary--\r\n";
 
         $clone = clone $this;
-        $stream = $this->factory->createStream($body);
+        $stream = $this->psrFactory->createStream($body);
         $clone->exchange = $this->exchange->withBody($stream)
                                         ->withHeader('Content-Type', "multipart/form-data; boundary=$boundary");
         return $clone;

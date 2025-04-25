@@ -1,6 +1,6 @@
 <?php
 
-namespace Explt13\Nosmi\Routing;
+namespace Explt13\Nosmi\Http;
 
 use Explt13\Nosmi\Interfaces\IncomingRequestInterface;
 use Explt13\Nosmi\Interfaces\LightRequestInterface;
@@ -9,7 +9,6 @@ use Explt13\Nosmi\Traits\ExchangeTrait;
 use Explt13\Nosmi\Traits\IncomingRequestTrait;
 use Explt13\Nosmi\Traits\OutgoingRequestTrait;
 use Explt13\Nosmi\Traits\RequestTrait;
-use Nyholm\Psr7\Factory\Psr17Factory;
 use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
@@ -25,22 +24,11 @@ class Request implements LightRequestInterface, IncomingRequestInterface, Outgoi
     use IncomingRequestTrait;
 
     private RequestInterface $exchange;
-    private RequestFactoryInterface&StreamFactoryInterface $factory;
+    private StreamFactoryInterface $psrFactory;
 
-    public function __construct(string $method, string $uri, array $headers = [], string $body = '')
+    public function __construct(RequestInterface $psrRequest, StreamFactoryInterface $psrFactory)
     {
-        $this->factory = new Psr17Factory();
-        $this->exchange = $this->factory->createRequest($method, $uri);
-
-        // Set headers
-        foreach ($headers as $name => $value) {
-            $this->exchange = $this->exchange->withHeader($name, $value);
-        }
-
-        // Set body
-        if (!empty($body)) {
-            $stream = $this->factory->createStream($body);
-            $this->exchange = $this->exchange->withBody($stream);
-        }
+        $this->exchange = $psrRequest;
+        $this->psrFactory = $psrFactory;
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Explt13\Nosmi\Routing;
+namespace Explt13\Nosmi\Http;
 
 use Explt13\Nosmi\Exceptions\NotInArrayException;
 use Explt13\Nosmi\Interfaces\IncomingRequestInterface;
@@ -8,11 +8,8 @@ use Explt13\Nosmi\Interfaces\LightServerRequestInterface;
 use Explt13\Nosmi\Traits\ExchangeTrait;
 use Explt13\Nosmi\Traits\IncomingRequestTrait;
 use Explt13\Nosmi\Traits\RequestTrait;
-use Nyholm\Psr7\Factory\Psr17Factory;
-use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\ServerRequestFactoryInterface;
+use Nyholm\Psr7\ServerRequest as Psr7ServerRequest;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\UriInterface;
 
 class ServerRequest implements LightServerRequestInterface, IncomingRequestInterface
 {
@@ -20,25 +17,25 @@ class ServerRequest implements LightServerRequestInterface, IncomingRequestInter
     use RequestTrait;
     use IncomingRequestTrait;
 
-    private const AVAILABLE_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'];
     private ServerRequestInterface $exchange;
-    private ServerRequestFactoryInterface $factory;
 
-    public function __construct(string $method, string $uri, $serverParams = [])
+    public function __construct(
+        ServerRequestInterface $psrServerRequest, 
+    )
     {
-        $this->validateIsAllowedMethod($method);
-        $this->factory = new Psr17Factory();
-        $this->exchange = $this->factory->createServerRequest($method, $uri, $serverParams);
+        $this->exchange = $psrServerRequest;
+        foreach ($this->getServerHeaders() as $headername => $value) {
+            $this->exchange = $this->exchange->withHeader($headername, $value);
+        }
     }
-
-    public static function init()
+    public static function capture(): static
     {
         $method = $_SERVER['REQUEST_METHOD'];
         $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
         $hostname = $_SERVER['SERVER_NAME'];
         $port = $_SERVER['SERVER_PORT'];
         $url = $_SERVER['REQUEST_URI'];
-        return new ServerRequest($method, "$scheme://$hostname:$port$url", $_SERVER);
+        return new static(new Psr7ServerRequest($method, "$scheme://$hostname:$port$url", [], null, "1.1", $_SERVER));
     }
 
     public function getServerParams(): array
@@ -208,15 +205,7 @@ class ServerRequest implements LightServerRequestInterface, IncomingRequestInter
         return $data;
     }
 
-    private function validateIsAllowedMethod(string $method): bool
-    {
-        if (!in_array(strtoupper($method), self::AVAILABLE_METHODS)) {
-            throw new NotInArrayException($method, self::AVAILABLE_METHODS);
-        }
-        return true;
-    }
-
-    private function getHeadersFromServer(): array
+    private function getServerHeaders(): array
     {
         $headers = [];
         foreach ($this->getServerParams() as $key => $value) {
