@@ -2,28 +2,27 @@
 
 namespace Explt13\Nosmi\Http;
 
-use Explt13\Nosmi\Exceptions\NotInArrayException;
-use Explt13\Nosmi\Interfaces\IncomingRequestInterface;
 use Explt13\Nosmi\Interfaces\LightServerRequestInterface;
+use Explt13\Nosmi\Interfaces\ReadExchangeInterface;
 use Explt13\Nosmi\Traits\ExchangeTrait;
-use Explt13\Nosmi\Traits\IncomingRequestTrait;
+use Explt13\Nosmi\Traits\ReadExchangeTrait;
 use Explt13\Nosmi\Traits\RequestTrait;
 use Nyholm\Psr7\ServerRequest as Psr7ServerRequest;
 use Psr\Http\Message\ServerRequestInterface;
 
-class ServerRequest implements LightServerRequestInterface, IncomingRequestInterface
+class ServerRequest implements LightServerRequestInterface, ReadExchangeInterface
 {
     use ExchangeTrait;
     use RequestTrait;
-    use IncomingRequestTrait;
+    use ReadExchangeTrait;
 
     private ServerRequestInterface $exchange;
 
     public function __construct(
-        ServerRequestInterface $psrServerRequest, 
+        ServerRequestInterface $psr_server_request, 
     )
     {
-        $this->exchange = $psrServerRequest;
+        $this->exchange = $psr_server_request;
         foreach ($this->getServerHeaders() as $headername => $value) {
             $this->exchange = $this->exchange->withHeader($headername, $value);
         }

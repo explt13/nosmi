@@ -1,7 +1,6 @@
 <?php
 namespace Explt13\Nosmi\Interfaces;
 
-use Explt13\Nosmi\Base\LightFactory;
 
 interface ControllerInterface
 {

@@ -1,23 +1,29 @@
 <?php
 namespace Explt13\Nosmi\Http;
 
+use Explt13\Nosmi\Interfaces\HttpFactoryInterface;
 use Explt13\Nosmi\Interfaces\LightResponseInterface;
+use Explt13\Nosmi\Interfaces\ReadExchangeInterface;
+use Explt13\Nosmi\Interfaces\WriteExchangeInterface;
 use Explt13\Nosmi\Traits\ExchangeTrait;
+use Explt13\Nosmi\Traits\ReadExchangeTrait;
+use Explt13\Nosmi\Traits\WriteExchangeTrait;
 use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 
-class Response implements LightResponseInterface
+class Response implements LightResponseInterface, ReadExchangeInterface, WriteExchangeInterface
 {
     use ExchangeTrait;
+    use ReadExchangeTrait;
+    use WriteExchangeTrait;
 
     private ResponseInterface $exchange;
-    private StreamFactoryInterface $psrFactory;
+    private HttpFactoryInterface $factory;
 
-    public function __construct(ResponseInterface $psrResponse, StreamFactoryInterface $psrFactory)
+    public function __construct(ResponseInterface $psr_response, HttpFactoryInterface $factory)
     {
-        $this->exchange = $psrResponse;
-        $this->psrFactory = $psrFactory;
+        $this->exchange = $psr_response;
+        $this->factory = $factory;
     }
 
     public function getStatusCode(): int
@@ -40,25 +46,25 @@ class Response implements LightResponseInterface
     public function withJson(array $data): static
     {
         $body = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
-        $stream = $this->psrFactory->createStream($body);
+        $stream = $this->factory->createStream($body);
         return $this->withHeader('Content-Type', 'application/json')->withBody($stream);
     }
 
     public function withXml(string $xml): static
     {
-        $stream = $this->psrFactory->createStream($xml);
+        $stream = $this->factory->createStream($xml);
         return $this->withHeader('Content-Type', 'application/xml; charset=utf-8')->withBody($stream);
     }
 
     public function withHtml(string $html): static
     {
-        $stream = $this->psrFactory->createStream($html);
+        $stream = $this->factory->createStream($html);
         return $this->withHeader('Content-Type', 'text/html; charset=utf-8')->withBody($stream);
     }
 
     public function withText(string $text): static
     {
-        $stream = $this->psrFactory->createStream($text);
+        $stream = $this->factory->createStream($text);
         return $this->withHeader('Content-Type', 'text/plain; charset=utf-8')->withBody($stream);
     }
 
@@ -100,7 +106,7 @@ class Response implements LightResponseInterface
         }
         $fileName = $fileName ?? basename($filePath);
     
-        $stream = $this->psrFactory->createStream(file_get_contents($fileName));
+        $stream = $this->factory->createStream(file_get_contents($fileName));
         return $this->withHeader('Content-Type', mime_content_type($filePath))
                     ->withHeader('Content-Disposition', 'attachment; filename="' . $fileName . '"')
                     ->withHeader('Content-Length', (string) filesize($filePath))
@@ -129,7 +135,7 @@ class Response implements LightResponseInterface
         ob_start();
         $streamCallback();
         $data = ob_get_clean();
-        $stream = $this->psrFactory->createStream($data);
+        $stream = $this->factory->createStream($data);
         return $this->withHeader('Content-Type', 'application/octet-stream')->withBody($stream);
     }
 
@@ -140,7 +146,7 @@ class Response implements LightResponseInterface
         }
 
         $fileName = $fileName ?? basename($filePath);
-        $stream = $this->psrFactory->createStreamFromFile($filePath, 'rb');
+        $stream = $this->factory->createStreamFromFile($filePath, 'rb');
 
         return $this->withHeader('Content-Type', mime_content_type($filePath))
                     ->withHeader('Content-Disposition', 'attachment; filename="' . $fileName . '"')

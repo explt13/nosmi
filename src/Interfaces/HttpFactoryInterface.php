@@ -9,7 +9,7 @@ use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Message\UploadedFileFactoryInterface;
 use Psr\Http\Message\UriFactoryInterface;
 
-interface Psr17FactoryInterface extends RequestFactoryInterface,
+interface HttpFactoryInterface extends RequestFactoryInterface,
                                         ResponseFactoryInterface,
                                         UriFactoryInterface,
                                         StreamFactoryInterface,

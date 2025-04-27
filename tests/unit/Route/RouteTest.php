@@ -36,41 +36,48 @@ class RouteTest extends TestCase
         Route::add('/first/pattern/:id', 'FirstController');
         Route::add('/second/pattern/<string>:name', 'SecondController');
         $this->route = new Route();
-        $uri = new Uri('https://example.com/order/new/dsda-09/213/?address=Baker-av3-street&quantity=4');
-        $this->route->resolvePath($uri->getPath());
+        $uri = new Uri('https://example.com/order/new/dsda-09/213?address=Baker-av3-street&quantity=4');
+        $this->route = $this->route->resolvePath($uri->getPath());
         
+    }
+
+    public function testUseMiddleware()
+    {
+        Route::useMiddleware('/order/new/<slug>:product/<int>:id', 'SomeMiddleware');
+        Route::useMiddleware('/order/new/<slug>:product/<int>:id', 'AnotherMiddleware');
+        $this->assertSame(['SomeMiddleware', 'AnotherMiddleware'], $this->route->getRouteMiddleware());
     }
 
     public static function pathAndPatternsProvider(): array
     {
         return [
             "no conversion needed due to absence of named parameters" => [
-                "regexp" => "/order/add/12334",
+                "regexp" => "^/order/add/12334$",
                 "path_pattern" => "/order/add/12334"
             ],
             "conversion typed params" => [
-                "regexp" => "/order/(?P<name>[a-zA-Z]+)/(?P<id>[0-9]+)",
+                "regexp" => "^/order/(?P<name>[a-zA-Z]+)/(?P<id>[0-9]+)$",
                 "path_pattern" => "/order/<string>:name/<int>:id"
             ],
             "conversion typed params trailing slash" => [
-                "regexp" => "/order/(?P<name>[a-zA-Z]+)/(?P<id>[0-9]+)/",
+                "regexp" => "^/order/(?P<name>[a-zA-Z]+)/(?P<id>[0-9]+)/$",
                 "path_pattern" => "/order/<string>:name/<int>:id/"
             ],
             "implicit conversion to slug type if type is not specified" => [
-                "regexp" => "/order/(?P<name>[a-zA-Z]+)/(?P<id>[a-zA-Z0-9-]+)",
+                "regexp" => "^/order/(?P<name>[a-zA-Z]+)/(?P<id>[a-zA-Z0-9-]+)$",
                 "path_pattern" => "/order/<string>:name/:id"
             ],
             "conversion explicit slug typed params to slug type with no dublications" => [
-                "regexp" => "/order/(?P<name>[a-zA-Z]+)/(?P<id>[a-zA-Z0-9-]+)",
+                "regexp" => "^/order/(?P<name>[a-zA-Z]+)/(?P<id>[a-zA-Z0-9-]+)$",
                 "path_pattern" => "/order/<string>:name/<slug>:id"
             ],
             "conversion with underscored name" => [
-                "regexp" => "/order/(?P<name>[a-zA-Z]+)/(?P<id_for_user>[a-zA-Z0-9-]+)",
+                "regexp" => "^/order/(?P<name>[a-zA-Z]+)/(?P<id_for_user>[a-zA-Z0-9-]+)$",
                 "path_pattern" => "/order/<string>:name/<slug>:id_for_user",
             ],
             
             "fail a conversion, a non-existed typed param" => [
-                "regexp" => "/order/(?P<name>[a-zA-Z]+)/(?P<notexisted>[a-zA-Z0-9-]+)",
+                "regexp" => "^/order/(?P<name>[a-zA-Z]+)/(?P<notexisted>[a-zA-Z0-9-]+)$",
                 "path_pattern" => "/order/<string>:name/<notexisted>:id",
                 "fail" => [
                     "class" => InvalidAssocArrayValueException::class,
@@ -78,7 +85,7 @@ class RouteTest extends TestCase
                 ]
             ],
             "fail a conversion, an empty string type" => [
-                "regexp" => "/order/(?P<name>[a-zA-Z]+)/(?P<>[a-zA-Z0-9-]+)",
+                "regexp" => "^/order/(?P<name>[a-zA-Z]+)/(?P<>[a-zA-Z0-9-]+)$",
                 "path_pattern" => "/order/<string>:name/<>:id",
                 "fail" => [
                     "class" => LogicException::class,
@@ -86,7 +93,7 @@ class RouteTest extends TestCase
                 ]
             ],
             "fail a conversion, an invalid type syntax" => [
-                "regexp" => "/order/(?P<name>[a-zA-Z]+)/(?P<no_triangle_braces>[a-zA-Z0-9-]+)",
+                "regexp" => "^/order/(?P<name>[a-zA-Z]+)/(?P<no_triangle_braces>[a-zA-Z0-9-]+)$",
                 "path_pattern" => "/order/<string>:name/no_triangle_braces here:id",
                 "fail" => [
                     "class" => LogicException::class,
@@ -94,7 +101,7 @@ class RouteTest extends TestCase
                 ]
             ],
             "fail a conversion, matched parameters count is less than needed count of conversion due to name contains digits" => [
-                "regexp" => "/order/(?P<name>[a-zA-Z]+)/(?P<int>[a-zA-Z0-9-]+)",
+                "regexp" => "^/order/(?P<name>[a-zA-Z]+)/(?P<int>[a-zA-Z0-9-]+)$",
                 "path_pattern" => "/order/<string>:name/<int>:id21321",
                 "fail" => [
                     "class" => LogicException::class,
@@ -102,7 +109,7 @@ class RouteTest extends TestCase
                 ]
             ],
             "fail a conversion, matched parameters count is less than needed count of conversion due to name contains dashes" => [
-                "regexp" => "/order/(?P<name>[a-zA-Z]+)/(?P<int>[a-zA-Z0-9-]+)",
+                "regexp" => "^/order/(?P<name>[a-zA-Z]+)/(?P<int>[a-zA-Z0-9-]+)$",
                 "path_pattern" => "/order/<string>:name/<int>:id-for-user",
                 "fail" => [
                     "class" => LogicException::class,
@@ -135,7 +142,7 @@ class RouteTest extends TestCase
 
     public function testGetRequestPathRegexp()
     {
-        $this->assertSame('/order/new/(?P<product>[a-zA-Z0-9-]+)/(?P<id>[0-9]+)', $this->route->getPathRegexp());
+        $this->assertSame('^/order/new/(?P<product>[a-zA-Z0-9-]+)/(?P<id>[0-9]+)$', $this->route->getPathRegexp());
     }
 
     public function testGetRequestParams()
@@ -158,15 +165,15 @@ class RouteTest extends TestCase
         Route::add('/second/pattern/<string>:name', 'SecondController');
         $this->assertSame(['/first/pattern/:id', '/second/pattern/<string>:name'], Route::getPathPatterns());
         $this->assertSame([
-                '/first/pattern/:id' => '/first/pattern/(?P<id>[a-zA-Z0-9-]+)', 
-                '/second/pattern/<string>:name' => '/second/pattern/(?P<name>[a-zA-Z]+)'
+                '/first/pattern/:id' => '^/first/pattern/(?P<id>[a-zA-Z0-9-]+)$', 
+                '/second/pattern/<string>:name' => '^/second/pattern/(?P<name>[a-zA-Z]+)$'
             ], 
             Route::getPatternToRegexMap()
         );
-        $this->assertSame(['/first/pattern/(?P<id>[a-zA-Z0-9-]+)', '/second/pattern/(?P<name>[a-zA-Z]+)'], Route::getPathRegexps());
+        $this->assertSame(['^/first/pattern/(?P<id>[a-zA-Z0-9-]+)$', '^/second/pattern/(?P<name>[a-zA-Z]+)$'], Route::getPathRegexps());
         $this->assertSame([
-                '/first/pattern/(?P<id>[a-zA-Z0-9-]+)' => 'FirstController',
-                '/second/pattern/(?P<name>[a-zA-Z]+)' => 'SecondController'
+                '^/first/pattern/(?P<id>[a-zA-Z0-9-]+)$' => 'FirstController',
+                '^/second/pattern/(?P<name>[a-zA-Z]+)$' => 'SecondController'
             ],
             Route::getRoutes()
         );
@@ -174,7 +181,7 @@ class RouteTest extends TestCase
 
     public function testGetRegexpByPathPattern()
     {
-        $this->assertSame('/second/pattern/(?P<name>[a-zA-Z]+)', Route::getRegexpByPathPattern('/second/pattern/<string>:name'));
+        $this->assertSame('^/second/pattern/(?P<name>[a-zA-Z]+)$', Route::getRegexpByPathPattern('/second/pattern/<string>:name'));
         $this->assertSame(null, Route::getRegexpByPathPattern('/not_existed/pattern/<string>:name'));
     }
 
@@ -187,8 +194,8 @@ class RouteTest extends TestCase
 
     public function testGetControllerByRegexp()
     {
-        $this->assertSame('FirstController', Route::getControllerByRegexp('/first/pattern/(?P<id>[a-zA-Z0-9-]+)'));
-        $this->assertSame('SecondController', Route::getControllerByRegexp('/second/pattern/(?P<name>[a-zA-Z]+)'));
+        $this->assertSame('FirstController', Route::getControllerByRegexp('^/first/pattern/(?P<id>[a-zA-Z0-9-]+)$'));
+        $this->assertSame('SecondController', Route::getControllerByRegexp('^/second/pattern/(?P<name>[a-zA-Z]+)$'));
         $this->assertSame(null, Route::getControllerByRegexp('/not_existed/pattern/<string>:name'));
     }
 
@@ -201,6 +208,6 @@ class RouteTest extends TestCase
     public function testgetControllerRegexps()
     {
         Route::add('/another/pattern', 'FirstController');
-        $this->assertSame(['/first/pattern/(?P<id>[a-zA-Z0-9-]+)', '/another/pattern'], Route::getControllerRegexps('FirstController'));
+        $this->assertSame(['^/first/pattern/(?P<id>[a-zA-Z0-9-]+)$', '^/another/pattern$'], Route::getControllerRegexps('FirstController'));
     }
 }

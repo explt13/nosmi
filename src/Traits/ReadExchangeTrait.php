@@ -2,7 +2,7 @@
 
 namespace Explt13\Nosmi\Traits;
 
-trait IncomingRequestTrait
+trait ReadExchangeTrait
 {
     public function readBody(int $length): string
     {

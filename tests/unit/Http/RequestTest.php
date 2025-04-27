@@ -2,51 +2,54 @@
 
 namespace Tests\Unit\Http;
 use PHPUnit\Framework\TestCase;
-use Explt13\Nosmi\Exceptions\NotInArrayException;
 use Explt13\Nosmi\Http\HttpFactory;
 use Explt13\Nosmi\Http\Request;
-use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7\Request as Psr7Request;
 
 class RequestTest extends TestCase
 {
-    private $factory;
-
-    public function setUp(): void
+    public function testGetMethod()
     {
-        $this->factory = new Psr17Factory();
-    }
+        $psrRequest = new Psr7Request('GET', 'https://example.com');
+        $factory = $this->createMock(\Psr\Http\Message\StreamFactoryInterface::class);
 
-    public function testGetParsedBodyParsesJsonBody()
-    {
-        $request = $this->createRequestWithStream(['key' => 'value']);
+        $request = new Request($psrRequest, $factory);
 
-        $parsedBody = $request->getParsedBody();
-        $this->assertEquals(['key' => 'value'], $parsedBody);
-    }
-
-    public function testGetMethodReturnsCorrectMethod()
-    {
-        $request = new Request(new Psr7Request("GET", 'http://example.com'), $this->factory);
         $this->assertSame('GET', $request->getMethod());
     }
 
-    public function testReadFromStream()
+    public function testGetUri()
     {
-        $request = $this->createRequestWithStream(['something' => 'else']);
-        $this->assertEquals('{"som', $request->readBody(5));
-        $this->assertEquals('eth', $request->readBody(3));
-        $this->assertEquals('{"something":"else"}', $request->getBodyContent());
+        $psrRequest = new Psr7Request('GET', 'https://example.com');
+        $factory = $this->createMock(\Psr\Http\Message\StreamFactoryInterface::class);
+
+        $request = new Request($psrRequest, $factory);
+
+        $this->assertSame('https://example.com', (string) $request->getUri());
     }
 
-    private function createRequestWithStream(array $post_data)
+    public function testWithMethod()
     {
-        $factory = new HttpFactory(new Psr17Factory());
-        $stream = $factory->createStream(json_encode($post_data));
-        $request = $factory->createRequest('POST', 'http://example.com');
-        $request = $request->withBody($stream)->withHeader('Content-Type', 'application/json');
+        $psrRequest = new Psr7Request('GET', 'https://example.com');
+        $factory = $this->createMock(\Psr\Http\Message\StreamFactoryInterface::class);
 
-        return $request;
+        $request = new Request($psrRequest, $factory);
+        $newRequest = $request->withMethod('POST');
+
+        $this->assertNotSame($request, $newRequest);
+        $this->assertSame('POST', $newRequest->getMethod());
     }
 
+    public function testWithUri()
+    {
+        $psrRequest = new Psr7Request('GET', 'https://example.com');
+        $factory = $this->createMock(\Psr\Http\Message\StreamFactoryInterface::class);
+
+        $request = new Request($psrRequest, $factory);
+        $newUri = new \Nyholm\Psr7\Uri('https://new-example.com');
+        $newRequest = $request->withUri($newUri);
+
+        $this->assertNotSame($request, $newRequest);
+        $this->assertSame('https://new-example.com', (string) $newRequest->getUri());
+    }
 }

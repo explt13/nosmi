@@ -8,9 +8,25 @@ interface LightRouteInterface
      * Resolves the given path against the defined routes.
      *
      * @param string $path The path to resolve.
-     * @return bool True if the path matches a route, false otherwise.
+     * @return static returns self
+     * @throws \RuntimeException if there is no route matched for a given path
      */
-    public function resolvePath(string $path): bool;
+    public function resolvePath(string $path): static;
+
+    /**
+     * Adds a middleware for specific path pattern or path
+     * @param string $path_pattern the path pattern to use a middleware for
+     * @param string $middleware_class the class name of the middleware
+     * @return void;
+     * @throws \RuntimeException if path pattern or path is not present in path patterns map 
+     */
+    public static function useMiddleware(string $path_pattern, string $middleware_class): void;
+
+    /**
+     * Gets all middleware for the current route
+     * @return array
+     */
+    public function getRouteMiddleware(): array;
 
     /**
      * Retrieves the controller associated with the resolved route.

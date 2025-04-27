@@ -11,27 +11,44 @@ class Route implements LightRouteInterface
     /**
      * @var string[] $params route parameters array
      */
-    private array $params = [];
-    private string $controller;
-    private string $regexp;
-    private string $path;
-    private static array $routes = [];
-    private static array $patterns_map = [];
-    private const PATH_PARAMETERS_TYPES = ['<string>' => '[a-zA-Z]+', '<int>' => '[0-9]+', '<slug>' => '[a-zA-Z0-9-]+'];
+    protected array $params = [];
+    protected string $controller;
+    protected string $regexp;
+    protected string $path;
+    protected string $path_pattern;
+    protected static array $routes = [];
+    protected static array $patterns_map = [];
+    protected static array $route_middleware = [];
+    protected const PATH_PARAMETERS_TYPES = ['<string>' => '[a-zA-Z]+', '<int>' => '[0-9]+', '<slug>' => '[a-zA-Z0-9-]+'];
 
-    public function resolvePath(string $path): bool
+    public function resolvePath(string $path): static
     {
         foreach (self::$routes as $regexp => $controller) {
             if (preg_match("#$regexp#", $path, $parameters)) {
-                $this->path = $path;
-                $this->regexp = $regexp;
-                $this->controller = $controller;
                 $parameters = array_filter($parameters, fn($key) => !is_int($key), ARRAY_FILTER_USE_KEY);
-                $this->setPathParams($parameters);
-                return true;
+                $new = clone $this;
+                $new->setPathParams($parameters);
+                $new->path = $path;
+                $new->regexp = $regexp;
+                $new->path_pattern = $new->getPathPattern();
+                $new->controller = $controller;
+                return $new;
             }
         }
-        return false;
+        throw new \RuntimeException("Route `$path` is not found", 404);
+    }
+
+    public static function useMiddleware(string $path_pattern, string $middleware_class): void
+    {
+        if (!isset(self::$patterns_map[$path_pattern])) {
+            throw new \RuntimeException("Path pattern: $path_pattern is not found in patterns map");
+        }
+        self::$route_middleware[$path_pattern][] = $middleware_class;
+    }
+
+    public function getRouteMiddleware(): array
+    {
+        return self::$route_middleware[$this->path_pattern];
     }
 
     public function getController(): string
@@ -127,7 +144,7 @@ class Route implements LightRouteInterface
         $needs_convert = substr_count($path_pattern, ':');
 
         // If there is nothing to convert, return path
-        if (empty($needs_convert)) return $path_pattern;
+        if (empty($needs_convert)) return "^".$path_pattern."$";
 
         $path_pattern = self::normalizePathPattern($path_pattern);
 
@@ -146,7 +163,7 @@ class Route implements LightRouteInterface
             self::validatePathParameterType($type);
             $path_pattern = self::makeRegexConversion($type, $name, $path_pattern);
         }
-        return $path_pattern;
+        return "^".$path_pattern."$";
     }
 
     private static function normalizePathPattern(string $path_pattern): string

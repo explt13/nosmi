@@ -2,33 +2,29 @@
 
 namespace Explt13\Nosmi\Http;
 
-use Explt13\Nosmi\Interfaces\IncomingRequestInterface;
 use Explt13\Nosmi\Interfaces\LightRequestInterface;
-use Explt13\Nosmi\Interfaces\OutgoingRequestInterface;
+use Explt13\Nosmi\Interfaces\WriteExchangeInterface;
 use Explt13\Nosmi\Traits\ExchangeTrait;
-use Explt13\Nosmi\Traits\IncomingRequestTrait;
-use Explt13\Nosmi\Traits\OutgoingRequestTrait;
 use Explt13\Nosmi\Traits\RequestTrait;
-use Psr\Http\Message\RequestFactoryInterface;
+use Explt13\Nosmi\Traits\WriteExchangeTrait;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 
 /**
- * Request class primarily used for outgoing requests
+ * Request class that primarily used for outgoing requests
  */
-class Request implements LightRequestInterface, IncomingRequestInterface, OutgoingRequestInterface
+class Request implements LightRequestInterface, WriteExchangeInterface
 {
     use ExchangeTrait;
     use RequestTrait;
-    use OutgoingRequestTrait;
-    use IncomingRequestTrait;
+    use WriteExchangeTrait;
 
     private RequestInterface $exchange;
-    private StreamFactoryInterface $psrFactory;
+    private StreamFactoryInterface $factory;
 
-    public function __construct(RequestInterface $psrRequest, StreamFactoryInterface $psrFactory)
+    public function __construct(RequestInterface $psr_request, StreamFactoryInterface $factory)
     {
-        $this->exchange = $psrRequest;
-        $this->psrFactory = $psrFactory;
+        $this->exchange = $psr_request;
+        $this->factory = $factory;
     }
 }

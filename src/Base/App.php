@@ -4,10 +4,11 @@ namespace Explt13\Nosmi\Base;
 use Explt13\Nosmi\AppConfig\AppConfig;
 use Explt13\Nosmi\AppConfig\ConfigLoader;
 use Explt13\Nosmi\Dependencies\Container;
+use Explt13\Nosmi\Http\ServerRequest;
 use Explt13\Nosmi\Interfaces\ConfigInterface;
 use Explt13\Nosmi\Interfaces\ContainerInterface;
 use Explt13\Nosmi\Interfaces\DependencyManagerInterface;
-use Explt13\Nosmi\Routing\Request;
+use Explt13\Nosmi\Middleware\MiddlewareRegistry;
 use Explt13\Nosmi\Routing\Router;
 
 class App
@@ -15,16 +16,16 @@ class App
     private DependencyManagerInterface $dependency_manager;
     private ConfigLoader $config_loader;
     private bool $bootstrapped = false;
-    private MiddlewareLoader $middleware_loader;
+    private MiddlewareRegistry $middleware_registry;
 
 
     public function __construct(
-        MiddlewareLoader $middleware_loader,
+        MiddlewareRegistry $middleware_registry,
         DependencyManagerInterface $dependency_manager,
         ConfigLoader $config_loader
     )
     {
-        $this->middleware_loader = $middleware_loader;
+        $this->middleware_registry = $middleware_registry;
         $this->dependency_manager = $dependency_manager;
         $this->config_loader = $config_loader;
     }
@@ -37,7 +38,7 @@ class App
      */
     public function use(string $middleware): void
     {
-        $this->middleware_loader->add($middleware);
+        $this->middleware_registry->add($middleware);
     }
 
 
@@ -70,6 +71,6 @@ class App
 
         session_start();
         $router = $this->dependency_manager->getDependency(Router::class);
-        $router->dispatch(Request::init());
+        $router->dispatch(ServerRequest::capture());
     }
 }

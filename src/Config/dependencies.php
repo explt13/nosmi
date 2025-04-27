@@ -8,7 +8,6 @@ use Explt13\Nosmi\Base\Controller;
 use Explt13\Nosmi\Base\ControllerResolver;
 use Explt13\Nosmi\Base\Db;
 use Explt13\Nosmi\Base\ErrorHandler;
-use Explt13\Nosmi\Base\MiddlewareLoader;
 use Explt13\Nosmi\Base\Model;
 use Explt13\Nosmi\Base\ServiceProviderLoader;
 use Explt13\Nosmi\Base\View;
@@ -17,18 +16,27 @@ use Explt13\Nosmi\Cache\Cache;
 use Explt13\Nosmi\Dependencies\Container;
 use Explt13\Nosmi\Dependencies\ContainerValidator;
 use Explt13\Nosmi\Dependencies\DependencyManager;
+use Explt13\Nosmi\Http\Request;
+use Explt13\Nosmi\Http\Response;
+use Explt13\Nosmi\Http\ServerRequest;
 use Explt13\Nosmi\Interfaces\CacheInterface;
 use Explt13\Nosmi\Interfaces\ConfigInterface;
 use Explt13\Nosmi\Interfaces\ConfigValidatorInterface;
 use Explt13\Nosmi\Interfaces\ContainerInterface;
 use Explt13\Nosmi\Interfaces\DependencyManagerInterface;
 use Explt13\Nosmi\Interfaces\FileValidatorInterface;
+use Explt13\Nosmi\Interfaces\LightRequestHandlerInterface;
+use Explt13\Nosmi\Interfaces\LightRequestInterface;
+use Explt13\Nosmi\Interfaces\LightResponseInterface;
+use Explt13\Nosmi\Interfaces\LightRouteInterface;
+use Explt13\Nosmi\Interfaces\LightServerRequestInterface;
 use Explt13\Nosmi\Interfaces\LogFormatterInterface;
 use Explt13\Nosmi\Interfaces\LoggerInterface;
 use Explt13\Nosmi\Logging\DefaultFormatter;
 use Explt13\Nosmi\Logging\Logger;
 use Explt13\Nosmi\Logging\LogStatus;
-use Explt13\Nosmi\Routing\Request;
+use Explt13\Nosmi\Middleware\MiddlewareDispatcher;
+use Explt13\Nosmi\Middleware\MiddlewareRegistry;
 use Explt13\Nosmi\Routing\Route;
 use Explt13\Nosmi\Routing\Router;
 use Explt13\Nosmi\Utils\Namespacer;
@@ -36,37 +44,50 @@ use Explt13\Nosmi\Validators\ClassValidator;
 use Explt13\Nosmi\Validators\FileValidator;
 
 return [
-    DependencyManagerInterface::class => DependencyManager::class,
-    ConfigInterface::class => AppConfig::class,
-    ConfigLoader::class => ConfigLoader::class,
-    ConfigValidatorInterface::class => ConfigValidator::class,
-    ContainerInterface::class => Container::class,
-    ContainerValidator::class => ContainerValidator::class,
-    DependencyManager::class => DependencyManager::class,
-    LoggerInterface::class => Logger::class,
-    LogFormatterInterface::class => DefaultFormatter::class,
-    LogStatus::class => LogStatus::class,
-    ClassValidator::class => ClassValidator::class,
-    FileValidatorInterface::class => FileValidator::class,
-    App::class => App::class,
-    CacheInterface::class => Cache::class,
-    MiddlewareLoader::class => MiddlewareLoader::class,
-    Request::class => Request::class,
-    Route::class => Route::class,
-    Router::class => Router::class,
-    Controller::class => Controller::class,
-    ControllerResolver::class => ControllerResolver::class,
-    Db::class => Db::class,
-    ErrorHandler::class => ErrorHandler::class,
-    Model::class => Model::class,
-    ServiceProviderLoader::class => ServiceProviderLoader::class,
-    View::class => View::class,
-    Widget::class => Widget::class,
+    // App Config
+    ConfigInterface::class              =>  AppConfig::class,
+    ConfigLoader::class                 =>  ConfigLoader::class,
+    ConfigValidatorInterface::class     =>  ConfigValidator::class,
+
+    // Dependencies
+    DependencyManagerInterface::class   =>  DependencyManager::class,
+    ContainerInterface::class           =>  Container::class,
+    ContainerValidator::class           =>  ContainerValidator::class,
+    
+    // Logs
+    LoggerInterface::class              =>  Logger::class,
+    LogFormatterInterface::class        =>  DefaultFormatter::class,
+    LogStatus::class                    =>  LogStatus::class,
+    
+    //Middleware
+    MiddlewareRegistry::class           =>  MiddlewareRegistry::class,
+    LightRequestHandlerInterface::class =>  MiddlewareDispatcher::class,
+
+    // Http
+    LightServerRequestInterface::class  =>  ServerRequest::class,
+    LightRequestInterface::class        =>  Request::class,
+    LightResponseInterface::class       =>  Response::class,
+    
+    // Routing
+    LightRouteInterface::class          =>  Route::class,
+    Router::class                       =>  Router::class,
+
+    // Base
+    App::class                          =>  App::class,
+    Controller::class                   =>  Controller::class,
+    ControllerResolver::class           =>  ControllerResolver::class,
+    Db::class                           =>  Db::class,
+    ErrorHandler::class                 =>  ErrorHandler::class,
+    Model::class                        =>  Model::class,
+    ServiceProviderLoader::class        =>  ServiceProviderLoader::class,
+    View::class                         =>  View::class,
+    Widget::class                       =>  Widget::class,
+    CacheInterface::class               =>  Cache::class,
 
     // Utils
-    Namespacer::class => Namespacer::class,
+    Namespacer::class                   =>  Namespacer::class,
 
     // Validators
-    FileValidatorInterface::class => FileValidator::class,
-    ClassValidator::class => ClassValidator::class,
+    FileValidatorInterface::class       =>  FileValidator::class,
+    ClassValidator::class               =>  ClassValidator::class,
 ];

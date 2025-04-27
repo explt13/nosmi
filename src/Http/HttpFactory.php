@@ -2,63 +2,50 @@
 
 namespace Explt13\Nosmi\Http;
 
-use Explt13\Nosmi\Interfaces\IncomingRequestInterface;
+use Explt13\Nosmi\Interfaces\HttpFactoryInterface;
 use Explt13\Nosmi\Interfaces\LightRequestInterface;
 use Explt13\Nosmi\Interfaces\LightResponseInterface;
 use Explt13\Nosmi\Interfaces\LightServerRequestInterface;
-use Explt13\Nosmi\Interfaces\OutgoingRequestInterface;
-use Explt13\Nosmi\Interfaces\Psr17FactoryInterface;
-use Psr\Http\Message\RequestFactoryInterface;
-use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\ResponseFactoryInterface;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestFactoryInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\StreamFactoryInterface;
+use Explt13\Nosmi\Interfaces\ReadExchangeInterface;
+use Explt13\Nosmi\Interfaces\WriteExchangeInterface;
+use Nyholm\Psr7\Factory\Psr17Factory;
 use Psr\Http\Message\StreamInterface;
-use Psr\Http\Message\UploadedFileFactoryInterface;
 use Psr\Http\Message\UploadedFileInterface;
-use Psr\Http\Message\UriFactoryInterface;
 use Psr\Http\Message\UriInterface;
 
-class HttpFactory implements Psr17FactoryInterface
+class HttpFactory implements HttpFactoryInterface
 {
-    private $factory;
-    public function __construct(
-        RequestFactoryInterface&
-        ResponseFactoryInterface&
-        UriFactoryInterface&
-        StreamFactoryInterface&
-        UploadedFileFactoryInterface&
-        ServerRequestFactoryInterface $factory
-    )
+    protected $factory;
+    public function __construct()
     {
-        $this->factory = $factory;
+        $this->factory = new Psr17Factory();
     }
 
-    public function createRequest(string $method, $uri): LightRequestInterface&OutgoingRequestInterface&IncomingRequestInterface
+    public function createRequest(string $method, $uri): LightRequestInterface&WriteExchangeInterface
     {
         $request = $this->factory->createRequest($method, $uri);
-        return new Request($request, $this->factory);
+        return new Request($request, $this);
     }
 
-    public function createResponse(int $code = 200, string $reasonPhrase = ''): LightResponseInterface
+    public function createResponse(int $code = 200, string $reasonPhrase = ''): LightResponseInterface&ReadExchangeInterface&WriteExchangeInterface
     {
         $response = $this->factory->createResponse($code, $reasonPhrase);
-        return new Response($response, $this->factory);
+        return new Response($response, $this);
     }
 
-    public function createServerRequest(?string $method = null, $uri = null, array $serverParams = []): LightServerRequestInterface&IncomingRequestInterface
+    public function createServerRequest(?string $method = null, $uri = null, array $serverParams = []): LightServerRequestInterface&ReadExchangeInterface
     {
-        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-        $hostname = $_SERVER['SERVER_NAME'];
-        $port = $_SERVER['SERVER_PORT'];
-        $url = $_SERVER['REQUEST_URI'];
-        
+        if (is_null($uri)) {
+            $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+            $hostname = $_SERVER['SERVER_NAME'];
+            $port = $_SERVER['SERVER_PORT'];
+            $url = $_SERVER['REQUEST_URI'];
+        }
+
         $method ??= $_SERVER['REQUEST_METHOD'];
         $uri ??= "$scheme://$hostname:$port$url";
         $server_request = $this->factory->createServerRequest($method, $uri, $serverParams);
-        return new ServerRequest($server_request, $this->factory);
+        return new ServerRequest($server_request, $this);
     }
 
     public function createStream(string $content = ''): StreamInterface

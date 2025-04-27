@@ -2,7 +2,7 @@
 
 namespace Explt13\Nosmi\Interfaces;
 
-interface OutgoingRequestInterface
+interface WriteExchangeInterface
 {
     /**
      * Sets the request body as form-encoded data.

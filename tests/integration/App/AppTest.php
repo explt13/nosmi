@@ -9,6 +9,7 @@ use Explt13\Nosmi\Dependencies\Container;
 use Explt13\Nosmi\Dependencies\DependencyManager;
 use Explt13\Nosmi\Interfaces\ConfigInterface;
 use Explt13\Nosmi\Interfaces\DependencyManagerInterface;
+use Explt13\Nosmi\Middleware\MiddlewareRegistry;
 use Explt13\Nosmi\Routing\Router;
 use Explt13\Nosmi\Validators\FileValidator;
 use PHPUnit\Framework\TestCase;
@@ -19,14 +20,14 @@ class AppTest extends TestCase
     private App $app;
     private ConfigInterface $app_config;
     private DependencyManagerInterface $dependency_manager;
-    private MiddlewareLoader $middleware_loader;
+    private MiddlewareRegistry $middleware_registry;
 
     public function setUp(): void
     {
         $this->dependency_manager = new DependencyManager(Container::getInstance());
         $this->app_config = AppConfig::getInstance();
-        $this->middleware_loader = MiddlewareLoader::getInstance();
-        $this->app = new App($this->middleware_loader, $this->dependency_manager, new ConfigLoader($this->app_config, new FileValidator()));
+        $this->middleware_registry = MiddlewareRegistry::getInstance();
+        $this->app = new App($this->middleware_registry, $this->dependency_manager, new ConfigLoader($this->app_config, new FileValidator()));
     }
 
     public function testBootstrap()

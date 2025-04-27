@@ -69,7 +69,6 @@ class ConfigLoader
             'APP_VIEWS' => "$app_root/src/views",
             'APP_PROVIDERS' => "$app_root/src/providers",
             'APP_LAYOUTS' => "$app_root/src/layouts",
-            'APP_MIDDLEWARES' => "$app_root/src/middlewares",
             'APP_CONFIG' => "$app_root/config",
         ];
 

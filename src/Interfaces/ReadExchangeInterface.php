@@ -2,7 +2,7 @@
 
 namespace Explt13\Nosmi\Interfaces;
 
-interface IncomingRequestInterface
+interface ReadExchangeInterface
 {
     /**
      * Get the entire body content as a string.
