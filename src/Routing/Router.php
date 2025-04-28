@@ -1,27 +1,22 @@
 <?php
 namespace Explt13\Nosmi\Routing;
 
-use Explt13\Nosmi\Base\ControllerResolver;
-use Explt13\Nosmi\Interfaces\MvcFactoryInterface;
-use Explt13\Nosmi\Interfaces\LightRequestInterface;
+use Explt13\Nosmi\Base\RequestPipeline;
 use Explt13\Nosmi\Interfaces\LightRouteInterface;
 use Explt13\Nosmi\Interfaces\LightServerRequestInterface;
-use Explt13\Nosmi\Middleware\FinalMiddleware;
-use Explt13\Nosmi\Middleware\MiddlewareDispatcher;
-use Explt13\Nosmi\Middleware\MiddlewareManager;
-use Explt13\Nosmi\Middleware\MiddlewareRegistry;
+use Explt13\Nosmi\Middleware\MiddlewareFactory;
 
 class Router
 {
-    private MvcFactoryInterface $factory;
     private LightRouteInterface $route;
+    private RequestPipeline $request_pipeline;
 
     public function __construct(
-        MvcFactoryInterface $factory,
+        RequestPipeline $request_pipeline,
         LightRouteInterface $route,
     )
     {
-        $this->factory = $factory;
+        $this->request_pipeline = $request_pipeline;
         $this->route = $route;
     }
 
@@ -32,10 +27,6 @@ class Router
         }
         $path = $request->getUri()->getPath();
         $this->route = $this->route->resolvePath($path);
-
-        $controller = $this->factory->createController($request, $this->route);
-        $middleware_registry = MiddlewareRegistry::getInstance();
-        $middleware_registry->addBulk($this->route->getRouteMiddleware());
-        $middleware_dispatcher = new MiddlewareDispatcher($middleware_registry->getAll(), new FinalMiddleware());
+        $this->request_pipeline->process($request, $this->route);
     }
 }

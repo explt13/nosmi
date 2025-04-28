@@ -1,6 +1,6 @@
 <?php
 
-namespace Explt13\Nosmi\Middleware;
+namespace Tests\Integration\Middleware;
 
 use Explt13\Nosmi\Interfaces\LightMiddlewareInterface;
 use Explt13\Nosmi\Interfaces\LightResponseInterface;
