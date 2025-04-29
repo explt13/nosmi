@@ -9,10 +9,11 @@ use Explt13\Nosmi\Exceptions\InvalidResourceException;
 use Explt13\Nosmi\Exceptions\ResourceNotFoundException;
 use Explt13\Nosmi\Exceptions\ResourceReadException;
 use Explt13\Nosmi\Interfaces\ConfigInterface;
+use Explt13\Nosmi\Interfaces\ConfigLoaderInterface;
 use Explt13\Nosmi\Interfaces\FileValidatorInterface;
 use Explt13\Nosmi\Validators\FileValidator;
 
-class ConfigLoader
+class ConfigLoader implements ConfigLoaderInterface
 {
     /**
      * @var ConfigInterface $app_config App config instance
@@ -35,17 +36,8 @@ class ConfigLoader
         $this->file_validator = $file_validator;
     }
 
-    /**
-     * Load a config in .env, .json, .ini
-     * @param string $config_path a destination to the config file
-     * @return void
-     */
-    public function loadConfig(?string $config_path = null): void
+    public function loadConfig(string $config_path): void
     {
-        if (is_null($config_path)) {
-            // LOG
-            return;
-        }
         $this->validateConfigFilePath($config_path);
         $config = $this->getConfig(pathinfo($config_path, PATHINFO_EXTENSION), $config_path);
         $this->app_config->bulkSet($config);

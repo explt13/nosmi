@@ -12,22 +12,33 @@ use Explt13\Nosmi\Utils\Types;
 final class DependencyManager implements DependencyManagerInterface
 {
     private ContainerInterface $container;
+    protected static array $framework_dependencies = [];
+    protected static bool $framework_dependencies_loaded = false;
 
-    public function __construct(ContainerInterface $container)
+    public function __construct()
     {
-        $this->container = $container;
+        $this->container = Container::getInstance();
     }
 
-    public function getDependency(string $abstract, bool $getNew = false, bool $cacheNew = false): object
+    /**
+     * @internal
+     */
+    public function loadFrameworkDependencies(string $path): void
     {
-        return $this->container->get($abstract, $getNew, $cacheNew);
+        if (self::$framework_dependencies_loaded) {
+            // log
+            return;
+        }
+        self::$framework_dependencies_loaded = true;
+        $dependencies = require_once $path;
+        $this->setDependencies($dependencies, true);
     }
 
     /**
      * @param string $path the path to the dependencies
      * @note dependencies structure array<string, string|array{concrete: string, singleton: bool}> 
      */
-    public function loadDependencies(?string $path): void
+    public function loadDependencies(string $path): void
     {
         if (is_null($path)) {
             // LOG
@@ -41,23 +52,20 @@ final class DependencyManager implements DependencyManagerInterface
         }
 
         $dependencies = require_once $path;
-        foreach ($dependencies as $abstract => $dependency)
-        {
-            if (!Types::is_primitive($dependency) && Types::array_is_assoc($dependency)) {
-                if (!isset($dependency['concrete'])) {
-                    // Log critical
-                    throw MissingAssocArrayKeyException::withMessage(sprintf("Cannot set the dependency %s missing the key: %s", $abstract, 'concrete'));
-                }
-                $this->container->set($abstract, $dependency['concrete'], $dependency['singleton'] ?? false);
-                continue;
-            }
-            $this->container->set($abstract, $dependency);
-        }
+        $this->setDependencies($dependencies, false);
+    }
+
+    public function getDependency(string $abstract, bool $getNew = false, bool $cacheNew = false): object
+    {
+        return $this->container->get($abstract, $getNew, $cacheNew);
     }
 
     public function addDependency(string $abstract, string $concrete, bool $singleton = false): void
     {
         if ($this->hasDependency($abstract)) {
+            if (in_array($abstract, self::$framework_dependencies)) {
+                throw new \RuntimeException("Cannot override $abstract: is framework dependency.");
+            }
             // log warning
         }
         $this->container->set($abstract, $concrete, $singleton);
@@ -71,5 +79,32 @@ final class DependencyManager implements DependencyManagerInterface
     public function removeDependency(string $abstract)
     {
         $this->container->remove($abstract);
+    }
+
+    /**
+     * @param array<string, string|array{concrete: string, singleton: bool}> $dependencies
+     */
+    protected function setDependencies(array $dependencies, bool $framework_deps)
+    {
+        foreach ($dependencies as $abstract => $dependency)
+        {
+            if ($framework_deps) {
+                self::$framework_dependencies[] = $abstract;
+            }
+
+            if ($this->container->has($abstract) && in_array($abstract, self::$framework_dependencies)) {
+                throw new \RuntimeException("Cannot override $abstract: is framework dependency.");
+            }
+
+            if (!Types::is_primitive($dependency) && Types::array_is_assoc($dependency)) {
+                if (!isset($dependency['concrete'])) {
+                    // Log critical
+                    throw MissingAssocArrayKeyException::withMessage(sprintf("Cannot set the dependency %s missing the key: %s", $abstract, 'concrete'));
+                }
+                $this->container->set($abstract, $dependency['concrete'], $dependency['singleton'] ?? false);
+                continue;
+            }
+            $this->container->set($abstract, $dependency);
+        }
     }
 }

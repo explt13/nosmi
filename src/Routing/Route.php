@@ -16,6 +16,7 @@ class Route implements LightRouteInterface
     protected string $regexp;
     protected string $path;
     protected string $path_pattern;
+    protected string $render;
     protected static array $routes = [];
     protected static array $patterns_map = [];
     protected static array $route_middleware = [];
@@ -23,7 +24,7 @@ class Route implements LightRouteInterface
 
     public function resolvePath(string $path): static
     {
-        foreach (self::$routes as $regexp => $controller) {
+        foreach (self::$routes as $regexp => $specs) {
             if (preg_match("#$regexp#", $path, $parameters)) {
                 $parameters = array_filter($parameters, fn($key) => !is_int($key), ARRAY_FILTER_USE_KEY);
                 $new = clone $this;
@@ -31,7 +32,8 @@ class Route implements LightRouteInterface
                 $new->path = $path;
                 $new->regexp = $regexp;
                 $new->path_pattern = $new->getPathPattern();
-                $new->controller = $controller;
+                $new->controller = $specs['controller'];
+                $new->render = $this->setRender($specs['render']);
                 return $new;
             }
         }
@@ -54,6 +56,18 @@ class Route implements LightRouteInterface
     public function getController(): string
     {
         return $this->controller;
+    }
+
+    public function getRender(): string
+    {
+        return $this->render;
+    }
+    private function setRender(string $render): string
+    {
+        if (preg_match("/^[a-z0-9]*$/", $render)) {
+            return $render;
+        }
+        throw new \LogicException('route\'s `render` parameter should have ^[a-z0-9]*$ pattern.');
     }
 
     public function getParams(): array
@@ -80,12 +94,12 @@ class Route implements LightRouteInterface
     {
         return array_search($this->regexp, self::$patterns_map);
     }
-
-    public static function add(string $path_pattern, string $controller): void
+    
+    public static function add(string $path_pattern, string $controller, string $render = ""): void
     {
         $regexp = self::convertPathPatternToRegexp($path_pattern);
         self::$patterns_map[$path_pattern] = $regexp;
-        self::$routes[$regexp] = $controller;
+        self::$routes[$regexp] = ['controller' => $controller, 'render' => $render];
     }
 
     public static function getPatternToRegexMap(): array
@@ -117,26 +131,35 @@ class Route implements LightRouteInterface
     {
         $regexp = self::getRegexpByPathPattern($path_pattern);
         if (is_null($regexp)) return null;
-        return self::$routes[$regexp];
+        return self::$routes[$regexp]['controller'];
+    }
+
+    public static function getRenderByPathPattern(string $path_pattern): ?string
+    {
+        $regexp = self::getRegexpByPathPattern($path_pattern);
+        if (is_null($regexp)) return null;
+        return self::$routes[$regexp]['render'];
     }
 
     public static function getControllerByRegexp(string $regexp): ?string
     {
-        return isset(self::$routes[$regexp]) ? self::$routes[$regexp] : null;
+        return isset(self::$routes[$regexp]) ? self::$routes[$regexp]['controller'] : null;
     }
 
-    public static function getControllerPatternPaths(string $controller): array
+    public static function getPathPatternsOfController(string $controller): array
     {
-        $regexps = self::getControllerRegexps($controller);
+        $regexps = self::getRegexpsOfController($controller);
         $patterns = array_keys(array_filter(self::$patterns_map, function($regexp) use ($regexps) {
             return in_array($regexp, $regexps, true);
         }));
         return $patterns;
     }
-
-    public static function getControllerRegexps(string $controller): array
+    public static function getRegexpsOfController(string $controller): array
     {
-        return array_keys(self::$routes, $controller, true);
+        $routes = array_filter(self::$routes, function($route) use ($controller) {
+            return $route['controller'] === $controller;
+        });
+        return array_keys($routes);
     }
 
     private static function convertPathPatternToRegexp(string $path_pattern): string

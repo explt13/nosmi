@@ -35,6 +35,14 @@ interface LightRouteInterface
      */
     public function getController(): string;
 
+
+    /**
+     * Retrieves the render page name that is associated with the resolved route.
+     *
+     * @return string The controller name.
+     */
+    public function getRender(): string;
+
     /**
      * Retrieves all parameters from the resolved route.
      *
@@ -138,12 +146,12 @@ interface LightRouteInterface
      * @param string $controller The controller name.
      * @return array An array of path patterns.
      */
-    public static function getControllerPatternPaths(string $controller): array;
+    public static function getPathPatternsOfController(string $controller): array;
     /**
      * Retrieves an array of regular expressions associated with the specified controller.
      *
      * @param string $controller The name of the controller for which to retrieve the regular expressions.
      * @return array An array of regular expressions associated with the controller.
      */
-    public static function getControllerRegexps(string $controller): array;
+    public static function getRegexpsOfController(string $controller): array;
 }

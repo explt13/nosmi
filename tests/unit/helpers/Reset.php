@@ -60,4 +60,16 @@ class Reset
             return;
         }
     }
+
+    public static function resetStaticClass(string $class)
+    {
+        $reflectionClass = new \ReflectionClass($class);
+        $staticProps = $reflectionClass->getStaticProperties();
+        $defaultProps = $reflectionClass->getDefaultProperties(); // includes static + instance defaults
+
+        foreach ($staticProps as $name => $value) {
+            $defaultValue = $defaultProps[$name] ?? null;
+            $reflectionClass->setStaticPropertyValue($name, $defaultValue);
+        }
+    }
 }

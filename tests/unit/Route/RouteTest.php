@@ -25,8 +25,7 @@ class RouteTest extends TestCase
 
     protected function tearDown(): void
     {
-        Reset::resetStaticProp(Route::class, 'routes');
-        Reset::resetStaticProp(Route::class, 'patterns_map');
+        Reset::resetStaticClass(Route::class);
     }
 
 
@@ -130,9 +129,16 @@ class RouteTest extends TestCase
         $this->assertSame($regexp, Route::getRegexpByPathPattern($path_pattern));
     }
 
-    public function testGetRequestController()
+    public function testGetController()
     {
         $this->assertSame('OrderController', $this->route->getController());
+    }
+
+    public function testGetRender()
+    {
+        Route::add('some/new/route/path', 'NewController', 'pro2file');
+        $route = (new Route())->resolvePath('some/new/route/path');
+        $this->assertSame("pro2file", $route->getRender());
     }
 
     public function testGetRequestPathPattern()
@@ -172,8 +178,8 @@ class RouteTest extends TestCase
         );
         $this->assertSame(['^/first/pattern/(?P<id>[a-zA-Z0-9-]+)$', '^/second/pattern/(?P<name>[a-zA-Z]+)$'], Route::getPathRegexps());
         $this->assertSame([
-                '^/first/pattern/(?P<id>[a-zA-Z0-9-]+)$' => 'FirstController',
-                '^/second/pattern/(?P<name>[a-zA-Z]+)$' => 'SecondController'
+                '^/first/pattern/(?P<id>[a-zA-Z0-9-]+)$' => ['controller' => 'FirstController', 'render' => ''],
+                '^/second/pattern/(?P<name>[a-zA-Z]+)$' => ['controller' => 'SecondController', 'render' => '']
             ],
             Route::getRoutes()
         );
@@ -199,15 +205,15 @@ class RouteTest extends TestCase
         $this->assertSame(null, Route::getControllerByRegexp('/not_existed/pattern/<string>:name'));
     }
 
-    public function testGetControllerPatternPaths()
+    public function testGetPathPatternsOfController()
     {
         Route::add('/another/pattern', 'FirstController');
-        $this->assertSame(['/first/pattern/:id', '/another/pattern'], Route::getControllerPatternPaths('FirstController'));
+        $this->assertSame(['/first/pattern/:id', '/another/pattern'], Route::getPathPatternsOfController('FirstController'));
     }
 
-    public function testgetControllerRegexps()
+    public function testGetRegexpsOfController()
     {
         Route::add('/another/pattern', 'FirstController');
-        $this->assertSame(['^/first/pattern/(?P<id>[a-zA-Z0-9-]+)$', '^/another/pattern$'], Route::getControllerRegexps('FirstController'));
+        $this->assertSame(['^/first/pattern/(?P<id>[a-zA-Z0-9-]+)$', '^/another/pattern$'], Route::getRegexpsOfController('FirstController'));
     }
 }

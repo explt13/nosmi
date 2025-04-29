@@ -16,6 +16,12 @@ interface DependencyManagerInterface
      * @return T
      */
     public function getDependency(string $abstract, bool $getNew = false, bool $cacheNew = false): object;
+
+
+    /**
+     * @internal
+     */
+    public function loadFrameworkDependencies(string $path): void;
     
     /**
      * Load an array of dependencies

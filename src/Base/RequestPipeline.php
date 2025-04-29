@@ -2,6 +2,7 @@
 
 namespace Explt13\Nosmi\Base;
 
+use Explt13\Nosmi\Interfaces\LightResponseInterface;
 use Explt13\Nosmi\Interfaces\LightRouteInterface;
 use Explt13\Nosmi\Interfaces\LightServerRequestInterface;
 use Explt13\Nosmi\Middleware\MiddlewareFactory;
@@ -15,7 +16,7 @@ class RequestPipeline
         $this->middleware_factory = $middleware_factory;
     }
 
-    public function process(LightServerRequestInterface $request, LightRouteInterface $route)
+    public function process(LightServerRequestInterface $request, LightRouteInterface $route): LightResponseInterface
     {
         $controller = new $route->getController();
         $controller->setRoute($route);
@@ -25,5 +26,6 @@ class RequestPipeline
 
         $middleware_dispatcher = $this->middleware_factory->createDispatcher($middleware_registry->getAll(), $controller);
         $response = $middleware_dispatcher->handle($request);
+        return $response;
     }
 }

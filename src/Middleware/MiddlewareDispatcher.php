@@ -25,9 +25,7 @@ public function __construct(array $middleware_list, ControllerInterface $control
     public function handle(ServerRequestInterface $request): LightResponseInterface
     {
         if (empty($this->middleware_list)) {
-            $this->controller->processRequest($request);
-
-            return $this->controller->response();
+            return $this->controller->processRequest($request);
         }
         
         
