@@ -25,11 +25,6 @@ class AppConfigTest extends TestCase
         Reset::resetSingleton($this->app_config::class);
     }
 
-    public static function setUpBeforeClass(): void
-    {
-        IncludeFiles::includeUtilFunctions();
-    }
-
     public function testGetAllBulkSet()
     {
         $this->app_config->bulkSet([

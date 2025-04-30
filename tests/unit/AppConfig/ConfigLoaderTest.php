@@ -8,7 +8,6 @@ use Explt13\Nosmi\Exceptions\InvalidFileExtensionException;
 use Explt13\Nosmi\Exceptions\InvalidResourceException;
 use Explt13\Nosmi\Exceptions\ResourceNotFoundException;
 use Explt13\Nosmi\Interfaces\ConfigInterface;
-use Explt13\Nosmi\Interfaces\FileValidatorInterface;
 use Explt13\Nosmi\Validators\FileValidator;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -18,30 +17,18 @@ use Tests\Unit\helpers\IncludeFiles;
 class ConfigLoaderTest extends TestCase
 {
     private (ConfigInterface&MockObject)|null $mock_app_config;
+    private FileValidator&MockObject $file_validator;
     private ConfigLoader|null $config_loader;
-    private FileValidatorInterface&MockObject $file_validator;
-
-    public static function setUpBeforeClass(): void
-    {
-        IncludeFiles::includeUtilFunctions();
-    }
 
     public function setUp(): void
     {
         $this->mock_app_config = $this->createMock(ConfigInterface::class);
-        $this->mock_app_config->method('HAS')->willReturnCallback(function ($key) {
-            return in_array($key, ['APP_ROOT', 'APP_PSR']);
-        });
-        // $this->mock_app_config->method('GET')->with('APP_ROOT')->willReturn('fakeapp');
-        $this->mock_app_config->method('GET')->willReturnCallback(function ($key) {
-            $paths = [
-                'APP_ROOT' => 'root',
-            ];
-            return $paths[$key];
-        });
-        $this->file_validator = $this->createMock(FileValidatorInterface::class);
+        $this->mock_app_config->method('HAS')->willReturn(true);
+        $this->mock_app_config->method('GET')->willReturn(__DIR__);
+        $this->file_validator = $this->createMock(FileValidator::class);
+        $this->file_validator->method('isReadableDir')->willReturn(true);
        
-        $this->config_loader = new ConfigLoader($this->mock_app_config, $this->file_validator);
+        $this->config_loader = new ConfigLoader($this->mock_app_config);
     }
 
     public function tearDown(): void

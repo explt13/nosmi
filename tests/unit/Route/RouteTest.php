@@ -134,11 +134,19 @@ class RouteTest extends TestCase
         $this->assertSame('OrderController', $this->route->getController());
     }
 
-    public function testGetRender()
+    public function testGetAction()
     {
         Route::add('some/new/route/path', 'NewController', 'pro2file');
         $route = (new Route())->resolvePath('some/new/route/path');
-        $this->assertSame("pro2file", $route->getRender());
+        $this->assertSame("pro2file", $route->getAction());
+
+        Route::add('some/new/route/two', 'NewController');
+        $route = (new Route())->resolvePath('some/new/route/two');
+        $this->assertSame(null, $route->getAction());
+
+        Route::add('some/another', 'NewController', 'asd-123');
+        $this->expectException(\LogicException::class);
+        $route = (new Route())->resolvePath('some/another');
     }
 
     public function testGetRequestPathPattern()
@@ -178,8 +186,8 @@ class RouteTest extends TestCase
         );
         $this->assertSame(['^/first/pattern/(?P<id>[a-zA-Z0-9-]+)$', '^/second/pattern/(?P<name>[a-zA-Z]+)$'], Route::getPathRegexps());
         $this->assertSame([
-                '^/first/pattern/(?P<id>[a-zA-Z0-9-]+)$' => ['controller' => 'FirstController', 'render' => ''],
-                '^/second/pattern/(?P<name>[a-zA-Z]+)$' => ['controller' => 'SecondController', 'render' => '']
+                '^/first/pattern/(?P<id>[a-zA-Z0-9-]+)$' => ['controller' => 'FirstController', 'action' => null],
+                '^/second/pattern/(?P<name>[a-zA-Z]+)$' => ['controller' => 'SecondController', 'action' => null]
             ],
             Route::getRoutes()
         );

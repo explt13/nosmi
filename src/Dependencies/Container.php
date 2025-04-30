@@ -7,6 +7,7 @@ use Explt13\Nosmi\Interfaces\ContainerInterface;
 use Explt13\Nosmi\Interfaces\SingletonInterface;
 use Explt13\Nosmi\Traits\SingletonTrait;
 use Explt13\Nosmi\Validators\ClassValidator;
+use Explt13\Nosmi\Validators\ContainerValidator;
 
 class Container implements ContainerInterface, SingletonInterface
 {
@@ -14,21 +15,13 @@ class Container implements ContainerInterface, SingletonInterface
 
     protected array $bindings = array();
     protected array $services = array();
-    protected ContainerValidator $container_validator;
-    protected ClassValidator $class_validator;
 
-    public function __construct()
-    {
-        $this->container_validator = new ContainerValidator();
-        $this->class_validator = new ClassValidator();
-    }
-   
     public function set(string $abstract, string $concrete, bool $singleton = false): void
     {
-        if (!$this->class_validator->isClassOrInterfaceExists($abstract)) {
+        if (!ClassValidator::isClassOrInterfaceExists($abstract)) {
             throw new ClassNotFoundException($abstract);
         }
-        if (!$this->class_validator->isClassExists($concrete)) {
+        if (!ClassValidator::isClassExists($concrete)) {
             throw ClassNotFoundException::withMessage("Class `$concrete` is not found.");
         }
 
@@ -40,8 +33,8 @@ class Container implements ContainerInterface, SingletonInterface
 
     public function remove(string $abstract): void
     {
-        if (!$this->container_validator->isDependencyInBindings($this->bindings, $abstract) && 
-            !$this->container_validator->isDependencyInServices($this->services, $abstract)) {
+        if (!ContainerValidator::isDependencyInBindings($this->bindings, $abstract) && 
+            !ContainerValidator::isDependencyInServices($this->services, $abstract)) {
             throw DependencyNotSetException::withMessage('Cannot unset non-existent dependency ' . $abstract);
         }
         unset($this->bindings[$abstract]);
@@ -56,11 +49,11 @@ class Container implements ContainerInterface, SingletonInterface
 
     public function get(string $abstract, bool $getNew = false, bool $cacheNew = false): object
     {
-        if (!$getNew && $this->container_validator->isDependencyInServices($this->services, $abstract)) {
+        if (!$getNew && ContainerValidator::isDependencyInServices($this->services, $abstract)) {
             return $this->services[$abstract];
         }
 
-        if (!$this->container_validator->isDependencyInBindings($this->bindings, $abstract)) {
+        if (!ContainerValidator::isDependencyInBindings($this->bindings, $abstract)) {
             throw new DependencyNotSetException($abstract);
         }
 

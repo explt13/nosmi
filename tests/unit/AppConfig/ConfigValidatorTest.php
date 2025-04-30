@@ -15,11 +15,6 @@ class ConfigValidatorTest extends TestCase
 {
     private ConfigValidatorInterface $config_validator;
 
-    public static function setUpBeforeClass(): void
-    {
-        IncludeFiles::includeUtilFunctions();
-    }
-
     protected function setUp(): void
     {
         $this->config_validator = new ConfigValidator();

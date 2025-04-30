@@ -16,7 +16,7 @@ class Route implements LightRouteInterface
     protected string $regexp;
     protected string $path;
     protected string $path_pattern;
-    protected string $render;
+    protected ?string $action;
     protected static array $routes = [];
     protected static array $patterns_map = [];
     protected static array $route_middleware = [];
@@ -33,7 +33,7 @@ class Route implements LightRouteInterface
                 $new->regexp = $regexp;
                 $new->path_pattern = $new->getPathPattern();
                 $new->controller = $specs['controller'];
-                $new->render = $this->setRender($specs['render']);
+                $new->action = $new->checkAction($specs['action']);
                 return $new;
             }
         }
@@ -58,16 +58,9 @@ class Route implements LightRouteInterface
         return $this->controller;
     }
 
-    public function getRender(): string
+    public function getAction(): ?string
     {
-        return $this->render;
-    }
-    private function setRender(string $render): string
-    {
-        if (preg_match("/^[a-z0-9]*$/", $render)) {
-            return $render;
-        }
-        throw new \LogicException('route\'s `render` parameter should have ^[a-z0-9]*$ pattern.');
+        return $this->action;
     }
 
     public function getParams(): array
@@ -95,11 +88,11 @@ class Route implements LightRouteInterface
         return array_search($this->regexp, self::$patterns_map);
     }
     
-    public static function add(string $path_pattern, string $controller, string $render = ""): void
+    public static function add(string $path_pattern, string $controller, ?string $action = null): void
     {
         $regexp = self::convertPathPatternToRegexp($path_pattern);
         self::$patterns_map[$path_pattern] = $regexp;
-        self::$routes[$regexp] = ['controller' => $controller, 'render' => $render];
+        self::$routes[$regexp] = ['controller' => $controller, 'action' => $action];
     }
 
     public static function getPatternToRegexMap(): array
@@ -134,11 +127,11 @@ class Route implements LightRouteInterface
         return self::$routes[$regexp]['controller'];
     }
 
-    public static function getRenderByPathPattern(string $path_pattern): ?string
+    public static function getActionByPathPattern(string $path_pattern): ?string
     {
         $regexp = self::getRegexpByPathPattern($path_pattern);
         if (is_null($regexp)) return null;
-        return self::$routes[$regexp]['render'];
+        return self::$routes[$regexp]['action'];
     }
 
     public static function getControllerByRegexp(string $regexp): ?string
@@ -154,6 +147,7 @@ class Route implements LightRouteInterface
         }));
         return $patterns;
     }
+
     public static function getRegexpsOfController(string $controller): array
     {
         $routes = array_filter(self::$routes, function($route) use ($controller) {
@@ -161,6 +155,18 @@ class Route implements LightRouteInterface
         });
         return array_keys($routes);
     }
+
+    private function checkAction(?string $action): ?string
+    {
+        if (is_null($action)) {
+            return null;
+        }
+        if (preg_match("/^[a-z0-9]*$/", $action)) {
+            return $action;
+        }
+        throw new \LogicException("Route {$this->path}: `action` parameter should have ^[a-z0-9]*$ pattern.");
+    }
+
 
     private static function convertPathPatternToRegexp(string $path_pattern): string
     {

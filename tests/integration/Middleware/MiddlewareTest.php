@@ -2,8 +2,8 @@
 
 namespace Tests\Integration\Middleware;
 
+use Explt13\Nosmi\Base\Controller;
 use Explt13\Nosmi\Http\HttpFactory;
-use Explt13\Nosmi\Middleware\FinalHandler;
 use Explt13\Nosmi\Middleware\MiddlewareDispatcher;
 use PHPUnit\Framework\TestCase;
 
@@ -16,7 +16,7 @@ class MiddlewareTest extends TestCase
             new FinalMiddleware()
         ];
         $request = (new HttpFactory())->createServerRequest('method', 'fake/app/v1', $_SERVER);
-        $middleware = new MiddlewareDispatcher($middleware_list, new FinalMiddleware());
+        $middleware = new MiddlewareDispatcher($middleware_list, new class extends Controller{});
         $response = $middleware->handle($request);
 
         $this->assertSame(['value1'], $response->getHeader('After-Auth'));

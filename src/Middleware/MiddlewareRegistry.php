@@ -2,10 +2,10 @@
 
 namespace Explt13\Nosmi\Middleware;
 
-use Explt13\Nosmi\Interfaces\LightMiddlewareInterface;
+use Explt13\Nosmi\Interfaces\MiddlewareRegistryInterface;
 use Explt13\Nosmi\Traits\SingletonTrait;
 
-class MiddlewareRegistry
+class MiddlewareRegistry implements MiddlewareRegistryInterface
 {
     use SingletonTrait;
     private array $middlewares_list;

@@ -10,7 +10,7 @@ use Explt13\Nosmi\Exceptions\ResourceNotFoundException;
 use Explt13\Nosmi\Exceptions\ResourceReadException;
 use Explt13\Nosmi\Interfaces\ConfigInterface;
 use Explt13\Nosmi\Interfaces\ConfigLoaderInterface;
-use Explt13\Nosmi\Interfaces\FileValidatorInterface;
+use Explt13\Nosmi\Utils\Utils;
 use Explt13\Nosmi\Validators\FileValidator;
 
 class ConfigLoader implements ConfigLoaderInterface
@@ -20,8 +20,6 @@ class ConfigLoader implements ConfigLoaderInterface
      */
     protected ConfigInterface $app_config;
 
-    protected FileValidatorInterface $file_validator;
-
     /**
      * @var array{0: 'env', 1: 'json', 2: 'ini'} CONFIG_EXTENSTIONS available extensions for the config file
      */
@@ -30,10 +28,9 @@ class ConfigLoader implements ConfigLoaderInterface
     /**
      * @param ConfigInterface $app_config An app config object
      */
-    public function __construct(ConfigInterface $app_config, FileValidatorInterface $file_validator)
+    public function __construct(ConfigInterface $app_config)
     {
         $this->app_config = $app_config;
-        $this->file_validator = $file_validator;
     }
 
     public function loadConfig(string $config_path): void
@@ -46,30 +43,26 @@ class ConfigLoader implements ConfigLoaderInterface
 
     protected function setRequiredMissingParams(): void
     {
-        if (!$this->app_config->has('APP_ROOT')) {
+        if (!defined('APP_ROOT') && !$this->app_config->has('APP_ROOT')) {
             throw new ConfigParameterNotSetException('APP_ROOT');
         }
-        
-        if (!$this->app_config->has('APP_PSR')) {
-            throw new ConfigParameterNotSetException('APP_PSR');
-        }
 
-        $app_root = $this->app_config->get('APP_ROOT');
-        $this->file_validator->validateDirIsReadable($app_root);
+        $app_root = Utils::getConstant("APP_ROOT") ?? $this->app_config->get('APP_ROOT');
+        FileValidator::validateDirIsReadable($app_root);
+
         $required_dirs = [
-            'APP_SRC' => "$app_root/src",
-            'APP_VIEWS' => "$app_root/src/views",
-            'APP_PROVIDERS' => "$app_root/src/providers",
-            'APP_LAYOUTS' => "$app_root/src/layouts",
-            'APP_CONFIG' => "$app_root/config",
+            'APP_SRC' => Utils::getConstant("APP_SRC") ?? "$app_root/src",
+            'APP_VIEWS' => Utils::getConstant("APP_VIEWS") ?? "$app_root/src/views",
+            'APP_LAYOUTS' => Utils::getConstant("APP_LAYOUTS") ?? "$app_root/src/layouts",
+            'APP_CONFIG' => Utils::getConstant("APP_CONFIG") ?? "$app_root/config",
         ];
 
         foreach ($required_dirs as $key => $value) {
             if ($this->app_config->has($key)) {
-                $this->file_validator->validateDirIsReadable($this->app_config->get($key));
+                FileValidator::validateDirIsReadable($this->app_config->get($key));
                 continue;
             }
-            $this->file_validator->validateDirIsReadable($value);
+            FileValidator::validateDirIsReadable($value);
             $this->app_config->set($key, $value);
         }
     }
@@ -82,16 +75,16 @@ class ConfigLoader implements ConfigLoaderInterface
      */
     protected function validateConfigFilePath(string $config_path): void
     {
-        if (!$this->file_validator->resourceExists($config_path)) {
+        if (!FileValidator::resourceExists($config_path)) {
             throw new ResourceNotFoundException('Cannot find a resource: ' . $config_path);
         }
-        if (!$this->file_validator->isFile($config_path)) {
+        if (!FileValidator::isFile($config_path)) {
             throw new InvalidResourceException('directory', 'file', $config_path);
         }
-        if (!$this->file_validator->isReadable($config_path)) {
+        if (!FileValidator::isReadable($config_path)) {
             throw new ResourceReadException('Cannot read a file ' . $config_path . ', please make sure the file has appropriate permissions');
         }
-        if (!$this->file_validator->isValidExtension($config_path, self::CONFIG_EXTENSTIONS)) {
+        if (!FileValidator::isValidExtension($config_path, self::CONFIG_EXTENSTIONS)) {
             throw new InvalidFileExtensionException($config_path, self::CONFIG_EXTENSTIONS);
         }
     }

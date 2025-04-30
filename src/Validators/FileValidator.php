@@ -2,49 +2,98 @@
 namespace Explt13\Nosmi\Validators;
 
 use Explt13\Nosmi\Exceptions\InvalidResourceException;
-use Explt13\Nosmi\Interfaces\FileValidatorInterface;
 
-class FileValidator implements FileValidatorInterface
+class FileValidator
 {
-    public function resourceExists(string $path): bool
+    /**
+     * Checks for the existence of the file or the directory
+     * 
+     * @param string $path The path to the resource.
+     * @return bool Returns true if the file or directory exists, false otherwise.
+     *
+     */
+    public static function resourceExists(string $path): bool
     {
         return file_exists($path);
     }
 
-    public function isFile(string $path): bool
+    /**
+     * Checks if the given path is a file.
+     *
+     * @param string $path The path to the resource.
+     * @return bool Returns true if the path is a file, false otherwise.
+     */
+    public static function isFile(string $path): bool
     {
         return is_file($path);
     }
 
-    public function isDir(string $path): bool
+    /**
+     * Checks if the given path is a directory.
+     *
+     * @param string $path The path to the resource.
+     * @return bool Returns true if the path is a directory, false otherwise.
+     */
+    public static function isDir(string $path): bool
     {
         return is_dir($path);
     }
 
-    public function isReadable(string $path): bool
+    /**
+     * Checks if the file or directory of the given path is readable.
+     *
+     * @param string $path The path to the resource.
+     * @return bool Returns true if the file is readable, false otherwise.
+     */
+    public static function isReadable(string $path): bool
     {
         return is_readable($path);
     }
 
-    public function isReadableDir(string $path): bool
+    /**
+     * Checks if the file of the given path is readable and a directory.
+     *
+     * @param string $path The path to the resource.
+     * @return bool Returns true if the file is readable, false otherwise.
+     */
+    public static function isReadableDir(string $path): bool
     {
-        return $this->isDir($path) && $this->isReadable($path);
+        return self::isDir($path) && self::isReadable($path);
     }
 
-    public function validateDirIsReadable(string $path): void
+    /**
+     * Checks if the file of the given path is readable and a directory.
+     *
+     * @param string $path The path to the resource.
+     * @return void
+     * @throws InvalidResourceException
+     */
+    public static function validateDirIsReadable(string $path): void
     {
-        if (!$this->isReadableDir($path)) {
+        if (!self::isReadableDir($path)) {
             throw InvalidResourceException::withMessage('The specified folder is not a valid directory: ' . $path);
         }
     }
 
-    public function isReadableFile(string $path): bool
+    /**
+     * Checks if the file of the given path is readable and a file.
+     *
+     * @param string $path The path to the resource.
+     * @return bool Returns true if the file is readable, false otherwise.
+     */
+    public static function isReadableFile(string $path): bool
     {
-        return $this->isFile($path) && $this->isReadable($path);
+        return self::isFile($path) && self::isReadable($path);
     }
 
-
-    public function isValidExtension(string $file, array $extensions): bool
+    /**
+     * Validates if the given file's extension is in the list of allowed extensions.
+     *
+     * @param string $extension The file to validate.
+     * @param array $extensions The list of allowed extensions.
+     * @return bool Returns true if the extension is valid, false otherwise.
+     */
+    public static function isValidExtension(string $file, array $extensions): bool
     {
         $extension = pathinfo($file, PATHINFO_EXTENSION);
         return in_array($extension, $extensions, true);

@@ -4,12 +4,12 @@ namespace Explt13\Nosmi\Utils;
 
 final class Debug
 {
-    static function printReadable(mixed $arr): void
+    public static function printReadable(mixed $arr): void
     {
         echo "<pre>" . print_r($arr, 1) . "</pre>";
     }
 
-    static function printIncludedFile(): void
+    public static function printIncludedFile(): void
     {
         $backtrace = debug_backtrace();
         foreach ($backtrace as $trace) {

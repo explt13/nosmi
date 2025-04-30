@@ -1,26 +1,20 @@
 <?php
 namespace Explt13\Nosmi\Base;
 
-use Explt13\Nosmi\AppConfig\AppConfig;
-use Explt13\Nosmi\AppConfig\ConfigLoader;
-use Explt13\Nosmi\Dependencies\Container;
 use Explt13\Nosmi\Dependencies\DependencyManager;
 use Explt13\Nosmi\Http\ServerRequest;
-use Explt13\Nosmi\Interfaces\ConfigInterface;
+use Explt13\Nosmi\Interfaces\AppInterface;
 use Explt13\Nosmi\Interfaces\ConfigLoaderInterface;
-use Explt13\Nosmi\Interfaces\ContainerInterface;
-use Explt13\Nosmi\Interfaces\DependencyManagerInterface;
-use Explt13\Nosmi\Middleware\MiddlewareRegistry;
+use Explt13\Nosmi\Interfaces\MiddlewareRegistryInterface;
+use Explt13\Nosmi\Interfaces\RouterInterface;
 use Explt13\Nosmi\Routing\Router;
 
-class App
+class App implements AppInterface
 {
-    private DependencyManagerInterface $dependency_manager;
-    private ConfigLoader $config_loader;
-    private MiddlewareRegistry $middleware_registry;
+    private MiddlewareRegistryInterface $middleware_registry;
+    private Router $router;
     private RequestPipeline $request_pipeline;
     private bool $bootstrapped = false;
-
 
     /**
      * Adds a middleware for request/response for __all__ routes
@@ -34,6 +28,10 @@ class App
         $this->middleware_registry->add($middleware);
     }
 
+    public function registerService(string $service): void
+    {
+
+    }
 
     public function bootstrap(string $config_path): void
     {
@@ -44,7 +42,7 @@ class App
         $dependency_manager = new DependencyManager();
 
         // Load framework's dependencies
-        $this->dependency_manager->loadFrameworkDependencies(FRAMEWORK . '/Config/dependencies.php');
+        $dependency_manager->loadFrameworkDependencies(FRAMEWORK . '/Config/dependencies.php');
 
         // get config loader object
         $config_loader = $dependency_manager->getDependency(ConfigLoaderInterface::class);
@@ -52,9 +50,13 @@ class App
         // Load app's config
         $config_loader->loadConfig($config_path);
 
-        // ErrorHandler::getInstance();
-        // $serviceLoader = $this->dependency_manager->getDependency(ServiceProviderLoader::class);
-        // $serviceLoader->load();
+        // Set router
+        $this->router = $dependency_manager->getDependency(RouterInterface::class);
+
+        // Set middleware registry
+        $this->middleware_registry = $dependency_manager->getDependency(MiddlewareRegistryInterface::class);
+
+
         $this->bootstrapped = true;
     }
 
@@ -63,8 +65,7 @@ class App
         $this->assureBootstrap();
         session_start();
         $request = ServerRequest::capture();
-        $router = $this->dependency_manager->getDependency(Router::class);
-        $route = $router->resolve($request);
+        $route = $this->router->resolve($request);
         $response = $this->request_pipeline->process($request, $route);
         $response->send();
     }

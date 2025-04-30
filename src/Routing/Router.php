@@ -4,9 +4,10 @@ namespace Explt13\Nosmi\Routing;
 use Explt13\Nosmi\Base\RequestPipeline;
 use Explt13\Nosmi\Interfaces\LightRouteInterface;
 use Explt13\Nosmi\Interfaces\LightServerRequestInterface;
+use Explt13\Nosmi\Interfaces\RouterInterface;
 use Explt13\Nosmi\Middleware\MiddlewareFactory;
 
-class Router
+class Router implements RouterInterface
 {
     private LightRouteInterface $route;
 

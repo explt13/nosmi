@@ -35,13 +35,12 @@ interface LightRouteInterface
      */
     public function getController(): string;
 
-
     /**
-     * Retrieves the render page name that is associated with the resolved route.
+     * Retrieves the action page name that is associated with the resolved route.
      *
-     * @return string The controller name.
+     * @return string The action name.
      */
-    public function getRender(): string;
+    public function getAction(): ?string;
 
     /**
      * Retrieves all parameters from the resolved route.
@@ -84,9 +83,11 @@ interface LightRouteInterface
      *
      * @param string $path_pattern The path pattern for the route.
      * @param string $controller The controller associated with the route.
+     * @param ?string $action set an action name that will be used as method __\<name\>Action__ for non-AJAX requests for the current route \
+     * if is null __defaultAction__ will be used
      * @return void
      */
-    public static function add(string $path_pattern, string $controller): void;
+    public static function add(string $path_pattern, string $controller, ?string $action = null): void;
 
     /**
      * Retrieves the mapping of path patterns to their corresponding regular expressions.
@@ -128,9 +129,17 @@ interface LightRouteInterface
      * Retrieves the controller associated with a given path pattern.
      *
      * @param string $path_pattern The path pattern.
-     * @return string|null The corresponding controller, or null if not found.
+     * @return string|null The corresponding controller, or null if not path pattern found.
      */
     public static function getControllerByPathPattern(string $path_pattern): ?string;
+
+    /**
+     * Retrieves the action associated with a given path pattern.
+     *
+     * @param string $path_pattern The path pattern.
+     * @return string|null The corresponding controller, or null if not path pattern found.
+     */
+    public static function getActionByPathPattern(string $path_pattern): ?string;
 
     /**
      * Retrieves the controller associated with a given regular expression.
@@ -147,6 +156,7 @@ interface LightRouteInterface
      * @return array An array of path patterns.
      */
     public static function getPathPatternsOfController(string $controller): array;
+
     /**
      * Retrieves an array of regular expressions associated with the specified controller.
      *

@@ -42,7 +42,7 @@ class ResponseTest extends TestCase
         $response = $response->withCorsHeader();
 
         $this->assertEquals('*', $response->getHeaderLine('Access-Control-Allow-Origin'));
-        $this->assertEquals('GET, POST, PUT, DELETE, OPTIONS', $response->getHeaderLine('Access-Control-Allow-Methods'));
+        $this->assertEquals('GET, POST, PUT, PATCH, DELETE, OPTIONS', $response->getHeaderLine('Access-Control-Allow-Methods'));
     }
 
     public function testJson()
