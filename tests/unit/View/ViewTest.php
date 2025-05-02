@@ -71,7 +71,7 @@ class ViewTest extends TestCase
 
     public function testRenderThrowsFileNotFoundExceptionForInvalidView(): void
     {
-        $this->routeMock->method('getController')->willReturn('TestController');
+        $this->routeMock->method('getController')->willReturn('NameSpace\TestController');
         $this->view->withRoute($this->routeMock);
 
         $this->expectException(FileNotFoundException::class);
@@ -80,7 +80,7 @@ class ViewTest extends TestCase
 
     public function testRenderReturnsContentWhenWithReturnIsSet(): void
     {
-        $this->routeMock->method('getController')->willReturn('TestController');
+        $this->routeMock->method('getController')->willReturn('NameSpace\TestController');
         $this->view->withRoute($this->routeMock);
         $this->view->withReturn();
 
@@ -95,7 +95,7 @@ class ViewTest extends TestCase
 
     public function testRenderReturnsContentWhenWithEchoImmediately(): void
     {
-        $this->routeMock->method('getController')->willReturn('SomeController');
+        $this->routeMock->method('getController')->willReturn('NameSpace\SomeController');
         $this->view->withRoute($this->routeMock);
         $this->expectOutputString('there is some content' . PHP_EOL);
         $this->view->render('test-view');
@@ -104,7 +104,7 @@ class ViewTest extends TestCase
 
     public function testRenderReturnsContentWithLayout(): void
     {
-        $this->routeMock->method('getController')->willReturn('SomeController');
+        $this->routeMock->method('getController')->willReturn('NameSpace\SomeController');
         $this->view->withRoute($this->routeMock);
         $output = $this->view->withReturn()->withLayout('default_layout')->render('test-view');
         $this->assertSame('<div>

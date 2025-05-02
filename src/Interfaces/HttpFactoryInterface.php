@@ -16,4 +16,10 @@ interface HttpFactoryInterface extends RequestFactoryInterface,
                                         UploadedFileFactoryInterface,
                                         ServerRequestFactoryInterface
 {
+    /**
+     * Creates and returns an instance of a class implementing the LightClientInterface.
+     *
+     * @return LightClientInterface An instance of a light client.
+     */
+    public function createClient(): LightClientInterface;
 }

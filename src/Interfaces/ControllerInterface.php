@@ -17,5 +17,19 @@ interface ControllerInterface
      *
      * @param LightRouteInterface $route The route to be set for the controller.
      */
-    public function setRoute(LightRouteInterface $route);
+    public function setRoute(LightRouteInterface $route): void;
+
+    /**
+     * Sets the response for the controller.
+     *
+     * @param LightResponseInterface $route The response to be set for the controller.
+     */
+    public function setResponse(LightResponseInterface $response): void;
+
+/**
+     * Creates the client for the controller.
+     *
+     * @param LightClientInterface $route The client to be set for the controller.
+     */
+    public function setClient(LightClientInterface $client): void;
 }

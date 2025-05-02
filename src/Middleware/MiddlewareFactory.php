@@ -4,8 +4,9 @@ namespace Explt13\Nosmi\Middleware;
 
 use Explt13\Nosmi\Interfaces\ControllerInterface;
 use Explt13\Nosmi\Interfaces\LightRequestHandlerInterface;
+use Explt13\Nosmi\Interfaces\MiddlewareFactoryInterface;
 
-class MiddlewareFactory
+class MiddlewareFactory implements MiddlewareFactoryInterface
 {
     public function createDispatcher(array $middleware_list, ControllerInterface $controller): LightRequestHandlerInterface
     {

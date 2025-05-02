@@ -2,25 +2,28 @@
 
 namespace Explt13\Nosmi\Base;
 
+use Explt13\Nosmi\Interfaces\ControllerFactoryInterface;
 use Explt13\Nosmi\Interfaces\LightResponseInterface;
 use Explt13\Nosmi\Interfaces\LightRouteInterface;
 use Explt13\Nosmi\Interfaces\LightServerRequestInterface;
-use Explt13\Nosmi\Middleware\MiddlewareFactory;
+use Explt13\Nosmi\Interfaces\MiddlewareFactoryInterface;
+use Explt13\Nosmi\Interfaces\RequestPipelineInterface;
 
-class RequestPipeline
+class RequestPipeline implements RequestPipelineInterface
 {
-    private MiddlewareFactory $middleware_factory;
+    private MiddlewareFactoryInterface $middleware_factory;
+    private ControllerFactoryInterface $controller_factory;
 
-    public function __construct(MiddlewareFactory $middleware_factory)
+    public function __construct(MiddlewareFactoryInterface $middleware_factory, ControllerFactoryInterface $controller_factory)
     {
         $this->middleware_factory = $middleware_factory;
+        $this->controller_factory = $controller_factory;
     }
 
     public function process(LightServerRequestInterface $request, LightRouteInterface $route): LightResponseInterface
     {
-        $controller = new $route->getController();
-        $controller->setRoute($route);
-    
+        $controller = $this->controller_factory->createController($route);
+
         $middleware_registry = $this->middleware_factory->createRegistry();
         $middleware_registry->addBulk($route->getRouteMiddleware());
 

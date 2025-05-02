@@ -2,7 +2,9 @@
 namespace Explt13\Nosmi\Base;
 
 use Explt13\Nosmi\AppConfig\AppConfig;
+use Explt13\Nosmi\Http\Client;
 use Explt13\Nosmi\Interfaces\ControllerInterface;
+use Explt13\Nosmi\Interfaces\LightClientInterface;
 use Explt13\Nosmi\Interfaces\LightResponseInterface;
 use Explt13\Nosmi\Interfaces\LightRouteInterface;
 use Explt13\Nosmi\Interfaces\LightServerRequestInterface;
@@ -12,10 +14,10 @@ use Explt13\Nosmi\Interfaces\ViewInterface;
 abstract class Controller implements ControllerInterface
 {
     private LightRouteInterface $route;
-    private ?ViewInterface $view = null;
+    private ViewInterface $view;
+    private Client $client;
     protected LightServerRequestInterface $request;
-    private LightResponseInterface $response;
-    
+    protected LightResponseInterface $response;
 
     /**
      * Handles a GET request.
@@ -104,7 +106,7 @@ abstract class Controller implements ControllerInterface
             if (is_null($action)) {
                 throw new \RuntimeException("Route {$this->route->getPath()} does not have an action. If the route is not assumed to be an API only, provide an action in Route::add method.");
             }
-            $method = $action . "Action";
+            $method = strtolower($action) . "Action";
             if (!method_exists($this, $method)) {
                 throw new \RuntimeException("Expected controller {$this->route->getController()} to have $method method.");
             }
@@ -112,14 +114,25 @@ abstract class Controller implements ControllerInterface
         }
     }
 
-    /**
-     * Sets the route for the controller.
-     *
-     * @param LightRouteInterface $route The route to be set.
-     */
-    final public function setRoute(LightRouteInterface $route)
+
+    final public function setRoute(LightRouteInterface $route): void
     {
         $this->route = $route;
+    }
+
+    final public function setResponse(LightResponseInterface $response): void
+    {
+        $this->response = $response;
+    }
+
+    final public function setClient(LightClientInterface $client): void
+    {
+        $this->client = $client;
+    }
+
+    final protected function getClient(): LightClientInterface
+    {
+        return $this->client;
     }
      
     /**
@@ -134,15 +147,12 @@ abstract class Controller implements ControllerInterface
      
     /**
      * Retrieves the view instance associated with the controller.
-     * If the view instance is not already created, it initializes a new one.
      *
      * @return ViewInterface The view instance.
      */
     final protected function getView(): ViewInterface
     {
-        if (is_null($this->view)) {
-            $this->view = new View(AppConfig::getInstance());
-        } 
+        $this->view = (new View(AppConfig::getInstance()))->withRoute($this->route);
         return $this->view;
     }
      

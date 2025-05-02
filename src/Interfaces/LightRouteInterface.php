@@ -82,7 +82,7 @@ interface LightRouteInterface
      * Adds a new route with a path pattern and associated controller.
      *
      * @param string $path_pattern The path pattern for the route.
-     * @param string $controller The controller associated with the route.
+     * @param string $controller The controller __class or interface name__ associated with the route. Controller must present in the dependency container.
      * @param ?string $action set an action name that will be used as method __\<name\>Action__ for non-AJAX requests for the current route \
      * if is null __defaultAction__ will be used
      * @return void

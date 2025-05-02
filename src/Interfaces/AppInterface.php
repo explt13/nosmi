@@ -16,17 +16,9 @@ interface AppInterface
      * Use a middleware in the application.
      *
      * @param string $middleware The fully qualified class name of the middleware to use.
-     * @return void
+     * @return static
      */
-    public function use(string $middleware): void;
-
-    /**
-     * Register a service in the application.
-     *
-     * @param string $service The fully qualified class name of the service to register.
-     * @return void
-     */
-    public function registerService(string $service): void;
+    public function use(string $middleware): static;
 
     /**
      * Bootstrap the application with the given configuration.
@@ -34,7 +26,7 @@ interface AppInterface
      * @param string $config_path The path to the configuration file or directory.
      * @return void
      */
-    public function bootstrap(string $config_path): void;
+    public function bootstrap(string $config_path): static;
 
     /**
      * Run the application.

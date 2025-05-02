@@ -3,7 +3,7 @@ namespace Explt13\Nosmi\Traits;
 
 trait SingletonTrait
 {
-    private static $instance;
+    private static $instance = null;
     
     private function __construct() {}
     final protected function __clone() {}

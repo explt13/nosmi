@@ -75,6 +75,20 @@ class FileValidator
         }
     }
 
+     /**
+     * Checks if the file of the given path is readable resource.
+     *
+     * @param string $path The path to the resource.
+     * @return void
+     * @throws InvalidResourceException
+     */
+    public static function validateResourceIsReadable(string $path): void
+    {
+        if (!self::resourceExists($path) || !self::isReadable($path)) {
+            throw InvalidResourceException::withMessage('The specified folder is not a valid directory: ' . $path);
+        }
+    }
+
     /**
      * Checks if the file of the given path is readable and a file.
      *

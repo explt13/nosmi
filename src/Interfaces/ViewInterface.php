@@ -55,20 +55,27 @@ interface ViewInterface
     public function withRoute(LightRouteInterface $route): static;
 
     /**
-     * Sets return option for rendering, if called a rendered content will be buffered and returned
+     * Sets immediate render option for rendering, if called a rendered content will be rendered and __not__ returned
      * 
      * @return static
      */
-    public function withReturn(): static;
+    public function withImmediateRender(): static;
+
+    /**
+     * Sets view file for rendering, if called specified view file will be used
+     * 
+     * @return static
+     */
+    public function withViewFile(string $viewFile): static;
 
     /**
      * Renders the specified view with optional data. \
      * The data for the view can be set with this method or with setData, setDataArray methods \
      * Provided data will overwrite existing value if key already presents 
      * 
-     * @param string $view The name of the view to render.
+     * @param string|null $view The name of the view to render.
      * @param array|null $data Optional data to pass to the view.
      * @return string|null The rendered view as a string, or null if withReturn() hasn't been called
      */
-    public function render(string $view, ?array $data = null): ?string;
+    public function render(?string $view = null, ?array $data = null): ?string;
 }

@@ -3,6 +3,7 @@
 namespace Explt13\Nosmi\Http;
 
 use Explt13\Nosmi\Interfaces\HttpFactoryInterface;
+use Explt13\Nosmi\Interfaces\LightClientInterface;
 use Explt13\Nosmi\Interfaces\LightRequestInterface;
 use Explt13\Nosmi\Interfaces\LightResponseInterface;
 use Explt13\Nosmi\Interfaces\LightServerRequestInterface;
@@ -70,5 +71,10 @@ class HttpFactory implements HttpFactoryInterface
     public function createUri(string $uri = ''): UriInterface
     {
         return $this->factory->createUri($uri);
+    }
+
+    public function createClient(): LightClientInterface
+    {
+        return new Client($this);
     }
 }

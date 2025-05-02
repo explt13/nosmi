@@ -15,7 +15,7 @@ class ErrorHandler
     protected function __construct()
     {
         $this->config = AppConfig::getInstance();
-        $this->debug = $this->config->get('APP_DEBUG');
+        $this->debug = $this->config->get('APP_DEBUG') ?? false;
         if ($this->debug) {
             error_reporting(E_ALL);
             set_error_handler([$this, 'errorHandler'], E_NOTICE | E_WARNING);

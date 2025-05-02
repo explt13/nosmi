@@ -24,7 +24,7 @@ class AppTest extends TestCase
         $this->app->bootstrap(__DIR__ . '/../mockapp/config/.env');
 
         $this->assertSame('/var/www/packages/nosmi/src', FRAMEWORK);
-        $this->dependency_manager = new DependencyManager(Container::getInstance());
+        $this->dependency_manager = new DependencyManager();
         $this->assertTrue($this->dependency_manager->hasDependency(RouterInterface::class));
     }
 

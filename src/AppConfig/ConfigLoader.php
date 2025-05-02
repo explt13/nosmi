@@ -43,28 +43,19 @@ class ConfigLoader implements ConfigLoaderInterface
 
     protected function setRequiredMissingParams(): void
     {
-        if (!defined('APP_ROOT') && !$this->app_config->has('APP_ROOT')) {
+        if (!$this->app_config->has('APP_ROOT')) {
             throw new ConfigParameterNotSetException('APP_ROOT');
         }
 
-        $app_root = Utils::getConstant("APP_ROOT") ?? $this->app_config->get('APP_ROOT');
+        $app_root = $this->app_config->get('APP_ROOT');
         FileValidator::validateDirIsReadable($app_root);
 
-        $required_dirs = [
-            'APP_SRC' => Utils::getConstant("APP_SRC") ?? "$app_root/src",
-            'APP_VIEWS' => Utils::getConstant("APP_VIEWS") ?? "$app_root/src/views",
-            'APP_LAYOUTS' => Utils::getConstant("APP_LAYOUTS") ?? "$app_root/src/layouts",
-            'APP_CONFIG' => Utils::getConstant("APP_CONFIG") ?? "$app_root/config",
-        ];
-
-        foreach ($required_dirs as $key => $value) {
-            if ($this->app_config->has($key)) {
-                FileValidator::validateDirIsReadable($this->app_config->get($key));
-                continue;
-            }
-            FileValidator::validateDirIsReadable($value);
-            $this->app_config->set($key, $value);
+        if (is_null($this->app_config->get('APP_SRC'))) {
+            $app_src = $app_root . '/src';
+            $this->app_config->set('APP_SRC', $app_src);
+            FileValidator::validateDirIsReadable($app_src);
         }
+        return;
     }
 
     /**

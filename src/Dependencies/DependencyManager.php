@@ -51,7 +51,7 @@ final class DependencyManager implements DependencyManagerInterface
             throw new InvalidFileExtensionException($path, ['php']);
         }
 
-        $dependencies = require_once $path;
+        $dependencies = require $path;
         $this->setDependencies($dependencies, false);
     }
 
@@ -92,19 +92,15 @@ final class DependencyManager implements DependencyManagerInterface
                 self::$framework_dependencies[] = $abstract;
             }
 
-            if ($this->container->has($abstract) && in_array($abstract, self::$framework_dependencies)) {
-                throw new \RuntimeException("Cannot override $abstract: is framework dependency.");
-            }
-
             if (!Types::is_primitive($dependency) && Types::array_is_assoc($dependency)) {
                 if (!isset($dependency['concrete'])) {
                     // Log critical
                     throw MissingAssocArrayKeyException::withMessage(sprintf("Cannot set the dependency %s missing the key: %s", $abstract, 'concrete'));
                 }
-                $this->container->set($abstract, $dependency['concrete'], $dependency['singleton'] ?? false);
+                $this->addDependency($abstract, $dependency['concrete'], $dependency['singleton'] ?? false);
                 continue;
             }
-            $this->container->set($abstract, $dependency);
+            $this->addDependency($abstract, $dependency);
         }
     }
 }
