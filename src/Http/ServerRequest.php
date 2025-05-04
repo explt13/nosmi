@@ -29,7 +29,7 @@ class ServerRequest implements LightServerRequestInterface, ReadExchangeInterfac
     }
     public static function capture(): static
     {
-        $method = $_SERVER['REQUEST_METHOD'];
+        $method = strtoupper($_SERVER['REQUEST_METHOD']);
         $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
         $hostname = $_SERVER['SERVER_NAME'];
         $port = $_SERVER['SERVER_PORT'];

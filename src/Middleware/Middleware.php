@@ -36,11 +36,18 @@ abstract class Middleware implements LightMiddlewareInterface
     final protected function createEarlyResponse(): LightResponseInterface
     {
         $factory = new HttpFactory();
-        return $factory->createResponse();
+        $this->early_response = $factory->createResponse();
+        return $this->early_response;
     }
 
     final protected function earlyResponse(LightResponseInterface $response): void
     {
         $this->early_response = $response;
+    }
+
+    final protected function reject(int $code, string $reasonPhrase = "")
+    {
+        $factory = new HttpFactory();
+        $this->early_response = $factory->createResponse($code, $reasonPhrase);
     }
 }

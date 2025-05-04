@@ -3,16 +3,17 @@ namespace Explt13\Nosmi\Base;
 
 use Explt13\Nosmi\AppConfig\AppConfig;
 use Explt13\Nosmi\Interfaces\ConfigInterface;
+use Explt13\Nosmi\Logging\FrameworkLogger;
 use Explt13\Nosmi\Logging\Logger;
 use Explt13\Nosmi\Traits\SingletonTrait;
+use Explt13\Nosmi\Validators\FileValidator;
 
 class ErrorHandler
 {
-    use SingletonTrait;
     protected ConfigInterface $config;
     protected readonly bool $debug;
 
-    protected function __construct()
+    public function __construct()
     {
         $this->config = AppConfig::getInstance();
         $this->debug = $this->config->get('APP_DEBUG') ?? false;
@@ -37,52 +38,44 @@ class ErrorHandler
     public function exceptionHandler(\Throwable $e): void
     {
         $this->logError($e->getMessage(), $e->getFile(), $e->getLine());
-        $this->render($e::class, $e->getMessage(), $e->getFile(), $e->getLine(), $e->getTrace(), $e->getCode() >= 100 ? $e->getCode() : 500);
+        $this->render($e::class, $e->getMessage(), $e->getFile(), $e->getLine(), $e->getTrace(), $e->getCode());
     }
 
     protected function logError(string $message = '', $file = '', $line = ''): void
     {
-        $logger = Logger::getInstance();
-        $logger->logError("$message | File: $file | Line: $line");
+        $logger = FrameworkLogger::getInstance();
+        $log_dest = $this->config->get('LOG_FRAMEWORK_FILE') ?? (dirname(__DIR__) . '/logs/errors.log');
+
+        $logger->logError("$message | File: $file | Line: $line", null, $log_dest);
     }
     
-    protected function render($err_type, $err_message, $err_file, $err_line, $callstack, $err_response = 500): void
+    protected function render($err_type, $err_message, $err_file, $err_line, $callstack, $err_code = 500): void
     {
-        if ($err_type === 'PDOException'){
-            $err_response = 500;
+        if ($err_code > 599) {
+            $err_code = 500;
         }
-        http_response_code($err_response);
-        
-        if (isAjax()) {
-            if (!$this->debug) {
-                if ($err_response >= 500 && $err_response < 600) {
-                    $err_message = "Operation has failed. Try again later";
-                }
-            }
-            echo json_encode(["message" => $err_message]);
-            exit;
-        }
-        
-        $views = null;
-        if ($this->config->has('APP_ERROR_VIEWS')) {
-            $views = require $this->config->get('APP_ERROR_VIEWS');
+        $views_map = null;
+        if ($this->config->has('APP_ERROR_VIEWS_MAP_FILE')) {
+            $views_map = require $this->config->get('APP_ERROR_VIEWS_MAP_FILE');
+            $error_views_folder = $this->config->get('APP_ERROR_VIEWS');
         }
 
         if ($this->debug) {
-            if (!is_null($views) && isset($views['DEBUG'])) {
-                require_once $views['DEBUG'];
-                exit;
+            if (!isset($views_map['dev'])) {
+                $file = FRAMEWORK . "/Templates/Views/Errors/dev.php";
+            } else {
+                $file_name = $views_map['dev'];
+                $file = $error_views_folder . "/" . $file_name . ".php";
             }
-            require_once FRAMEWORK . "/Templates/Views/Errors/dev.php";
-            exit;
-        }
-
-        foreach($views as $code => $file) {
-            if ($code === $err_response) {
-                require_once $file;
-                exit;
+        } else {
+            if (!isset($views_map['internal'])) {
+                $file = FRAMEWORK . "/Templates/Views/Errors/error.php";
+            } else {
+                $file_name = $views_map['internal'];
+                $file = $error_views_folder . '/' . $file_name . '.php';
             }
-            require_once FRAMEWORK . "/Templates/Views/Errors/500.php";
         }
+        require $file;
+        exit;
     }
 }

@@ -9,7 +9,7 @@ interface LoggerInterface
      * Logs info message
      * @param string $message the message to log
      * @param ?LogFormatterInterface $formatter [optional] set formatter handler for the current log
-     * @param string $dest [optional] the destination to the log file, defaults are LOG_FOLDER and LOG_FILE env variables
+     * @param string $dest [optional] the destination to the log file, defaults are LOG and LOG_FILE env variables
      * @return void
      */
     public function logInfo(string $message, ?LogFormatterInterface $formatter = null, ?string $dest = null): void;
@@ -18,7 +18,7 @@ interface LoggerInterface
      * Logs warning message
      * @param string $message the message to log
      * @param ?LogFormatterInterface $formatter [optional] set formatter handler for the current log
-     * @param string $dest [optional] the destination to the log file, defaults are LOG_FOLDER and LOG_FILE env variables
+     * @param string $dest [optional] the destination to the log file, defaults are LOG and LOG_FILE env variables
      * @return void
      */
     public function logWarning(string $message, ?LogFormatterInterface $formatter = null, ?string $dest = null): void;
@@ -27,7 +27,7 @@ interface LoggerInterface
      * Logs error message
      * @param string $message the message to log
      * @param ?LogFormatterInterface $formatter [optional] set formatter handler for the current log
-     * @param string $dest [optional] the destination to the log file, defaults are LOG_FOLDER and LOG_FILE env variables
+     * @param string $dest [optional] the destination to the log file, defaults are LOG and LOG_FILE env variables
      * @return void
      */
     public function logError(string $message, ?LogFormatterInterface $formatter = null, ?string $dest = null): void;

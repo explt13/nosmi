@@ -71,34 +71,27 @@ class ViewTest extends TestCase
 
     public function testRenderThrowsFileNotFoundExceptionForInvalidView(): void
     {
-        $this->routeMock->method('getController')->willReturn('NameSpace\TestController');
+        $this->routeMock->method('getController')->willReturn('NameSpace\AnotherController');
         $this->view->withRoute($this->routeMock);
 
         $this->expectException(FileNotFoundException::class);
         $this->view->render('nonexistent-view');
     }
 
-    public function testRenderReturnsContentWhenWithReturnIsSet(): void
+    public function testRenderReturnsContent(): void
     {
-        $this->routeMock->method('getController')->willReturn('NameSpace\TestController');
+        $this->routeMock->method('getController')->willReturn('NameSpace\AnotherController');
         $this->view->withRoute($this->routeMock);
-        $this->view->withReturn();
-
-        $viewFile = '/var/www/packages/nosmi/tests/unit/View/views/TestController/test-view.php';
-        file_put_contents($viewFile, '<?php echo "Test Content"; ?>');
-
-        $output = $this->view->render('test-view');
+        $output = $this->view->render('view-test');
         $this->assertSame('Test Content', $output);
-
-        unlink($viewFile);
     }
 
-    public function testRenderReturnsContentWhenWithEchoImmediately(): void
+    public function testRenderEchoesContentWhenWithImmediateRenderIsSet(): void
     {
         $this->routeMock->method('getController')->willReturn('NameSpace\SomeController');
-        $this->view->withRoute($this->routeMock);
+        $this->view->withRoute($this->routeMock)->withImmediateRender();
         $this->expectOutputString('there is some content' . PHP_EOL);
-        $this->view->render('test-view');
+        $this->view->render('view-test');
 
     }
 
@@ -106,7 +99,7 @@ class ViewTest extends TestCase
     {
         $this->routeMock->method('getController')->willReturn('NameSpace\SomeController');
         $this->view->withRoute($this->routeMock);
-        $output = $this->view->withReturn()->withLayout('default_layout')->render('test-view');
+        $output = $this->view->withLayout('default_layout')->render('view-test');
         $this->assertSame('<div>
     <h1>
         Some header

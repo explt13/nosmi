@@ -11,14 +11,16 @@ class Logger implements LoggerInterface
 {
     use SingletonTrait;
 
-    private LogFormatterInterface $formatter;
-    private ?LogFormatterInterface $info_formatter = null;
-    private ?LogFormatterInterface $warning_formatter = null;
-    private ?LogFormatterInterface $error_formatter = null;
+    protected LogFormatterInterface $formatter;
+    protected ?LogFormatterInterface $info_formatter = null;
+    protected ?LogFormatterInterface $warning_formatter = null;
+    protected ?LogFormatterInterface $error_formatter = null;
+    protected bool $log_enabled;
 
     protected function __construct()
     {
         $this->formatter = new DefaultFormatter();
+        $this->log_enabled = AppConfig::getInstance()->get('LOG_ON') ?? false;
     }
 
     public function setFormatter(LogFormatterInterface $formatter, ?LogStatus $forStatus = null): void
@@ -42,15 +44,23 @@ class Logger implements LoggerInterface
 
     protected function log(string $message, LogStatus $status, ?LogFormatterInterface $formatter, ?string $dest = null): void
     {
+        if (!$this->log_enabled) {
+            return;
+        }
+
         $config = AppConfig::getInstance();
         if (is_null($dest)) {
-            $log_dir = $config->get('LOG_FOLDER');
-            $log_file = $config->get("LOG_FILE_$status->name");
+            $log_dir = $config->get('LOG');
+            if (!$config->get("LOG_{$status->name}_FILE")) {
+                $log_file = $config->get("LOG_FILE");
+            } else {
+                $log_file = $config->get("LOG_{$status->name}_FILE");
+            }
 
             if (!($log_dir && $log_file)) {
-                throw new \LogicException("LOG_FOLDER and/or LOG_FILE env variables are not set, provide a valid value or specify `dest` parameter");
+                throw new \LogicException("LOG and/or LOG_(TYPE)?_FILE env variables are not set, provide a valid value or specify `dest` parameter");
             }
-            $dest = $log_dir . '/' . $log_file;
+            $dest = $log_file;
         } else {
             $log_dir = dirname($dest);
         }

@@ -23,10 +23,10 @@ class DbTest extends TestCase
         $config->set('DB_PASSWORD', '123');
     }
     
-    // public static function tearDownAfterClass(): void
-    // {
-    //     Reset::resetSingleton(AppConfig::class);
-    // }
+    public static function tearDownAfterClass(): void
+    {
+        Reset::resetSingleton(AppConfig::class);
+    }
 
     public function testDbConnectionSuccess(): void
     {

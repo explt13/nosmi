@@ -22,10 +22,11 @@ class AppTest extends TestCase
     public function testBootstrap()
     {
         $this->app->bootstrap(__DIR__ . '/../mockapp/config/.env');
-
+        
         $this->assertSame('/var/www/packages/nosmi/src', FRAMEWORK);
         $this->dependency_manager = new DependencyManager();
         $this->assertTrue($this->dependency_manager->hasDependency(RouterInterface::class));
+        restore_exception_handler();
     }
 
     // public static function tearDownAfterClass(): void

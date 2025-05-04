@@ -89,7 +89,7 @@ class ControllerTest extends TestCase
         $this->requestMock->method('isAjax')->willReturn(false);
         $this->routeMock->method('getAction')->willReturn('NotExisted');
         $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage("Expected controller NewController to have NotExistedAction method.");
+        $this->expectExceptionMessage("Expected controller NewController to have notexistedAction method.");
         $this->controller->processRequest($this->requestMock);
     }
 
@@ -106,8 +106,7 @@ class ControllerTest extends TestCase
     private function createController(): ControllerInterface
     {
         return new class($this->responseMock) extends Controller {
-
-            public function __construct(private LightResponseInterface $response) {
+            public function __construct(protected LightResponseInterface $response) {
                 $this->response = $response;
             }
 

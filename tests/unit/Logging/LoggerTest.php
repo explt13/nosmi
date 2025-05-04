@@ -4,6 +4,7 @@ namespace Tests\unit;
 
 use Explt13\Nosmi\AppConfig\AppConfig;
 use Explt13\Nosmi\Logging\DefaultFormatter;
+use Explt13\Nosmi\Logging\FrameworkLogger;
 use Explt13\Nosmi\Logging\Logger;
 use Explt13\Nosmi\Logging\LogStatus;
 use Explt13\Nosmi\Logging\VerboseFormatter;
@@ -47,6 +48,8 @@ class LoggerTest extends TestCase
     #[DataProvider('logWriteProvider')]
     public function testLogWrite($message, $dest)
     {
+        $config = AppConfig::getInstance();
+        $config->set('LOG_ON', 1);
         $path = __DIR__ . '/logs' . $dest;
         $logger = Logger::getInstance();
         $logger->setFormatter(new VerboseFormatter());
@@ -58,11 +61,12 @@ class LoggerTest extends TestCase
     public function testEnvVarsLogWrite($message, $dest)
     {
         $config = AppConfig::getInstance();
+        $config->set('LOG_ON', 1);
         $logger = Logger::getInstance();
         $logger->setFormatter(new DefaultFormatter());
-        $config->set('LOG_FOLDER', __DIR__.'/env_set_folder');
-        $config->set('LOG_FILE_WARNING', 'warning.log');
-        $config->set('LOG_FILE_INFO', 'warning.log');
+        $config->set('LOG', __DIR__.'/env_set_folder');
+        $config->set('LOG_WARNING_FILE', 'warning.log');
+        $config->set('LOG_INFO_FILE', 'warning.log');
         $logger->logInfo($message);
         $logger->logWarning($message);
         $this->assertTrue(true);
@@ -71,14 +75,14 @@ class LoggerTest extends TestCase
     public function testEnvInvalidDataLogWrite($message, $folder, $file)
     {
         $config = AppConfig::getInstance();
+        $config->set('LOG_ON', 1);
         $logger = Logger::getInstance();
 
         $this->expectException(\Exception::class);
-
-        $config->set('LOG_FOLDER', $folder);
-        $config->set('LOG_FILE_WARNING', $file);
-        $config->set('LOG_FILE_INFO', $file);
-        $config->set('LOG_FILE_ERROR', $file);
+        $config->set('LOG', $folder);
+        $config->set('LOG_WARNING_FILE', $file);
+        $config->set('LOG_INFO_FILE', $file);
+        $config->set('LOG_ERROR_FILE', $file);
         $logger->logInfo($message);
         $logger->logWarning($message);
         $logger->logError($message);
@@ -86,6 +90,8 @@ class LoggerTest extends TestCase
 
     public function testChangeFormatter()
     {
+        $config = AppConfig::getInstance();
+        $config->set('LOG_ON', 1);
         $message = "sample log message";
         $path = __DIR__ . '/formatter_logs';
         $logger = Logger::getInstance();

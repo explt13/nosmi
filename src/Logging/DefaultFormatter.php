@@ -10,6 +10,7 @@ class DefaultFormatter implements LogFormatterInterface
     public function format(array $log): string
     {
         $message = "[{$log['status']->value}] [" . date('d-m-Y h:i:s A') . "]" . " {$log['status']->name}: {$log['message']}";
+        $message .= "\n";
         $message .= str_repeat('-', 128);
         $message .= "\n\n";
         return $message;

@@ -12,10 +12,9 @@ class CorsMiddleware extends Middleware
     
     public function processRequest(LightServerRequestInterface $request): ?LightServerRequestInterface
     {
-        $method = strtolower($request->getMethod());
-        if ($method === 'options') {
+        if ($request->isOptions()) {
             $response = $this->createEarlyResponse();
-            $this->earlyResponse($response->withCorsHeader());
+            $this->earlyResponse($response->withCorsHeader()->withEmpty());
             return null;
         }
         return $request;

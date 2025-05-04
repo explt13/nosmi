@@ -25,7 +25,7 @@
                     </tr>
                     <tr style="background-color: rgba(240, 105, 105, 0.1);">
                         <td style="padding: 15px 30px;"><b>Response</b></td>
-                        <td><?=$err_response?></td>
+                        <td><?=$err_code?></td>
                     </tr>
                 </table>
                 <div class="err-callstack">

@@ -80,7 +80,7 @@ class MiddlewareTest extends TestCase
     {
         $middleware_registry = MiddlewareRegistry::getInstance();
         $middleware_registry->remove('SomeMiddleware');
-        $this->assertSame(["AnotherMiddleware"], $middleware_registry->getAll());
+        $this->assertSame(["1" => "AnotherMiddleware"], $middleware_registry->getAll());
     }
 
     private function createMockMiddleware(): LightMiddlewareInterface&MockObject

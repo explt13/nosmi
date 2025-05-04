@@ -24,7 +24,7 @@ interface AppInterface
      * Bootstrap the application with the given configuration.
      *
      * @param string $config_path The path to the configuration file or directory.
-     * @return void
+     * @return static
      */
     public function bootstrap(string $config_path): static;
 

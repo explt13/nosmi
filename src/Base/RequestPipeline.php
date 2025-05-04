@@ -25,9 +25,8 @@ class RequestPipeline implements RequestPipelineInterface
         $controller = $this->controller_factory->createController($route);
 
         $middleware_registry = $this->middleware_factory->createRegistry();
-        $middleware_registry->addBulk($route->getRouteMiddleware());
 
-        $middleware_dispatcher = $this->middleware_factory->createDispatcher($middleware_registry->getAll(), $controller);
+        $middleware_dispatcher = $this->middleware_factory->createDispatcher($middleware_registry->getForRoute($route->getPath()), $controller);
         $response = $middleware_dispatcher->handle($request);
         return $response;
     }

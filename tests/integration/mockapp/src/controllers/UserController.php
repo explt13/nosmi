@@ -9,7 +9,7 @@ class UserController extends Controller
 {
     public function get(): LightResponseInterface
     {
-        return $this->response;
+        return $this->response->withStatus(200);
     }
 
     public function profileAction(): LightResponseInterface
@@ -22,6 +22,7 @@ class UserController extends Controller
     public function settingsAction(): LightResponseInterface
     {
         $html = $this->getView()->withLayout('wrapper')->withData('info', ['name' => "John", "surname" => "Smith"])->render('settings');
+        throw new \Exception('Cannot find user', 404);
         // $this->response->getBody()->write($html);
         return $this->response->withJson(['html' => $html]);
         // return $this->response->withJson(['html' => $html]);

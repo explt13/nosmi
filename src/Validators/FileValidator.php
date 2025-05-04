@@ -62,6 +62,17 @@ class FileValidator
     }
 
     /**
+     * Checks if the file of the given path is readable and a file.
+     *
+     * @param string $path The path to the resource.
+     * @return bool Returns true if the file is readable, false otherwise.
+     */
+    public static function isReadableFile(string $path): bool
+    {
+        return self::isFile($path) && self::isReadable($path);
+    }
+
+    /**
      * Checks if the file of the given path is readable and a directory.
      *
      * @param string $path The path to the resource.
@@ -72,6 +83,20 @@ class FileValidator
     {
         if (!self::isReadableDir($path)) {
             throw InvalidResourceException::withMessage('The specified folder is not a valid directory: ' . $path);
+        }
+    }
+
+     /**
+     * Checks if the file of the given path is readable and a file.
+     *
+     * @param string $path The path to the resource.
+     * @return void
+     * @throws InvalidResourceException
+     */
+    public static function validateFileIsReadable(string $path): void
+    {
+        if (!self::isReadableFile($path)) {
+            throw InvalidResourceException::withMessage('The specified path is not a valid file: ' . $path);
         }
     }
 
@@ -89,16 +114,6 @@ class FileValidator
         }
     }
 
-    /**
-     * Checks if the file of the given path is readable and a file.
-     *
-     * @param string $path The path to the resource.
-     * @return bool Returns true if the file is readable, false otherwise.
-     */
-    public static function isReadableFile(string $path): bool
-    {
-        return self::isFile($path) && self::isReadable($path);
-    }
 
     /**
      * Validates if the given file's extension is in the list of allowed extensions.

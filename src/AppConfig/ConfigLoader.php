@@ -3,14 +3,12 @@
 namespace Explt13\Nosmi\AppConfig;
 
 use Dotenv\Dotenv;
-use Explt13\Nosmi\Exceptions\ConfigParameterNotSetException;
 use Explt13\Nosmi\Exceptions\InvalidFileExtensionException;
 use Explt13\Nosmi\Exceptions\InvalidResourceException;
 use Explt13\Nosmi\Exceptions\ResourceNotFoundException;
 use Explt13\Nosmi\Exceptions\ResourceReadException;
 use Explt13\Nosmi\Interfaces\ConfigInterface;
 use Explt13\Nosmi\Interfaces\ConfigLoaderInterface;
-use Explt13\Nosmi\Utils\Utils;
 use Explt13\Nosmi\Validators\FileValidator;
 
 class ConfigLoader implements ConfigLoaderInterface
@@ -38,22 +36,14 @@ class ConfigLoader implements ConfigLoaderInterface
         $this->validateConfigFilePath($config_path);
         $config = $this->getConfig(pathinfo($config_path, PATHINFO_EXTENSION), $config_path);
         $this->app_config->bulkSet($config);
-        $this->setRequiredMissingParams();
+        $this->validateRequiredParams();
     }
 
-    protected function setRequiredMissingParams(): void
+    protected function validateRequiredParams(): void
     {
-        if (!$this->app_config->has('APP_ROOT')) {
-            throw new ConfigParameterNotSetException('APP_ROOT');
-        }
-
-        $app_root = $this->app_config->get('APP_ROOT');
-        FileValidator::validateDirIsReadable($app_root);
-
-        if (is_null($this->app_config->get('APP_SRC'))) {
-            $app_src = $app_root . '/src';
-            $this->app_config->set('APP_SRC', $app_src);
-            FileValidator::validateDirIsReadable($app_src);
+        $params = RequiredConfigParams::cases();
+        foreach ($params as $param) {
+            $param->validateParam($this->app_config);
         }
         return;
     }

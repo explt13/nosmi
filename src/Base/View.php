@@ -21,7 +21,7 @@ class View implements ViewInterface
     public function __construct(ConfigInterface $config)
     {
         $this->config = $config;
-        $this->include_layout = $this->config->get('INCLUDE_LAYOUT_BY_DEFAULT') ?? false;
+        $this->include_layout = $this->config->get('INCLUDE_LAYOUT_BY_DEFAULT');
         $this->layout_filename = $this->config->get('DEFAULT_LAYOUT_FILENAME');
     }
 
@@ -124,11 +124,12 @@ class View implements ViewInterface
             throw new \RuntimeException('Cannot extract controller name from class name: ' . $this->route->getController());
         }
         $controller = $matches[1];
-        $view_folder = $this->config->get('APP_VIEWS') ?? $this->config->get('APP_SRC') . '/render/views';
+        $view_folder = $this->config->get('APP_VIEWS');
         $view_file =  $view_folder . '/' . $controller . '/' . $this->view_filename . '.php';
         if (FileValidator::isFile($view_file)) {
             require $view_file;
         } else {
+            ob_end_clean();
             throw new FileNotFoundException($view_file);
         }
     }
@@ -138,7 +139,7 @@ class View implements ViewInterface
         if (is_null($this->layout_filename)) {
             throw FileNotFoundException::withMessage('Layout file is not set');
         }
-        $layout_folder = $this->config->get('APP_LAYOUTS') ?? $this->config->get('APP_SRC') . '/render/layouts';
+        $layout_folder = $this->config->get('APP_LAYOUTS');
         $layout_file =  $layout_folder . '/' . $this->layout_filename . '.php';
         if (FileValidator::isFile($layout_file)) {
             require $layout_file;

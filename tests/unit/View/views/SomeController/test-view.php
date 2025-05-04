@@ -1,1 +1,0 @@
-<?php echo "there is some content" .PHP_EOL; ?>

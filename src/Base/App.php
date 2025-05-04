@@ -18,11 +18,7 @@ class App implements AppInterface
     private RequestPipelineInterface $request_pipeline;
     private bool $bootstrapped = false;
 
-    /**
-     * Adds a middleware for request/response for __all__ routes
-     * @param string $middleware class name of the middleware (::class)
-     * @return void
-     */
+    
     public function use(string $middleware): static
     {
         $this->assureBootstrap();
@@ -34,6 +30,8 @@ class App implements AppInterface
     {
         // Define framework's root folder path constant
         define('FRAMEWORK', dirname(__DIR__));
+
+        new ErrorHandler();
         
         // create dependency manager
         $dependency_manager = new DependencyManager();
@@ -57,10 +55,11 @@ class App implements AppInterface
 
         $app_config = $dependency_manager->getDependency(ConfigInterface::class);
 
-        require_once $app_config->get('APP_ROUTES_FILE') ?? $app_config->get('APP_SRC') . '/routes/routes.php';
-        $dependency_manager->loadDependencies($app_config->get('APP_DEPENDENCIES_FILE') ?? $app_config->get('APP_SRC') . '/dependencies/dependencies.php');
+        require_once $app_config->get('APP_ROUTES_FILE');
+        $dependency_manager->loadDependencies($app_config->get('APP_DEPENDENCIES_FILE'));
 
         $this->bootstrapped = true;
+        
         return $this;
     }
 

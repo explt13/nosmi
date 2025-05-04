@@ -106,6 +106,7 @@ abstract class Controller implements ControllerInterface
             if (is_null($action)) {
                 throw new \RuntimeException("Route {$this->route->getPath()} does not have an action. If the route is not assumed to be an API only, provide an action in Route::add method.");
             }
+ 
             $method = strtolower($action) . "Action";
             if (!method_exists($this, $method)) {
                 throw new \RuntimeException("Expected controller {$this->route->getController()} to have $method method.");

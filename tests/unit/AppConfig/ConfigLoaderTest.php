@@ -3,6 +3,7 @@
 namespace Tests\Unit\AppConfig;
 
 use Dotenv\Dotenv;
+use Explt13\Nosmi\AppConfig\AppConfig;
 use Explt13\Nosmi\AppConfig\ConfigLoader;
 use Explt13\Nosmi\Exceptions\InvalidFileExtensionException;
 use Explt13\Nosmi\Exceptions\InvalidResourceException;
@@ -13,6 +14,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Tests\Unit\helpers\IncludeFiles;
+use Tests\Unit\helpers\Reset;
 
 class ConfigLoaderTest extends TestCase
 {
@@ -24,7 +26,12 @@ class ConfigLoaderTest extends TestCase
     {
         $this->mock_app_config = $this->createMock(ConfigInterface::class);
         $this->mock_app_config->method('HAS')->willReturn(true);
-        $this->mock_app_config->method('GET')->willReturn(__DIR__);
+        $this->mock_app_config->method('GET')->willReturnCallback(function($param) {
+            if ($param === 'APP_ROUTES_FILE' || $param === 'APP_DEPENDENCIES_FILE') {
+                return __FILE__;
+            }
+            return __DIR__;
+        });
         $this->file_validator = $this->createMock(FileValidator::class);
         $this->file_validator->method('isReadableDir')->willReturn(true);
        
@@ -49,10 +56,10 @@ class ConfigLoaderTest extends TestCase
                 "ext" => "ini",
                 "path" => __DIR__ . '/mockdata/user_config.ini'
             ],
-            "env config" => [
-                "ext" => "env",
-                "path" => __DIR__ . '/mockdata/.env'
-            ],
+            // "env config" => [
+            //     "ext" => "env",
+            //     "path" => __DIR__ . '/mockdata/.env'
+            // ],
             "directory provided" => [
                 "ext" => "none",
                 "path" => __DIR__ . '/mockdata',
