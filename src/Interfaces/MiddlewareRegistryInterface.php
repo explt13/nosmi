@@ -2,32 +2,27 @@
 
 namespace Explt13\Nosmi\Interfaces;
 
+use Psr\Http\Server\MiddlewareInterface;
+
 interface MiddlewareRegistryInterface
 {
     /**
      * Adds a middleware class to the registry.
      *
-     * @param string $middleware_class The fully qualified class name of the middleware to add.
-     * @param string|null $route add middleware for __specific__ route
+     * @param MiddlewareInterface $middleware the middleware to add.
+     * @param string|null $route_pattern add middleware for __specific__ route
      * @return void
      */
-    public function add(string $middleware_class, ?string $route = null): void;
+    public function add(MiddlewareInterface $middleware, ?string $route_pattern = null): void;
 
     /**
      * Removes a middleware class from the registry.
      *
      * @param string $middleware_class The fully qualified class name of the middleware to remove.
+     * @param string|null $route_pattern remove middleware for __specific__ route
      * @return void
      */
-    public function remove(string $middleware_class): void;
-     
-    /**
-     * Adds multiple middleware classes to the registry in bulk.
-     *
-     * @param array $middleware An array of fully qualified class names of the middleware to add.
-     * @return void
-     */
-    public function addBulk(array $middleware);
+    public function remove(string $middleware_class, ?string $route_pattern = null): void;
      
     /**
      * Retrieves all middleware classes from the registry.

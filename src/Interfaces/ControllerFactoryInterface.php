@@ -7,7 +7,6 @@ interface ControllerFactoryInterface
     /**
      * Creates a controller instance based on the given request and route.
      *
-     * @param LightRequestInterface $request The request object.
      * @param LightRouteInterface $route The route object.
      * @return ControllerInterface The created controller instance.
      */

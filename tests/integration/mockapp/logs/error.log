@@ -1,3 +1,21 @@
 [E] [05-05-2025 01:10:22 AM] ERROR: Cannot find user | File: /var/www/packages/nosmi/tests/integration/mockapp/src/controllers/UserController.php | Line: 25
 --------------------------------------------------------------------------------------------------------------------------------
 
+[E] [06-05-2025 03:09:03 PM] ERROR: Too few arguments to function Explt13\Nosmi\Middleware\AuthorizationMiddleware::__construct(), 0 passed in /var/www/packages/nosmi/src/Middleware/MiddlewareDispatcher.php on line 37 and exactly 1 expected | File: /var/www/packages/nosmi/src/Middleware/AuthorizationMiddleware.php | Line: 11
+--------------------------------------------------------------------------------------------------------------------------------
+
+[E] [06-05-2025 03:30:33 PM] ERROR: Too few arguments to function Explt13\Nosmi\Middleware\AuthorizationMiddleware::__construct(), 0 passed in /var/www/packages/nosmi/src/Middleware/MiddlewareDispatcher.php on line 37 and exactly 1 expected | File: /var/www/packages/nosmi/src/Middleware/AuthorizationMiddleware.php | Line: 11
+--------------------------------------------------------------------------------------------------------------------------------
+
+[E] [06-05-2025 03:38:06 PM] ERROR: Too few arguments to function Explt13\Nosmi\Middleware\AuthorizationMiddleware::__construct(), 0 passed in /var/www/packages/nosmi/src/Middleware/MiddlewareDispatcher.php on line 37 and exactly 1 expected | File: /var/www/packages/nosmi/src/Middleware/AuthorizationMiddleware.php | Line: 11
+--------------------------------------------------------------------------------------------------------------------------------
+
+[E] [06-05-2025 03:39:04 PM] ERROR: Too few arguments to function Explt13\Nosmi\Middleware\AuthorizationMiddleware::__construct(), 0 passed in /var/www/packages/nosmi/src/Middleware/MiddlewareDispatcher.php on line 37 and exactly 1 expected | File: /var/www/packages/nosmi/src/Middleware/AuthorizationMiddleware.php | Line: 11
+--------------------------------------------------------------------------------------------------------------------------------
+
+[E] [08-05-2025 10:12:21 PM] ERROR: Too few arguments to function Explt13\Nosmi\Middleware\AuthorizationMiddleware::__construct(), 0 passed in /var/www/packages/nosmi/src/Middleware/MiddlewareDispatcher.php on line 37 and exactly 1 expected | File: /var/www/packages/nosmi/src/Middleware/AuthorizationMiddleware.php | Line: 11
+--------------------------------------------------------------------------------------------------------------------------------
+
+[E] [08-05-2025 10:13:13 PM] ERROR: Cannot find user | File: /var/www/packages/nosmi/tests/integration/mockapp/src/controllers/UserController.php | Line: 25
+--------------------------------------------------------------------------------------------------------------------------------
+

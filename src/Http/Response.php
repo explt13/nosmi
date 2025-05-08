@@ -1,6 +1,7 @@
 <?php
 namespace Explt13\Nosmi\Http;
 
+use Explt13\Nosmi\Interfaces\ExchangeInterface;
 use Explt13\Nosmi\Interfaces\HttpFactoryInterface;
 use Explt13\Nosmi\Interfaces\LightResponseInterface;
 use Explt13\Nosmi\Interfaces\ReadExchangeInterface;
@@ -11,7 +12,7 @@ use Explt13\Nosmi\Traits\WriteExchangeTrait;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 
-class Response implements LightResponseInterface, ReadExchangeInterface, WriteExchangeInterface
+class Response implements LightResponseInterface, ReadExchangeInterface, WriteExchangeInterface, ExchangeInterface
 {
     use ExchangeTrait;
     use ReadExchangeTrait;
@@ -45,7 +46,7 @@ class Response implements LightResponseInterface, ReadExchangeInterface, WriteEx
 
     public function withJson(array $data): static
     {
-        $body = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+        $body = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR);
         $stream = $this->factory->createStream($body);
         return $this->withHeader('Content-Type', 'application/json')->withBody($stream);
     }

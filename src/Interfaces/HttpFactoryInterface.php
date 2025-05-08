@@ -22,4 +22,19 @@ interface HttpFactoryInterface extends RequestFactoryInterface,
      * @return LightClientInterface An instance of a light client.
      */
     public function createClient(): LightClientInterface;
+
+    /**
+     * @return LightRequestInterface&WriteExchangeInterface&ExchangeInterface
+     */
+    public function createRequest(string $method, $uri): LightRequestInterface;
+
+    /**
+     * @return LightResponseInterface&ReadExchangeInterface&WriteExchangeInterface&ExchangeInterface
+     */
+    public function createResponse(int $code = 200, string $reasonPhrase = ''): LightResponseInterface;
+
+    /**
+     * @return LightServerRequestInterface&ReadExchangeInterface&ExchangeInterface
+     */
+    public function createServerRequest(?string $method = null, $uri = null, array $serverParams = []): LightServerRequestInterface;
 }

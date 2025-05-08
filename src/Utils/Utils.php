@@ -19,4 +19,13 @@ class Utils
         }
         return null;
     }
+
+    public static function flattenArray(array $array)
+    {
+        $result = [];
+        array_walk_recursive($array, function ($item) use (&$result) {
+            $result[] = $item;
+        });
+        return $result;
+    }
 }

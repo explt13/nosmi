@@ -4,12 +4,14 @@ namespace Explt13\Nosmi\Base;
 use Explt13\Nosmi\AppConfig\AppConfig;
 use Explt13\Nosmi\Http\Client;
 use Explt13\Nosmi\Interfaces\ControllerInterface;
+use Explt13\Nosmi\Interfaces\ExchangeInterface;
 use Explt13\Nosmi\Interfaces\LightClientInterface;
 use Explt13\Nosmi\Interfaces\LightResponseInterface;
 use Explt13\Nosmi\Interfaces\LightRouteInterface;
 use Explt13\Nosmi\Interfaces\LightServerRequestInterface;
 use Explt13\Nosmi\Interfaces\ReadExchangeInterface;
 use Explt13\Nosmi\Interfaces\ViewInterface;
+use Explt13\Nosmi\Interfaces\WriteExchangeInterface;
 
 abstract class Controller implements ControllerInterface
 {
@@ -25,7 +27,7 @@ abstract class Controller implements ControllerInterface
      * This method must be implemented in derived classes to handle
      * __GET__ request. If not implemented, an exception will be thrown.
      * 
-     * @return LightResponseInterface
+     * @return LightResponseInterface&ReadExchangeInterface&WriteExchangeInterface&ExchangeInterface
      * @throws \RuntimeException If the method is not implemented.
      */
     protected function get(): LightResponseInterface
@@ -39,7 +41,7 @@ abstract class Controller implements ControllerInterface
      * This method must be implemented in derived classes to handle
      * __POST__ request. If not implemented, an exception will be thrown.
      * 
-     * @return LightResponseInterface
+     * @return LightResponseInterface&ReadExchangeInterface&WriteExchangeInterface&ExchangeInterface
      * @throws \RuntimeException If the method is not implemented.
      */
     protected function post(): LightResponseInterface
@@ -53,7 +55,7 @@ abstract class Controller implements ControllerInterface
      * This method must be implemented in derived classes to handle
      * __DELETE__ request. If not implemented, an exception will be thrown.
      * 
-     * @return LightResponseInterface
+     * @return LightResponseInterface&ReadExchangeInterface&WriteExchangeInterface&ExchangeInterface
      * @throws \RuntimeException If the method is not implemented.
      */
     protected function delete(): LightResponseInterface
@@ -67,7 +69,7 @@ abstract class Controller implements ControllerInterface
      * This method must be implemented in derived classes to handle
      * __PUT__ request. If not implemented, an exception will be thrown.
      * 
-     * @return LightResponseInterface
+     * @return LightResponseInterface&ReadExchangeInterface&WriteExchangeInterface&ExchangeInterface
      * @throws \RuntimeException If the method is not implemented.
      */
     protected function put(): LightResponseInterface
@@ -81,7 +83,7 @@ abstract class Controller implements ControllerInterface
      * This method must be implemented in derived classes to handle
      * __PATCH__ request. If not implemented, an exception will be thrown.
      * 
-     * @return LightResponseInterface
+     * @return LightResponseInterface&ReadExchangeInterface&WriteExchangeInterface&ExchangeInterface
      * @throws \RuntimeException If the method is called.
      */
     protected function patch(): LightResponseInterface
@@ -89,9 +91,6 @@ abstract class Controller implements ControllerInterface
         $this->methodIsNotAvailable('PATCH');
     }
 
-    /**
-     * @return LightResponseInterface&ReadExchangeInterface&WriteExchangeInterface
-     */
     public function processRequest(LightServerRequestInterface $request): LightResponseInterface
     {
         $this->request = $request;

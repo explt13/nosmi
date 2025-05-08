@@ -2,6 +2,7 @@
 
 namespace Explt13\Nosmi\Http;
 
+use Explt13\Nosmi\Interfaces\ExchangeInterface;
 use Explt13\Nosmi\Interfaces\LightServerRequestInterface;
 use Explt13\Nosmi\Interfaces\ReadExchangeInterface;
 use Explt13\Nosmi\Traits\ExchangeTrait;
@@ -10,7 +11,7 @@ use Explt13\Nosmi\Traits\RequestTrait;
 use Nyholm\Psr7\ServerRequest as Psr7ServerRequest;
 use Psr\Http\Message\ServerRequestInterface;
 
-class ServerRequest implements LightServerRequestInterface, ReadExchangeInterface
+class ServerRequest implements LightServerRequestInterface, ReadExchangeInterface, ExchangeInterface
 {
     use ExchangeTrait;
     use RequestTrait;

@@ -37,7 +37,7 @@ class HttpErrorHandler
     
     protected function generateResponse($err_type, $err_message, $err_file, $err_line, $callstack, $err_code = 500): LightResponseInterface
     {
-        if ($err_code > 599){
+        if ($err_code < 100 || $err_code > 599){
             $err_code = 500;
         }
 

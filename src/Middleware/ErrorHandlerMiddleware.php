@@ -25,9 +25,6 @@ class ErrorHandlerMiddleware extends Middleware
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): LightResponseInterface
     {
         try {
-             /**
-             * @var RequestHandlerInterface $handler
-             */
             return parent::process($request, $handler);
         } catch (\Throwable $e) {
             $handler = new HttpErrorHandler($request);

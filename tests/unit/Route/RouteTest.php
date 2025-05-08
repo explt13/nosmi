@@ -12,14 +12,24 @@ use Nyholm\Psr7\Uri;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Server\MiddlewareInterface;
 use Tests\Unit\helpers\Reset;
+use Tests\Unit\Route\mockadata\AlsoMatchesMiddleware;
 use Tests\Unit\Route\mockadata\AnotherController;
+use Tests\Unit\Route\mockadata\AnotherMiddleware;
+use Tests\Unit\Route\mockadata\GenericMiddleware;
+use Tests\Unit\Route\mockadata\LastCommonMiddleware;
+use Tests\Unit\Route\mockadata\NotRelatedMiddleware;
+use Tests\Unit\Route\mockadata\SomeCommonMiddleware;
 use Tests\Unit\Route\mockadata\SomeController;
+use Tests\Unit\Route\mockadata\SomeMiddleware;
+use Tests\Unit\Route\mockadata\SpecificMiddleware;
 
 class RouteTest extends TestCase
 {
     private LightRouteInterface $route;
     private MiddlewareRegistryInterface&MockObject $middlewareRegistryMock;
+
 
     public static function setUpBeforeClass(): void
     {
@@ -42,23 +52,95 @@ class RouteTest extends TestCase
         Route::add('/second/pattern/<string>:name', SomeController::class);
         $this->route = new Route($this->middlewareRegistryMock);
         $uri = new Uri('https://example.com/order/new/dsda-09/213?address=Baker-av3-street&quantity=4');
-        $this->route = $this->route->resolvePath($uri->getPath());
-        
+        $this->route = $this->route->resolvePath($uri->getPath());        
     }
 
     public function testUseMiddleware()
     {
+        $some_common_middleware = new SomeCommonMiddleware;
+        $some_middleware = new SomeMiddleware;
+        $another_middleware = new AnotherMiddleware;
+        $also_matches_middleware = new AlsoMatchesMiddleware;
+        $not_related_middleware = new NotRelatedMiddleware;
+        $specific_middleware = new SpecificMiddleware;
+        $generic_middleware = new GenericMiddleware;
+        $last_common_middleware = new LastCommonMiddleware;
+        
         $middleware_registry = MiddlewareRegistry::getInstance();
-        new Route($middleware_registry);
-        $middleware_registry->add("SomeCommonMiddleware");
-        Route::useMiddleware('/order/new/<slug>:product/<int>:id', 'SomeMiddleware');
-        Route::useMiddleware('/order/new/<slug>:product/<int>:id', 'AnotherMiddleware');
-        Route::useMiddleware('/order/NOT_RELATED/<slug>:product/<int>:id', 'OneMoreMiddlewareThatNotRelated');
-        Route::useMiddleware('/order/<string>:age/<slug>:product/<int>:id', 'AlsoMatchesMiddleware');
-        Route::useMiddleware('/order/new/dsda-09/213', 'SpecificMiddleware', true);
-        Route::useMiddleware('/<string>:entity/<string>:age/<slug>:product/<int>:id', 'LastMiddleware');
-        $middleware_registry->add("AlsoSomeCommonMiddleware");
-        $this->assertSame(['SomeCommonMiddleware','SomeMiddleware', 'AnotherMiddleware', 'AlsoMatchesMiddleware', 'SpecificMiddleware', 'LastMiddleware', 'AlsoSomeCommonMiddleware'], $this->route->getRouteMiddleware());
+        $another_route = new Route($middleware_registry);
+        $uri = new Uri('https://example.com/something/really/different/123');
+        Route::add('/something/really/different/<int>:id', AnotherController::class);
+        $another_route = $another_route->resolvePath($uri->getPath());
+
+        $middleware_registry->add($some_common_middleware);
+        Route::useMiddleware('/order/new/<slug>:product/<int>:id', $some_middleware);
+        Route::useMiddleware('/order/new/<slug>:product/<int>:id', $another_middleware);
+        Route::useMiddleware('/order/NOT_RELATED/<slug>:product/<int>:id', $not_related_middleware);
+        Route::useMiddleware('/order/<string>:age/<slug>:product/<int>:id', $also_matches_middleware);
+        Route::useMiddleware('/order/new/dsda-09/213', $specific_middleware);
+        Route::useMiddleware('/<string>:entity/<string>:age/<slug>:product/<int>:id', $generic_middleware);
+        $middleware_registry->add($last_common_middleware);
+        $this->assertSame(
+            [
+                $some_common_middleware::class => $some_common_middleware, 
+                $some_middleware::class => $some_middleware, 
+                $another_middleware::class => $another_middleware, 
+                $also_matches_middleware::class => $also_matches_middleware, 
+                $specific_middleware::class => $specific_middleware, 
+                $generic_middleware::class => $generic_middleware, 
+                $last_common_middleware::class => $last_common_middleware
+            ], 
+            $this->route->getRouteMiddleware()
+        );
+
+        Route::disableMiddleware('/order/new/<slug>:product/<int>:id', $another_middleware::class);
+        Route::disableMiddleware('/order/<string>:age/<slug>:product/<int>:id', $also_matches_middleware::class);
+        Route::disableMiddleware('/order/new/dsda-09/213', $specific_middleware::class);
+        $this->assertSame(
+            [
+                $some_common_middleware::class => $some_common_middleware, 
+                $some_middleware::class => $some_middleware, 
+                $generic_middleware::class => $generic_middleware, 
+                $last_common_middleware::class => $last_common_middleware
+            ], 
+            $this->route->getRouteMiddleware()
+        );
+
+        Route::disableMiddleware('/order/new/dsda-09/213', $last_common_middleware::class);
+        $this->assertSame(
+            [
+                $some_common_middleware::class => $some_common_middleware, 
+                $some_middleware::class => $some_middleware, 
+                $generic_middleware::class => $generic_middleware, 
+            ], 
+            $this->route->getRouteMiddleware()
+        );
+
+        $this->assertSame(
+            [ 
+                $some_common_middleware::class => $some_common_middleware, 
+                $generic_middleware::class => $generic_middleware,
+                $last_common_middleware::class =>  $last_common_middleware,
+            ],
+            $another_route->getRouteMiddleware()
+        );
+
+        $middleware_registry->remove($some_common_middleware::class);
+        $this->assertSame(
+            [
+                $some_middleware::class => $some_middleware, 
+                $generic_middleware::class => $generic_middleware, 
+            ], 
+            $this->route->getRouteMiddleware()
+        );
+
+        $this->assertSame(
+            [ 
+                $generic_middleware::class => $generic_middleware,
+                $last_common_middleware::class =>  $last_common_middleware,
+            ],
+            $another_route->getRouteMiddleware()
+        );
     }
 
     public static function pathAndPatternsProvider(): array

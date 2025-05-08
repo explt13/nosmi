@@ -8,5 +8,10 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 interface LightMiddlewareInterface extends MiddlewareInterface
 {
+    /**
+     * @param LightServerRequestInterface&ReadExchangeInterface&ExchangeInterface $request
+     * @param LightRequestHandlerInterface $handler
+     * @return LightResponseInterface&ReadExchangeInterface&WriteExchangeInterface&ExchangeInterface
+     */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): LightResponseInterface;
 }

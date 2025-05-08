@@ -47,9 +47,7 @@ class ControllerTest extends TestCase
     {
         $this->requestMock->method('isAjax')->willReturn(true);
         $this->requestMock->method('getMethod')->willReturnOnConsecutiveCalls('GET', 'nonStandardAjaxMethod');
-        /**
-         * @var LightResponseInterface&ReadExchangeInterface&WriteExchangeInterface
-         */
+        
         $response = $this->controller->processRequest($this->requestMock);
         $this->assertSame('123', $response->getBodyContent());
 

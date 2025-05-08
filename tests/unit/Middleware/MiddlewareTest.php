@@ -69,13 +69,6 @@ class MiddlewareTest extends TestCase
         $this->assertSame(['123'], $response->getHeader('final'));
     }
 
-    public function testMiddlewareRegistryBulkSet()
-    {
-        $middleware_registry = MiddlewareRegistry::getInstance();
-        $middleware_registry->addBulk(["SomeMiddleware", "AnotherMiddleware"]);
-        $this->assertSame(["SomeMiddleware", "AnotherMiddleware"], $middleware_registry->getAll());
-    }
-
     public function testMiddlewareRegistryUnset()
     {
         $middleware_registry = MiddlewareRegistry::getInstance();

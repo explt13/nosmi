@@ -7,7 +7,7 @@ interface RouterInterface
     /**
      * Resolves the given server request and returns the corresponding route.
      *
-     * @param LightServerRequestInterface $request The server request to resolve.
+     * @param LightServerRequestInterface&ReadExchangeInterface&ExchangeInterface $request The server request to resolve.
      * @return LightRouteInterface The resolved route.
      */
     public function resolve(LightServerRequestInterface $request): LightRouteInterface;

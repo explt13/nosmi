@@ -60,6 +60,8 @@ class ErrorHandler
             $error_views_folder = $this->config->get('APP_ERROR_VIEWS');
         }
 
+        http_response_code($err_code);
+        header('Content-Type: text/html; charset=utf-8');
         if ($this->debug) {
             if (!isset($views_map['dev'])) {
                 $file = FRAMEWORK . "/Templates/Views/Errors/dev.php";

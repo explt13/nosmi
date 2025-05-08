@@ -28,14 +28,11 @@ public function __construct(array $middleware_list, ControllerInterface $control
             return $this->controller->processRequest($request);
         }
         
-        
-        $middleware_class = array_shift($this->middleware_list);
-        
-        /**
+         /**
          * @var LightMiddlewareInterface $middleware
          */
-        $middleware = new $middleware_class;
-
+        $middleware = array_shift($this->middleware_list);
+        
         return $middleware->process($request, $this);
     }
 }

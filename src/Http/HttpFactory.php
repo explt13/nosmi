@@ -2,6 +2,7 @@
 
 namespace Explt13\Nosmi\Http;
 
+use Explt13\Nosmi\Interfaces\ExchangeInterface;
 use Explt13\Nosmi\Interfaces\HttpFactoryInterface;
 use Explt13\Nosmi\Interfaces\LightClientInterface;
 use Explt13\Nosmi\Interfaces\LightRequestInterface;
@@ -22,19 +23,19 @@ class HttpFactory implements HttpFactoryInterface
         $this->factory = new Psr17Factory();
     }
 
-    public function createRequest(string $method, $uri): LightRequestInterface&WriteExchangeInterface
+    public function createRequest(string $method, $uri): LightRequestInterface
     {
         $request = $this->factory->createRequest($method, $uri);
         return new Request($request, $this);
     }
 
-    public function createResponse(int $code = 200, string $reasonPhrase = ''): LightResponseInterface&ReadExchangeInterface&WriteExchangeInterface
+    public function createResponse(int $code = 200, string $reasonPhrase = ''): LightResponseInterface
     {
         $response = $this->factory->createResponse($code, $reasonPhrase);
         return new Response($response, $this);
     }
 
-    public function createServerRequest(?string $method = null, $uri = null, array $serverParams = []): LightServerRequestInterface&ReadExchangeInterface
+    public function createServerRequest(?string $method = null, $uri = null, array $serverParams = []): LightServerRequestInterface
     {
         if (is_null($uri)) {
             $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';

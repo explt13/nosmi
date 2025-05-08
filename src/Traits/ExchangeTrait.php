@@ -19,6 +19,15 @@ trait ExchangeTrait
         return $clone;
     }
 
+    public function withHeaders(array $headers): static
+    {
+        $clone = clone $this;
+        foreach ($headers as $header => $value) {
+            $clone->exchange = $this->exchange->withHeader($header, $value);
+        }
+        return $clone;
+    }
+
     public function withAddedHeader(string $name, $value): static
     {
         $clone = clone $this;

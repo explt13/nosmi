@@ -7,8 +7,8 @@ interface ControllerInterface
     /**
      * Processes an incoming HTTP request and returns an appropriate response.
      *
-     * @param LightServerRequestInterface $request The HTTP request to process.
-     * @return LightResponseInterface The response generated after processing the request.
+     * @param LightServerRequestInterface&ReadExchangeInterface&ExchangeInterface $request The HTTP request to process.
+     * @return LightResponseInterface&ReadExchangeInterface&WriteExchangeInterface&ExchangeInterface The response generated after processing the request.
      */
     public function processRequest(LightServerRequestInterface $request): LightResponseInterface;
      
@@ -22,7 +22,7 @@ interface ControllerInterface
     /**
      * Sets the response for the controller.
      *
-     * @param LightResponseInterface $route The response to be set for the controller.
+     * @param LightResponseInterface&ReadExchangeInterface&WriteExchangeInterface&ExchangeInterface $route The response to be set for the controller.
      */
     public function setResponse(LightResponseInterface $response): void;
 

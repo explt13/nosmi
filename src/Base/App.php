@@ -1,7 +1,7 @@
 <?php
 namespace Explt13\Nosmi\Base;
 
-use Explt13\Nosmi\AppConfig\AppConfig;
+use ArgumentCountError;
 use Explt13\Nosmi\Dependencies\DependencyManager;
 use Explt13\Nosmi\Http\ServerRequest;
 use Explt13\Nosmi\Interfaces\AppInterface;
@@ -10,6 +10,7 @@ use Explt13\Nosmi\Interfaces\ConfigLoaderInterface;
 use Explt13\Nosmi\Interfaces\MiddlewareRegistryInterface;
 use Explt13\Nosmi\Interfaces\RequestPipelineInterface;
 use Explt13\Nosmi\Interfaces\RouterInterface;
+use Psr\Http\Server\MiddlewareInterface;
 
 class App implements AppInterface
 {
@@ -19,10 +20,17 @@ class App implements AppInterface
     private bool $bootstrapped = false;
 
     
-    public function use(string $middleware): static
+    public function use(MiddlewareInterface $middleware): static
     {
         $this->assureBootstrap();
         $this->middleware_registry->add($middleware);
+        return $this;
+    }
+
+    public function disable(string $middleware_class): static
+    {
+        $this->assureBootstrap();
+        $this->middleware_registry->remove($middleware_class);
         return $this;
     }
 

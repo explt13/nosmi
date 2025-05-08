@@ -2,6 +2,8 @@
 
 namespace Explt13\Nosmi\Interfaces;
 
+use Psr\Http\Server\MiddlewareInterface;
+
 interface LightRouteInterface
 {
     /**
@@ -16,11 +18,19 @@ interface LightRouteInterface
     /**
      * Adds a middleware for specific path pattern or path
      * @param string $path_pattern the path pattern to use a middleware for
-     * @param string $middleware_class the class name of the middleware
+     * @param MiddlewareInterface $middleware the middleware to add to the route
      * @return void;
-     * @throws \RuntimeException if path pattern or path is not present in path patterns map 
      */
-    public static function useMiddleware(string $path_pattern, string $middleware_class): void;
+    public static function useMiddleware(string $path_pattern, MiddlewareInterface $middleware): void;
+
+    /**
+     * Disables a middleware for specific path pattern or path
+     * @param string $path_pattern the path pattern to disable a middleware for
+     * @param string $middleware_class the middleware class to disable
+     * @return void;
+     */
+    public static function disableMiddleware(string $path_pattern, string $middleware_class): void;
+
 
     /**
      * Gets all middleware for the current route

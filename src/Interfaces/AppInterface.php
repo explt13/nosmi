@@ -2,23 +2,17 @@
 
 namespace Explt13\Nosmi\Interfaces;
 
-/**
- * Interface AppInterface
- *
- * Defines the contract for an application class, including methods for
- * middleware usage, service registration, configuration bootstrapping,
- * and application execution.
- */
+use Psr\Http\Server\MiddlewareInterface;
 
 interface AppInterface
 {
     /**
      * Use a middleware in the application.
      *
-     * @param string $middleware The fully qualified class name of the middleware to use.
+     * @param MiddlewareInterface $middleware The middleware to use.
      * @return static
      */
-    public function use(string $middleware): static;
+    public function use(MiddlewareInterface $middleware): static;
 
     /**
      * Bootstrap the application with the given configuration.

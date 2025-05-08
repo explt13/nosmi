@@ -7,6 +7,7 @@ use Explt13\Nosmi\Exceptions\InvalidAssocArrayValueException;
 use Explt13\Nosmi\Interfaces\LightRouteInterface;
 use Explt13\Nosmi\Interfaces\MiddlewareRegistryInterface;
 use Explt13\Nosmi\Utils\PathConvertter;
+use Psr\Http\Server\MiddlewareInterface;
 
 class Route implements LightRouteInterface
 {
@@ -46,15 +47,21 @@ class Route implements LightRouteInterface
         throw new \RuntimeException("Route `$path` is not found", 404);
     }
 
-    public static function useMiddleware(string $path_pattern, string $middleware_class): void
+    public static function useMiddleware(string $path_pattern, MiddlewareInterface $middleware): void
     {
         $regexp = PathConvertter::convertPathPatternToRegexp($path_pattern);
-        self::$middleware_registry->add($middleware_class, $regexp);
+        self::$middleware_registry->add($middleware, $regexp);
+    }
+
+    public static function disableMiddleware(string $path_pattern, string $middleware_class): void
+    {
+        $regexp = PathConvertter::convertPathPatternToRegexp($path_pattern);
+        self::$middleware_registry->remove($middleware_class, $regexp);
     }
 
     public function getRouteMiddleware(): array
     {
-        return  self::$middleware_registry->getForRoute($this->getPath());
+        return self::$middleware_registry->getForRoute($this->getPath());
     }
 
     public function getController(): string
