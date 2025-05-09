@@ -14,6 +14,11 @@ class MiddlewareRegistry implements MiddlewareRegistryInterface
     private array $middleware_list = [];
     private array $middleware_ignore = [];
 
+    protected function __construct()
+    {
+        $this->middleware_list[ErrorHandlerMiddleware::class] = new ErrorHandlerMiddleware;
+    }
+
     public function add(MiddlewareInterface $middleware, ?string $route_pattern = null): void
     {
         if ($route_pattern) {

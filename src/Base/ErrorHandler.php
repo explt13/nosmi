@@ -51,7 +51,7 @@ class ErrorHandler
     
     protected function render($err_type, $err_message, $err_file, $err_line, $callstack, $err_code = 500): void
     {
-        if ($err_code > 599) {
+        if ($err_code < 100 || $err_code > 599) {
             $err_code = 500;
         }
         $views_map = null;

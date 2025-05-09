@@ -30,7 +30,7 @@ class AuthorizationMiddleware extends Middleware
         return $request;
     }
 
-    protected function processResponse(LightResponseInterface $response): LightResponseInterface
+    protected function processResponse(LightResponseInterface $response, LightServerRequestInterface $request): LightResponseInterface
     {
         return $response;
     }

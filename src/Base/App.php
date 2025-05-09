@@ -10,6 +10,7 @@ use Explt13\Nosmi\Interfaces\ConfigLoaderInterface;
 use Explt13\Nosmi\Interfaces\MiddlewareRegistryInterface;
 use Explt13\Nosmi\Interfaces\RequestPipelineInterface;
 use Explt13\Nosmi\Interfaces\RouterInterface;
+use Explt13\Nosmi\Routing\RoutesLoader;
 use Psr\Http\Server\MiddlewareInterface;
 
 class App implements AppInterface
@@ -38,8 +39,6 @@ class App implements AppInterface
     {
         // Define framework's root folder path constant
         define('FRAMEWORK', dirname(__DIR__));
-
-        new ErrorHandler();
         
         // create dependency manager
         $dependency_manager = new DependencyManager();
@@ -47,11 +46,14 @@ class App implements AppInterface
         // Load framework's dependencies
         $dependency_manager->loadFrameworkDependencies(FRAMEWORK . '/Dependencies/dependencies.php');
 
-        // get config loader object
+        // Get config loader object
         $config_loader = $dependency_manager->getDependency(ConfigLoaderInterface::class);
         
         // Load app's config
         $config_loader->loadConfig($config_path);
+
+        // Initialize error handler
+        new ErrorHandler();
 
         // Set router
         $this->router = $dependency_manager->getDependency(RouterInterface::class);
@@ -59,13 +61,19 @@ class App implements AppInterface
         // Set middleware registry
         $this->middleware_registry = $dependency_manager->getDependency(MiddlewareRegistryInterface::class);
 
+        // Set request pipeline
         $this->request_pipeline = $dependency_manager->getDependency(RequestPipelineInterface::class);
 
+        // Get app config
         $app_config = $dependency_manager->getDependency(ConfigInterface::class);
 
-        require_once $app_config->get('APP_ROUTES_FILE');
+        // Load routes
+        RoutesLoader::load($app_config->get('APP_ROUTES_FILE'));
+
+        // Load app dependencies
         $dependency_manager->loadDependencies($app_config->get('APP_DEPENDENCIES_FILE'));
 
+        // Flag bootstrapped to true
         $this->bootstrapped = true;
         
         return $this;

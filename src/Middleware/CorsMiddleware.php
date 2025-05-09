@@ -10,7 +10,7 @@ use Explt13\Nosmi\Interfaces\LightServerRequestInterface;
 class CorsMiddleware extends Middleware
 {
     
-    public function processRequest(LightServerRequestInterface $request): ?LightServerRequestInterface
+    protected function processRequest(LightServerRequestInterface $request): ?LightServerRequestInterface
     {
         if ($request->isOptions()) {
             $response = $this->createEarlyResponse();
@@ -20,7 +20,7 @@ class CorsMiddleware extends Middleware
         return $request;
     }
 
-    public function processResponse(LightResponseInterface $response): LightResponseInterface
+    protected function processResponse(LightResponseInterface $response, LightServerRequestInterface $request): LightResponseInterface
     {
         $response = $response->withCorsHeader();
         return $response;

@@ -31,7 +31,7 @@ abstract class Middleware implements LightMiddlewareInterface
      * @param LightResponseInterface&ReadExchangeInterface&WriteExchangeInterface&ExchangeInterface $response
      * @return LightResponseInterface&ReadExchangeInterface&WriteExchangeInterface&ExchangeInterface
      */
-    abstract protected function processResponse(LightResponseInterface $response): LightResponseInterface;
+    abstract protected function processResponse(LightResponseInterface $response, LightServerRequestInterface $request): LightResponseInterface;
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): LightResponseInterface
     {
@@ -40,7 +40,7 @@ abstract class Middleware implements LightMiddlewareInterface
             return $this->early_response;
         }
         $response = $handler->handle($request);
-        $response = $this->processResponse($response);
+        $response = $this->processResponse($response, $request);
         return $response;
     }
 

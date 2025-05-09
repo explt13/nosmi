@@ -13,6 +13,9 @@ use Explt13\Nosmi\Base\RequestPipeline;
 use Explt13\Nosmi\Base\View;
 use Explt13\Nosmi\Base\Widget;
 use Explt13\Nosmi\Cache\Cache;
+use Explt13\Nosmi\Cache\CacheFactory;
+use Explt13\Nosmi\Cache\FileCache;
+use Explt13\Nosmi\Cache\RedisCache;
 use Explt13\Nosmi\Dependencies\Container;
 use Explt13\Nosmi\Dependencies\DependencyManager;
 use Explt13\Nosmi\Http\HttpFactory;
@@ -20,6 +23,7 @@ use Explt13\Nosmi\Http\Request;
 use Explt13\Nosmi\Http\Response;
 use Explt13\Nosmi\Http\ServerRequest;
 use Explt13\Nosmi\Interfaces\AppInterface;
+use Explt13\Nosmi\Interfaces\CacheFactoryInterface;
 use Explt13\Nosmi\Interfaces\CacheInterface;
 use Explt13\Nosmi\Interfaces\ConfigInterface;
 use Explt13\Nosmi\Interfaces\ConfigLoaderInterface;
@@ -94,10 +98,14 @@ return [
     ErrorHandler::class                 =>  ErrorHandler::class,
     ModelInterface::class               =>  Model::class,
     ViewInterface::class                =>  View::class,
-    CacheInterface::class               =>  Cache::class,
     Widget::class                       =>  Widget::class,
     ControllerFactoryInterface::class   =>  ControllerFactory::class,
     RequestPipelineInterface::class     =>  RequestPipeline::class,
+
+    // Cache
+    CacheFactoryInterface::class        =>  CacheFactory::class,
+    RedisCache::class                   =>  RedisCache::class,
+    FileCache::class                    =>  FileCache::class,
 
     // Utils
     Debug::class                        =>  Debug::class,

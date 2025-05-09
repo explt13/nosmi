@@ -16,7 +16,7 @@ class MiddlewareDispatcher implements LightRequestHandlerInterface
     protected array $middleware_list;
     protected ControllerInterface $controller;
 
-public function __construct(array $middleware_list, ControllerInterface $controller)
+    public function __construct(array $middleware_list, ControllerInterface $controller)
     {
         $this->middleware_list = $middleware_list;
         $this->controller = $controller;    
