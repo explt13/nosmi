@@ -5,6 +5,7 @@ namespace Tests\Unit\Route;
 use Explt13\Nosmi\Exceptions\InvalidAssocArrayValueException;
 use Explt13\Nosmi\Interfaces\LightRouteInterface;
 use Explt13\Nosmi\Interfaces\MiddlewareRegistryInterface;
+use Explt13\Nosmi\Middleware\ErrorHandlerMiddleware;
 use Explt13\Nosmi\Middleware\MiddlewareRegistry;
 use Explt13\Nosmi\Routing\Route;
 use LogicException;
@@ -73,6 +74,7 @@ class RouteTest extends TestCase
         $another_route = $another_route->resolvePath($uri->getPath());
 
         $middleware_registry->add($some_common_middleware);
+        $middleware_registry->remove(ErrorHandlerMiddleware::class);
         Route::useMiddleware('/order/new/<slug>:product/<int>:id', $some_middleware);
         Route::useMiddleware('/order/new/<slug>:product/<int>:id', $another_middleware);
         Route::useMiddleware('/order/NOT_RELATED/<slug>:product/<int>:id', $not_related_middleware);

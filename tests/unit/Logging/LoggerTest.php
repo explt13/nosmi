@@ -65,8 +65,8 @@ class LoggerTest extends TestCase
         $logger = Logger::getInstance();
         $logger->setFormatter(new DefaultFormatter());
         $config->set('LOG', __DIR__.'/env_set_folder');
-        $config->set('LOG_WARNING_FILE', 'warning.log');
-        $config->set('LOG_INFO_FILE', 'warning.log');
+        $config->set('LOG_WARNING_FILE', __DIR__.'/env_set_folder/warning.log');
+        $config->set('LOG_INFO_FILE', __DIR__.'/env_set_folder/warning.log');
         $logger->logInfo($message);
         $logger->logWarning($message);
         $this->assertTrue(true);

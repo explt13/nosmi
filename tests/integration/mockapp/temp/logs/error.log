@@ -1,6 +1,0 @@
-[E] [09-05-2025 11:49:44 PM] ERROR: Failed to initialize Redis client: Failed: WRONGPASS invalid username-password pair or user is disabled. [tcp://127.0.0.1:6379] | File: /var/www/packages/nosmi/src/Base/Redis.php | Line: 36
---------------------------------------------------------------------------------------------------------------------------------
-
-[E] [09-05-2025 11:50:24 PM] ERROR: Failed to initialize Redis client: Failed: WRONGPASS invalid username-password pair or user is disabled. [tcp://127.0.0.1:6379] | File: /var/www/packages/nosmi/src/Base/Redis.php | Line: 36
---------------------------------------------------------------------------------------------------------------------------------
-

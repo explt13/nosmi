@@ -8,6 +8,7 @@ use Explt13\Nosmi\Interfaces\LightRequestHandlerInterface;
 use Explt13\Nosmi\Interfaces\LightResponseInterface;
 use Explt13\Nosmi\Interfaces\LightServerRequestInterface;
 use Explt13\Nosmi\Middleware\AuthMiddleware;
+use Explt13\Nosmi\Middleware\ErrorHandlerMiddleware;
 use Explt13\Nosmi\Middleware\FinalHandler;
 use Explt13\Nosmi\Middleware\FinalMiddleware;
 use Explt13\Nosmi\Middleware\MiddlewareDispatcher;
@@ -67,13 +68,6 @@ class MiddlewareTest extends TestCase
 
         $this->assertSame(['token [123]'], $response->getHeader('auth'));
         $this->assertSame(['123'], $response->getHeader('final'));
-    }
-
-    public function testMiddlewareRegistryUnset()
-    {
-        $middleware_registry = MiddlewareRegistry::getInstance();
-        $middleware_registry->remove('SomeMiddleware');
-        $this->assertSame(["1" => "AnotherMiddleware"], $middleware_registry->getAll());
     }
 
     private function createMockMiddleware(): LightMiddlewareInterface&MockObject

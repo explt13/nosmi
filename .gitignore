@@ -1,6 +1,8 @@
 composer.lock
 vendor
 .vscode
-tests/unit/Logging/logs
+tests/unit/Logging/*
+!tests/unit/Logging/LoggerTest
+tests/integration/mockapp/temp
 src/Config/.env
 src/logs

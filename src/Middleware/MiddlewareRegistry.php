@@ -59,64 +59,14 @@ class MiddlewareRegistry implements MiddlewareRegistryInterface
         return $route_middleware;
     }
 
-
-    // public function getForRoute(string $route): array
-    // {
-    //     $route_middleware = [];
-    //     foreach($this->middleware_list as $pattern => $middleware) {
-    //         if (preg_match("#$pattern#", $route)) {
-    //             $route_middleware = array_merge($route_middleware, $middleware);
-    //             continue;
-    //         }
-    //         if (!is_array($middleware) && !in_array($middleware, $this->middleware_ignore)) {
-    //             $route_middleware[] = $middleware;
-    //         }
-    //     }
-    //     return $route_middleware;
-    // }
-
-    // public function add(MiddlewareInterface $middleware, ?string $route = null): void
-    // {
-    //     if ($route) {
-    //         $this->middleware_list[$route][$middleware::class] = $middleware;
-    //         return;
-    //     }
-    //     $this->middleware_list[$middleware::class] = $middleware;
-    // }
-
-    // public function remove(string $middleware_class, ?string $route = null): void
-    // {
-    //     // if used via Route class Route::disableMiddleware
-    //     if ($route) {
-    //         if (isset($this->middleware_list[$route][$middleware_class])) {
-    //             unset($this->middleware_list[$route][$middleware_class]);
-    //         }
-    //     }
-    //     $this->middleware_ignore[] = $middleware_class;
-    // }
-
-    // public function getForRoute(string $route): array
-    // {
-    //     $route_middleware = [];
-    //     foreach($this->middleware_list as $pattern => $middleware) {
-    //         if (preg_match("#$pattern#", $route)) {
-    //             $route_middleware = array_merge($route_middleware, $middleware);
-    //         }
-    //         if (!is_array($middleware) && !in_array($middleware, $this->middleware_ignore)) {
-    //             $route_middleware[$middleware::class] = $middleware;
-    //         }
-    //     }
-    //     return $route_middleware;
-    // }
-
-
     public function getCommon(): array
     {
-        return array_filter($this->middleware_list, fn($val) => !is_array($val));
+        $common_middleware = array_filter($this->middleware_list, fn($val) => !is_array($val));
+        return array_filter($common_middleware, fn($md_class) => !in_array($md_class, $this->middleware_ignore), ARRAY_FILTER_USE_KEY);
     }
 
     public function getAll(): array
     {
-        return $this->middleware_list;
+        return array_filter($this->middleware_list);
     }
 }

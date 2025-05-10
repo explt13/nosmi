@@ -27,11 +27,6 @@ class AppTest extends TestCase
         $this->dependency_manager = new DependencyManager();
         $this->assertTrue($this->dependency_manager->hasDependency(RouterInterface::class));
         restore_exception_handler();
+        restore_error_handler();
     }
-
-    // public static function tearDownAfterClass(): void
-    // {
-    //     Reset::resetSingleton(Container::class);
-    //     Reset::resetSingleton(AppConfig::class);
-    // }
 }
