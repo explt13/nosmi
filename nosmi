@@ -1,0 +1,228 @@
+#!/usr/bin/env php
+<?php
+
+function envContent(array $params)
+{
+    return sprintf('# Application Environment
+APP_ROOT="%s"
+APP_SRC="${APP_ROOT}/src"
+APP_VIEWS="${APP_SRC}/render/views"
+APP_ERROR_VIEWS="${APP_SRC}/render/views/errors"
+APP_LAYOUTS="${APP_SRC}/render/layouts"
+APP_ROUTES_FILE="${APP_SRC}/routes/routes.php"
+APP_DEPENDENCIES_FILE="${APP_SRC}/dependencies/dependencies.php"
+APP_NAME="%s"
+APP_URL=http://localhost
+APP_DEBUG=true
+APP_ENV=production
+INCLUDE_LAYOUT_BY_DEFAULT=0
+DEFAULT_LAYOUT_FILENAME=""
+
+# Cache
+CACHE_HANDLER=file
+
+# file
+FILE_CACHE_FOLDER="${APP_ROOT}/temp/cache"
+FILE_CACHE_HASH=md5
+FILE_CACHE_EXT=txt
+
+# redis
+# REDIS_SCHEME=tcp
+# REDIS_HOSTNAME=127.0.0.1
+# REDIS_PORT=6379
+# REDIS_DATABASE=15
+# REDIS_USERNAME=your_username
+# REDIS_PASSWORD=your_password
+# REDIS_PATH=null
+# REDIS_ASYNC=false
+# REDIS_TIMEOUT=5.0
+# REDIS_READ_WRITE_TIMEOUT=null
+
+# Database Configuration
+DB_CONNECTION=mysql
+DB_HOSTNAME=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=your_database_name
+DB_CHARSET=utf8mb4
+DB_USERNAME=your_username
+DB_PASSWORD=your_password
+
+# Mail Configuration
+MAILER=smtp
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_ENCRYPTION=tls
+MAIL_USERNAME=your_username
+MAIL_PASSWORD=your_password
+MAIL_FROM_ADDRESS="${MAIL_USERNAME}"
+MAIL_FROM_NAME="${APP_NAME}"
+MAIL_REPLY_TO="${MAIL_USERNAME}"
+
+#Log
+#A flag that used for enabling/disabling logger
+LOG_ON=1
+#A log folder
+LOG="${APP_ROOT}/temp/logs"
+#A general file for all types of log if specific is not set it will be used instead
+LOG_FILE="${LOG}/general.log"
+#Log files for specific log status
+# LOG_INFO_FILE="${LOG}/info.log"
+# LOG_WARNING_FILE="${LOG}/warning.log"
+# LOG_ERROR_FILE="${LOG}/error.log"',
+    $params['app_root'],
+    $params['app_name'],
+);
+}
+
+function indexContent()
+{
+    return '<?php
+
+use Explt13\Nosmi\Base\App;
+
+require __DIR__ . "/../vendor/autoload.php";
+
+$app = (new App())
+    ->bootstrap(dirname(__DIR__) . "/config/.env")
+    ->run();';
+}
+
+function htaccessContent()
+{
+    return "<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    RewriteCond %{HTTPS} off
+    RewriteRule .* - [E=REQUEST_SCHEME:http]
+
+    RewriteCond %{HTTPS} on
+    RewriteRule .* - [E=REQUEST_SCHEME:https]
+
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L,QSA]
+</IfModule>";
+}
+
+
+function prompt($question, $default = '')
+{
+    echo "$question ";
+    if ($default) echo "[$default] ";
+    $input = trim(fgets(STDIN));
+    return $input ?: $default;
+}
+
+function createDir($path)
+{
+    if (!is_dir($path)) {
+        mkdir($path, 0755, true);
+        echo "📁 Created: $path\n";
+    }
+}
+function createFile($path, string $content="")
+{
+    $dir = dirname($path);
+    createDir($dir);
+    if (!is_file($path)) {
+        file_put_contents($path, $content);
+        chmod($path, 0755);
+        echo "📝 Created: $path\n";
+    }
+}
+
+function initComposer(string $folder, string $app_name, string $username, string $email)
+{
+    $check = shell_exec("command -v composer");
+    if (!$check) {
+        echo "❌ Composer is not installed or not in PATH.\n";
+        echo "Install composer and run composer require explt13/nosmi manually";
+        return;
+    }
+
+    // Run composer init in the project directory
+    echo "⚙️  Initializing Composer...\n";
+    chdir($folder);
+    // This creates a default composer.json non-interactively
+    shell_exec(sprintf('composer --name="%s/%s" --author="%s <%s>" init --require=php:"^8.3.2" --require="explt13/nosmi:^1.0.0" --no-interaction --quiet', 
+    strtolower($username), strtolower($app_name), $username, $email
+    ));
+    $composer = json_decode(file_get_contents('composer.json'), true);
+
+    $composer['autoload'] = [
+        "psr-4" => [
+            ucfirst($username) . "\\" . ucfirst($app_name) . "\\" => "src/"
+        ]
+    ];
+
+    file_put_contents('composer.json', json_encode($composer, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+
+    shell_exec('composer dump-autoload --quiet');
+    
+    echo "📥  Installing dependencies...\n";
+    shell_exec('composer install --quiet');
+    echo "✅ Composer initialized (composer.json created).\n";
+}
+
+
+function initProject()
+{
+    echo "\n Nosmi Project Initializer\n\n";
+    $app_name = prompt("Enter app name", "new-app");
+    $username = trim(shell_exec('git config user.name') ?? "");
+    $email = trim(shell_exec('git config user.email') ?? "");
+    if (!$username) {
+        $username = prompt("Enter your GitHub username or any other username: ", "user");
+    }
+    if (!$email) {
+        $email = "your@email.com";
+    }
+    $base = getcwd() . DIRECTORY_SEPARATOR . $app_name;
+    $public = $base . DIRECTORY_SEPARATOR . "public";
+    $src = $base . DIRECTORY_SEPARATOR . "src";
+
+    createDir($base);
+    createDir($public);
+    createFile($public . DIRECTORY_SEPARATOR . "index.php", indexContent());
+    createFile($public . DIRECTORY_SEPARATOR . ".htaccess", htaccessContent());
+    createDir($src);
+    createDir($src . DIRECTORY_SEPARATOR . "controllers");
+    createDir($src . DIRECTORY_SEPARATOR . "models");
+    createDir($src . DIRECTORY_SEPARATOR . "render" . DIRECTORY_SEPARATOR . "views");
+    createDir($src . DIRECTORY_SEPARATOR . "render" . DIRECTORY_SEPARATOR . "views" . DIRECTORY_SEPARATOR . "errors");
+    createDir($src . DIRECTORY_SEPARATOR . "render" . DIRECTORY_SEPARATOR . "templates");
+    createDir($base . DIRECTORY_SEPARATOR ."config");
+    createFile($base . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR .".env", envContent(['app_root' => $base, 'app_name' => $app_name]));
+    createDir($base . DIRECTORY_SEPARATOR . "temp");
+    createDir($base . DIRECTORY_SEPARATOR . "temp" . DIRECTORY_SEPARATOR . "cache");
+    createDir($base . DIRECTORY_SEPARATOR . "temp" . DIRECTORY_SEPARATOR . "logs");
+    createDir($base . DIRECTORY_SEPARATOR . "tests");
+
+    initComposer($base, $app_name, $username, $email);
+
+    echo "\n✅ Project '$app_name' created successfully!\n";
+}
+
+// Main CLI Router
+$argv = $_SERVER['argv'];
+$command = $argv[1] ?? null;
+
+switch ($command) {
+    case 'startproject':
+    case 'init':
+        initProject();
+        break;
+    case 'help':
+    case '--help':
+    case '-h':
+        echo "Usage: nosmi <command>\n";
+        echo "Commands:\n";
+        echo "  startproject, init   Create a new Nosmi project\n";
+        echo "  help                 Show this help message\n";
+        break;
+    default:
+        echo "❌ Unknown command.\nTry: nosmi help\n";
+        break;
+}
+
+
