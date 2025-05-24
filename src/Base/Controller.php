@@ -99,7 +99,8 @@ abstract class Controller implements ControllerInterface
             if (!method_exists($this, $method)) {
                 throw new \RuntimeException("Route {$this->route->getPath()} does not have $method method.");
             }
-            return $this->$method();
+            $this->$method();
+            return $this->response;
         } else {
             $action = $this->route->getAction();
             if (is_null($action)) {
@@ -110,7 +111,8 @@ abstract class Controller implements ControllerInterface
             if (!method_exists($this, $method)) {
                 throw new \RuntimeException("Expected controller {$this->route->getController()} to have $method method.");
             }
-            return $this->$method();
+            $this->$method();
+            return $this->response;
         }
     }
 
