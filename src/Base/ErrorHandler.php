@@ -17,12 +17,15 @@ class ErrorHandler
     {
         $this->config = AppConfig::getInstance();
         $this->debug = $this->config->get('APP_DEBUG') ?? false;
+        error_reporting(E_ALL);
         if ($this->debug) {
-            error_reporting(E_ALL);
-            set_error_handler([$this, 'errorHandler'], E_NOTICE | E_WARNING);
+            ini_set('display_errors', 1);
+            $strict_mode = $this->config->get('APP_DEBUG_STRICT') ?? false;
+            if ($strict_mode) {
+                set_error_handler([$this, 'errorHandler'], E_NOTICE | E_WARNING);
+            }
         } else {
             ini_set('display_errors', 0);
-            error_reporting(0);
         }
 
         set_exception_handler([$this, 'exceptionHandler']);
