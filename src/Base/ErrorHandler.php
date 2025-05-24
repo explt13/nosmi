@@ -44,7 +44,7 @@ class ErrorHandler
     protected function logError(string $message = '', $file = '', $line = ''): void
     {
         $logger = FrameworkLogger::getInstance();
-        $log_dest = $this->config->get('LOG_FRAMEWORK_FILE') ?? (dirname(__DIR__) . '/logs/errors.log');
+        $log_dest = $this->config->get('LOG_FRAMEWORK_FILE') ?? $this->config->get('LOG') . '/framework.log';
 
         $logger->logError("$message | File: $file | Line: $line", null, $log_dest);
     }
