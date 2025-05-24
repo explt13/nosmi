@@ -25,24 +25,24 @@ class HttpErrorHandler
 
     public function exceptionHandler(\Throwable $e): LightResponseInterface
     {
-        $this->logError($e->getMessage(), $e->getFile(), $e->getLine());
+        $this->logError($e->getMessage(), $e->getFile(), $e->getLine(), $e->getCode());
         return $this->generateResponse($e::class, $e->getMessage(), $e->getFile(), $e->getLine(), $e->getTrace(), $e->getCode());
     }
 
-    protected function logError(string $message = '', $file = '', $line = ''): void
+    protected function logError(string $message = '', $file = '', $line = '', $code = ''): void
     {
         $logger = Logger::getInstance();
-        $logger->logError("$message | File: $file | Line: $line");
+        $logger->logError("[code: $code] $message | File: $file | Line: $line");
     }
     
     protected function generateResponse($err_type, $err_message, $err_file, $err_line, $callstack, $err_code = 500): LightResponseInterface
     {
-        if ($err_code < 100 || $err_code > 599){
-            $err_code = 500;
+        if ($err_code < 100 || $err_code > 599 || !is_int($err_code)){
+            $response_code = 500;
         }
 
         $factory = new HttpFactory();
-        $response = $factory->createResponse($err_code);
+        $response = $factory->createResponse($response_code);
         
         if ($this->request->isAjax()) {
             if ($this->debug) {
@@ -70,15 +70,15 @@ class HttpErrorHandler
                 $file = $error_views_folder . '/' . $views_map['dev'] . '.php';
             }
         } else {
-            $file = FRAMEWORK . "/Templates/Views/Errors/$err_code.php";
+            $file = FRAMEWORK . "/Templates/Views/Errors/$response_code.php";
             if (!FileValidator::isReadableFile($file)) {
                 $file = FRAMEWORK . "/Templates/Views/Errors/error.php";
             }
             if (isset($views_map['error'])) {
                 $file = $error_views_folder . '/error.php';
             }
-            if (isset($views_map[$err_code])) {
-                $file = $error_views_folder . '/' . $views_map[$err_code] . '.php';
+            if (isset($views_map[$response_code])) {
+                $file = $error_views_folder . '/' . $views_map[$response_code] . '.php';
             }
         }
         
