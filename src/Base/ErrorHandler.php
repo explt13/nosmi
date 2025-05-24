@@ -51,6 +51,7 @@ class ErrorHandler
     
     protected function render($err_type, $err_message, $err_file, $err_line, $callstack, $err_code = 500): void
     {
+        $response_code = $err_code;
         if ($err_code < 100 || $err_code > 599 || !is_int($err_code)) {
             $response_code = 500;
         }
