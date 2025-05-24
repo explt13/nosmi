@@ -27,10 +27,9 @@ abstract class Controller implements ControllerInterface
      * This method must be implemented in derived classes to handle
      * __GET__ request. If not implemented, an exception will be thrown.
      * 
-     * @return LightResponseInterface&ReadExchangeInterface&WriteExchangeInterface&ExchangeInterface
      * @throws \RuntimeException If the method is not implemented.
      */
-    protected function get(): LightResponseInterface
+    protected function get()
     {
         $this->methodIsNotAvailable('GET');
     }
@@ -41,10 +40,9 @@ abstract class Controller implements ControllerInterface
      * This method must be implemented in derived classes to handle
      * __POST__ request. If not implemented, an exception will be thrown.
      * 
-     * @return LightResponseInterface&ReadExchangeInterface&WriteExchangeInterface&ExchangeInterface
      * @throws \RuntimeException If the method is not implemented.
      */
-    protected function post(): LightResponseInterface
+    protected function post()
     {
         $this->methodIsNotAvailable('POST');
     }
@@ -55,10 +53,9 @@ abstract class Controller implements ControllerInterface
      * This method must be implemented in derived classes to handle
      * __DELETE__ request. If not implemented, an exception will be thrown.
      * 
-     * @return LightResponseInterface&ReadExchangeInterface&WriteExchangeInterface&ExchangeInterface
      * @throws \RuntimeException If the method is not implemented.
      */
-    protected function delete(): LightResponseInterface
+    protected function delete()
     {
         $this->methodIsNotAvailable('DELETE');
     }
@@ -69,10 +66,9 @@ abstract class Controller implements ControllerInterface
      * This method must be implemented in derived classes to handle
      * __PUT__ request. If not implemented, an exception will be thrown.
      * 
-     * @return LightResponseInterface&ReadExchangeInterface&WriteExchangeInterface&ExchangeInterface
      * @throws \RuntimeException If the method is not implemented.
      */
-    protected function put(): LightResponseInterface
+    protected function put()
     {
         $this->methodIsNotAvailable('PUT');
     }
@@ -83,10 +79,9 @@ abstract class Controller implements ControllerInterface
      * This method must be implemented in derived classes to handle
      * __PATCH__ request. If not implemented, an exception will be thrown.
      * 
-     * @return LightResponseInterface&ReadExchangeInterface&WriteExchangeInterface&ExchangeInterface
      * @throws \RuntimeException If the method is called.
      */
-    protected function patch(): LightResponseInterface
+    protected function patch()
     {
         $this->methodIsNotAvailable('PATCH');
     }
