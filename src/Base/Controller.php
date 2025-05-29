@@ -89,7 +89,10 @@ abstract class Controller implements ControllerInterface
     public function processRequest(LightServerRequestInterface $request): LightResponseInterface
     {
         $this->request = $request;
-        if ($this->request->isAjax()) {
+        $action = $this->route->getAction();
+        
+        // if request is ajax and action is null then call REST method based on request method
+        if ($this->request->isAjax() && is_null($action)) {
             $method = strtolower($this->request->getMethod());
             if (!method_exists($this, $method)) {
                 throw new \RuntimeException("Route {$this->route->getPath()} does not have $method method.");
