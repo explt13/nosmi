@@ -34,10 +34,10 @@ class RouteTest extends TestCase
 
     public static function setUpBeforeClass(): void
     {
-        Route::add('/order/<string>:name/<int>:id', SomeController::class);
-        Route::add('/order/add/:alias', SomeController::class);
-        Route::add('/user/<string>:id', SomeController::class);
-        Route::add('/:id', SomeController::class);
+        Route::get('/order/<string>:name/<int>:id', SomeController::class);
+        Route::get('/order/add/:alias', SomeController::class);
+        Route::get('/user/<string>:id', SomeController::class);
+        Route::get('/:id', SomeController::class);
     }
 
     protected function tearDown(): void
@@ -48,12 +48,12 @@ class RouteTest extends TestCase
     protected function setUp(): void
     {
         $this->middlewareRegistryMock = $this->createMock(MiddlewareRegistryInterface::class);
-        Route::add('/order/new/<slug>:product/<int>:id', SomeController::class);
-        Route::add('/first/pattern/:id', AnotherController::class);
-        Route::add('/second/pattern/<string>:name', SomeController::class);
+        Route::get('/order/new/<slug>:product/<int>:id', SomeController::class);
+        Route::get('/first/pattern/:id', AnotherController::class);
+        Route::get('/second/pattern/<string>:name', SomeController::class);
         $this->route = new Route($this->middlewareRegistryMock);
         $uri = new Uri('https://example.com/order/new/dsda-09/213?address=Baker-av3-street&quantity=4');
-        $this->route = $this->route->resolvePath($uri->getPath());        
+        $this->route = $this->route->resolvePath($uri->getPath(), 'GET');
     }
 
     public function testUseMiddleware()
@@ -70,8 +70,8 @@ class RouteTest extends TestCase
         $middleware_registry = MiddlewareRegistry::getInstance();
         $another_route = new Route($middleware_registry);
         $uri = new Uri('https://example.com/something/really/different/123');
-        Route::add('/something/really/different/<int>:id', AnotherController::class);
-        $another_route = $another_route->resolvePath($uri->getPath());
+        Route::get('/something/really/different/<int>:id', AnotherController::class);
+        $another_route = $another_route->resolvePath($uri->getPath(), 'GET');
 
         $middleware_registry->add($some_common_middleware);
         $middleware_registry->remove(ErrorHandlerMiddleware::class);
@@ -223,8 +223,8 @@ class RouteTest extends TestCase
             $this->expectExceptionMessage($fail["message"]);
             $this->expectException($fail["class"]);
         }
-        Route::add($path_pattern, SomeController::class);
-        $this->assertSame($regexp, Route::getRegexpByPathPattern($path_pattern));
+        Route::get($path_pattern, SomeController::class);
+        $this->assertSame($regexp, Route::getRegexpByPathPattern($path_pattern, 'GET'));
     }
 
     public function testGetController()
@@ -234,17 +234,17 @@ class RouteTest extends TestCase
 
     public function testGetAction()
     {
-        Route::add('some/new/route/path', SomeController::class, 'pro2file');
-        $route = (new Route($this->middlewareRegistryMock))->resolvePath('some/new/route/path');
+        Route::get('some/new/route/path', SomeController::class, 'pro2file');
+        $route = (new Route($this->middlewareRegistryMock))->resolvePath('some/new/route/path', 'GET');
         $this->assertSame("pro2file", $route->getAction());
 
-        Route::add('some/new/route/two', SomeController::class);
-        $route = (new Route($this->middlewareRegistryMock))->resolvePath('some/new/route/two');
+        Route::get('some/new/route/two', SomeController::class);
+        $route = (new Route($this->middlewareRegistryMock))->resolvePath('some/new/route/two', 'GET');
         $this->assertSame(null, $route->getAction());
 
-        Route::add('some/another', SomeController::class, 'd-09');
+        Route::get('some/another', SomeController::class, 'd-09');
         $this->expectException(\LogicException::class);
-        $route = (new Route($this->middlewareRegistryMock))->resolvePath('some/another');
+        $route = (new Route($this->middlewareRegistryMock))->resolvePath('some/another', 'GET');
     }
 
     public function testGetRequestPathPattern()
@@ -273,53 +273,91 @@ class RouteTest extends TestCase
         Reset::resetStaticProp(Route::class, 'routes');
         Reset::resetStaticProp(Route::class, 'patterns_map');
 
-        Route::add('/first/pattern/:id', SomeController::class);
-        Route::add('/second/pattern/<string>:name', SomeController::class);
-        $this->assertSame(['/first/pattern/:id', '/second/pattern/<string>:name'], Route::getPathPatterns());
-        $this->assertSame([
-                '/first/pattern/:id' => '^/first/pattern/(?P<id>[a-zA-Z0-9-]+)$', 
-                '/second/pattern/<string>:name' => '^/second/pattern/(?P<name>[a-zA-Z]+)$'
-            ], 
-            Route::getPatternToRegexMap()
+        Route::get('/first/pattern/:id', SomeController::class, null);
+        Route::get('/second/pattern/<string>:name', SomeController::class, null);
+        $this->assertSame(
+            ['/first/pattern/:id', '/second/pattern/<string>:name'],
+            Route::getPathPatterns('GET')
         );
-        $this->assertSame(['^/first/pattern/(?P<id>[a-zA-Z0-9-]+)$', '^/second/pattern/(?P<name>[a-zA-Z]+)$'], Route::getPathRegexps());
-        $this->assertSame([
+        $this->assertSame(
+            [
+                '/first/pattern/:id' => '^/first/pattern/(?P<id>[a-zA-Z0-9-]+)$',
+                '/second/pattern/<string>:name' => '^/second/pattern/(?P<name>[a-zA-Z]+)$'
+            ],
+            Route::getPatternToRegexMap('GET')
+        );
+        $this->assertSame(
+            ['^/first/pattern/(?P<id>[a-zA-Z0-9-]+)$', '^/second/pattern/(?P<name>[a-zA-Z]+)$'],
+            Route::getPathRegexps('GET')
+        );
+        $this->assertSame(
+            [
                 '^/first/pattern/(?P<id>[a-zA-Z0-9-]+)$' => ['controller' => SomeController::class, 'action' => null],
                 '^/second/pattern/(?P<name>[a-zA-Z]+)$' => ['controller' => SomeController::class, 'action' => null]
             ],
-            Route::getRoutes()
+            Route::getRoutes('GET')
         );
     }
 
     public function testGetRegexpByPathPattern()
     {
-        $this->assertSame('^/second/pattern/(?P<name>[a-zA-Z]+)$', Route::getRegexpByPathPattern('/second/pattern/<string>:name'));
-        $this->assertSame(null, Route::getRegexpByPathPattern('/not_existed/pattern/<string>:name'));
+        $this->assertSame(
+            '^/second/pattern/(?P<name>[a-zA-Z]+)$',
+            Route::getRegexpByPathPattern('/second/pattern/<string>:name', 'GET')
+        );
+        $this->assertSame(
+            null,
+            Route::getRegexpByPathPattern('/not_existed/pattern/<string>:name', 'GET')
+        );
     }
 
     public function testGetControllerByPathPattern()
     {
-        $this->assertSame(AnotherController::class, Route::getControllerByPathPattern('/first/pattern/:id'));
-        $this->assertSame(SomeController::class, Route::getControllerByPathPattern('/second/pattern/<string>:name'));
-        $this->assertSame(null, Route::getControllerByPathPattern('/not_existed/pattern/<string>:name'));
+        $this->assertSame(
+            AnotherController::class,
+            Route::getControllerByPathPattern('/first/pattern/:id', 'GET')
+        );
+        $this->assertSame(
+            SomeController::class,
+            Route::getControllerByPathPattern('/second/pattern/<string>:name', 'GET')
+        );
+        $this->assertSame(
+            null,
+            Route::getControllerByPathPattern('/not_existed/pattern/<string>:name', 'GET')
+        );
     }
 
     public function testGetControllerByRegexp()
     {
-        $this->assertSame(AnotherController::class, Route::getControllerByRegexp('^/first/pattern/(?P<id>[a-zA-Z0-9-]+)$'));
-        $this->assertSame(SomeController::class, Route::getControllerByRegexp('^/second/pattern/(?P<name>[a-zA-Z]+)$'));
-        $this->assertSame(null, Route::getControllerByRegexp('/not_existed/pattern/<string>:name'));
+        $this->assertSame(
+            AnotherController::class,
+            Route::getControllerByRegexp('^/first/pattern/(?P<id>[a-zA-Z0-9-]+)$', 'GET')
+        );
+        $this->assertSame(
+            SomeController::class,
+            Route::getControllerByRegexp('^/second/pattern/(?P<name>[a-zA-Z]+)$', 'GET')
+        );
+        $this->assertSame(
+            null,
+            Route::getControllerByRegexp('/not_existed/pattern/<string>:name', 'GET')
+        );
     }
 
     public function testGetPathPatternsOfController()
     {
-        Route::add('/another/pattern', AnotherController::class);
-        $this->assertSame(['/first/pattern/:id', '/another/pattern'], Route::getPathPatternsOfController(AnotherController::class));
+        Route::get('/another/pattern', AnotherController::class, null, 'GET');
+        $this->assertSame(
+            ['/first/pattern/:id', '/another/pattern'],
+            Route::getPathPatternsOfController(AnotherController::class, 'GET')
+        );
     }
 
     public function testGetRegexpsOfController()
     {
-        Route::add('/another/pattern', AnotherController::class);
-        $this->assertSame(['^/first/pattern/(?P<id>[a-zA-Z0-9-]+)$', '^/another/pattern$'], Route::getRegexpsOfController(AnotherController::class));
+        Route::get('/another/pattern', AnotherController::class, null, 'GET');
+        $this->assertSame(
+            ['^/first/pattern/(?P<id>[a-zA-Z0-9-]+)$', '^/another/pattern$'],
+            Route::getRegexpsOfController(AnotherController::class, 'GET')
+        );
     }
 }

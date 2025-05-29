@@ -29,16 +29,16 @@ class Route implements LightRouteInterface
     {
         self::$middleware_registry = $middleware_registry;
     }
-    public function resolvePath(string $path): static
+    public function resolvePath(string $path, string $method): static
     {
-        foreach (self::$routes as $regexp => $specs) {
+        foreach (self::$routes[$method] as $regexp => $specs) {
             if (preg_match("#$regexp#", $path, $parameters)) {
                 $parameters = array_filter($parameters, fn($key) => !is_int($key), ARRAY_FILTER_USE_KEY);
                 $new = clone $this;
                 $new->setPathParams($parameters);
                 $new->path = $path;
                 $new->regexp = $regexp;
-                $new->path_pattern = $new->getPathPattern();
+                $new->setPathPattern($method);
                 $new->controller = $specs['controller'];
                 $new->action = $new->checkAction($specs['action']);
                 return $new;
@@ -96,75 +96,117 @@ class Route implements LightRouteInterface
 
     public function getPathPattern(): string
     {
-        return array_search($this->regexp, self::$patterns_map);
+        return $this->path_pattern;
     }
     
-    public static function add(string $path_pattern, string $controller, ?string $action = null): void
+    public static function get(string $path_pattern, string $controller, ?string $action = null): void
     {
-        if (!class_exists($controller) && !is_subclass_of($controller, Controller::class)) {
-            throw new \RuntimeException("Expected controller to be an actual class name, got: $controller");
+        self::addRoute('GET', $path_pattern, $controller, $action);
+    }
+   
+    public static function post(string $path_pattern, string $controller, ?string $action = null): void
+    {
+        self::addRoute('POST', $path_pattern, $controller, $action);
+    }
+
+    public static function delete(string $path_pattern, string $controller, ?string $action = null): void
+    {
+        self::addRoute('DELETE', $path_pattern, $controller, $action);
+    }
+
+    public static function put(string $path_pattern, string $controller, ?string $action = null): void
+    {
+        self::addRoute('PUT', $path_pattern, $controller, $action);
+    }
+
+    public static function patch(string $path_pattern, string $controller, ?string $action = null): void
+    {
+        self::addRoute('PATCH', $path_pattern, $controller, $action);
+    }
+
+    public static function getPatternToRegexMap(?string $method = null): array
+    {
+        if (is_null($method)) {
+            return self::$patterns_map;
         }
-        $regexp = PathConvertter::convertPathPatternToRegexp($path_pattern);
-        self::$patterns_map[$path_pattern] = $regexp;
-        self::$routes[$regexp] = ['controller' => $controller, 'action' => $action];
+        return self::$patterns_map[$method] ?? [];
     }
 
-    public static function getPatternToRegexMap(): array
+    public static function getPathPatterns(?string $method = null): array
     {
-        return self::$patterns_map;
+        if (is_null($method)) {
+            $all = [];
+            foreach (self::$patterns_map as $m => $patterns) {
+                foreach ($patterns as $pattern => $regexp) {
+                    $all[] = $pattern;
+                }
+            }
+            return $all;
+        }
+        return isset(self::$patterns_map[$method]) ? array_keys(self::$patterns_map[$method]) : [];
     }
 
-    public static function getPathPatterns(): array
+    public static function getPathRegexps(?string $method = null): array
     {
-        return array_keys(self::$patterns_map);
+        if (is_null($method)) {
+            $all = [];
+            foreach (self::$patterns_map as $m => $patterns) {
+                foreach ($patterns as $pattern => $regexp) {
+                    $all[] = $regexp;
+                }
+            }
+            return $all;
+        }
+        return isset(self::$patterns_map[$method]) ? array_values(self::$patterns_map[$method]) : [];
     }
 
-    public static function getPathRegexps(): array
+    public static function getRoutes(?string $method = null): array
     {
-        return array_values(self::$patterns_map);
+        if (is_null($method)) {
+            return self::$routes;
+        }
+        return self::$routes[$method] ?? [];
     }
 
-    public static function getRoutes(): array
+    public static function getRegexpByPathPattern(string $path_pattern, string $method): ?string
     {
-        return self::$routes;
+        return self::$patterns_map[$method][$path_pattern] ?? null;
     }
 
-    public static function getRegexpByPathPattern(string $path_pattern): ?string
+    public static function getControllerByPathPattern(string $path_pattern, string $method): ?string
     {
-        return isset(self::$patterns_map[$path_pattern]) ? self::$patterns_map[$path_pattern] : null;
-    }
-
-    public static function getControllerByPathPattern(string $path_pattern): ?string
-    {
-        $regexp = self::getRegexpByPathPattern($path_pattern);
+        $regexp = self::getRegexpByPathPattern($path_pattern, $method);
         if (is_null($regexp)) return null;
-        return self::$routes[$regexp]['controller'];
+        return self::$routes[$method][$regexp]['controller'] ?? null;
     }
 
-    public static function getActionByPathPattern(string $path_pattern): ?string
+    public static function getActionByPathPattern(string $path_pattern, string $method): ?string
     {
-        $regexp = self::getRegexpByPathPattern($path_pattern);
+        $regexp = self::getRegexpByPathPattern($path_pattern, $method);
         if (is_null($regexp)) return null;
-        return self::$routes[$regexp]['action'];
+        return self::$routes[$method][$regexp]['action'] ?? null;
     }
 
-    public static function getControllerByRegexp(string $regexp): ?string
+    public static function getControllerByRegexp(string $regexp, string $method): ?string
     {
-        return isset(self::$routes[$regexp]) ? self::$routes[$regexp]['controller'] : null;
+        return self::$routes[$method][$regexp]['controller'] ?? null;
     }
 
-    public static function getPathPatternsOfController(string $controller): array
+    public static function getPathPatternsOfController(string $controller, string $method): array
     {
-        $regexps = self::getRegexpsOfController($controller);
-        $patterns = array_keys(array_filter(self::$patterns_map, function($regexp) use ($regexps) {
-            return in_array($regexp, $regexps, true);
-        }));
+        $regexps = self::getRegexpsOfController($controller, $method);
+        $patterns = [];
+        foreach (self::$patterns_map[$method] ?? [] as $pattern => $regexp) {
+            if (in_array($regexp, $regexps, true)) {
+                $patterns[] = $pattern;
+            }
+        }
         return $patterns;
     }
 
-    public static function getRegexpsOfController(string $controller): array
+    public static function getRegexpsOfController(string $controller, string $method): array
     {
-        $routes = array_filter(self::$routes, function($route) use ($controller) {
+        $routes = array_filter(self::$routes[$method] ?? [], function($route) use ($controller) {
             return $route['controller'] === $controller;
         });
         return array_keys($routes);
@@ -185,6 +227,26 @@ class Route implements LightRouteInterface
     {
         foreach ($parameters as $name => $value) {
             $this->params[$name] = $value;
+        }
+    }
+
+    private function setPathPattern(string $method): void
+    {
+        $this->path_pattern = array_search($this->regexp, self::$patterns_map[$method]);
+    }
+
+    private static function addRoute(string $method, string $path_pattern, string $controller, ?string $action): void
+    {
+        self::validateControllerExistence($controller);
+        $regexp = PathConvertter::convertPathPatternToRegexp($path_pattern);
+        self::$patterns_map[$method][$path_pattern] = $regexp;
+        self::$routes[$method][$regexp] = ['controller' => $controller, 'action' => $action];
+    }
+
+    private static function validateControllerExistence(string $controller): void
+    {
+        if (!class_exists($controller) && !is_subclass_of($controller, Controller::class)) {
+            throw new \RuntimeException("Expected controller to be an actual class name, got: $controller");
         }
     }
 }

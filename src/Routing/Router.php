@@ -24,6 +24,6 @@ class Router implements RouterInterface
             throw new \LogicException('No routes found, make sure you added them correctly.');
         }
         $path = $request->getUri()->getPath();
-        return $this->route->resolvePath($path);
+        return $this->route->resolvePath($path, $request->getMethod());
     }
 }
