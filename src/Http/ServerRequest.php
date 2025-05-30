@@ -214,6 +214,13 @@ class ServerRequest implements LightServerRequestInterface, ReadExchangeInterfac
                 $headers[$headerName] = $value;
             }
         }
+        // Add special cases
+        foreach (['CONTENT_TYPE', 'CONTENT_LENGTH', 'CONTENT_MD5'] as $special) {
+            if (isset($this->getServerParams()[$special])) {
+                $headerName = str_replace('_', '-', $special);
+                $headers[$headerName] = $this->getServerParams()[$special];
+            }
+        }
         return $headers;
     }
 }
