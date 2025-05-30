@@ -35,7 +35,7 @@ class ServerRequest implements LightServerRequestInterface, ReadExchangeInterfac
         $hostname = $_SERVER['SERVER_NAME'];
         $port = $_SERVER['SERVER_PORT'];
         $url = $_SERVER['REQUEST_URI'];
-        return new static(new Psr7ServerRequest($method, "$scheme://$hostname:$port$url", [], null, "1.1", $_SERVER));
+        return new static(new Psr7ServerRequest($method, "$scheme://$hostname:$port$url", [], file_get_contents('php://input'), "1.1", $_SERVER));
     }
 
     public function getServerParams(): array

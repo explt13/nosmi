@@ -48,6 +48,8 @@ class HttpFactory implements HttpFactoryInterface
         $method = strtoupper($method);
         $uri ??= "$scheme://$hostname:$port$url";
         $server_request = $this->factory->createServerRequest($method, $uri, $serverParams);
+        $stream = $this->createStream(file_get_contents('php://input'));
+        $server_request = $server_request->withBody($stream);
         return new ServerRequest($server_request, $this);
     }
 
