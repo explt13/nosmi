@@ -217,10 +217,10 @@ class Route implements LightRouteInterface
         if (is_null($action)) {
             return null;
         }
-        if (preg_match("/^[a-z0-9]*$/", $action)) {
+        if (preg_match("/^[a-zA-Z0-9_]+$/", $action)) {
             return $action;
         }
-        throw new \LogicException("Route {$this->path}: `action` parameter should have ^[a-z0-9]*$ pattern.");
+        throw new \LogicException("Route {$this->path}: `action` parameter should have ^[a-zA-Z0-9_]+$ pattern.");
     }
 
     private function setPathParams(array $parameters): void
