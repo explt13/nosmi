@@ -13,6 +13,12 @@ interface ViewInterface
     public function withLayout(string $layout_filename): static;
 
     /**
+     * Exclude using layout
+     * @return static
+     */
+    public function withoutLayout(): static;
+
+    /**
      * Adds a meta tag to the view.
      *
      * @param string $name The name of the meta tag.

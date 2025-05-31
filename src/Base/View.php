@@ -32,6 +32,12 @@ class View implements ViewInterface
         return $this;
     }
 
+    public function withoutLayout(): static
+    {
+        $this->include_layout = false;
+        return $this;
+    }
+
     public function withMeta(string $name, string $value): static
     {
         if (is_null($name)) {
