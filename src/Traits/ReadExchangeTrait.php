@@ -36,13 +36,15 @@ trait ReadExchangeTrait
             return $parsed ?? [];
         }
 
+        if (str_contains($contentType, 'multipart/form-data')) {
+            return $_POST;
+        }
+
         if (str_contains($contentType, 'application/x-www-form-urlencoded')) {
-            parse_str($bodyContent, $parsedBody);
-            return $parsedBody;
+            return $_POST;
         }
         return [];
     }
-
     public function getJsonBody(bool $asArray = true)
     {
         $body = (string) $this->getBody();
