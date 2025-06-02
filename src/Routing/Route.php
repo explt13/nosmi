@@ -221,7 +221,7 @@ class Route implements LightRouteInterface
     private static function setMiddlewareRegistry(): void
     {
         if (is_null(self::$middleware_registry)) {
-            self::$middleware_registry = new MiddlewareRegistry;
+            self::$middleware_registry = MiddlewareRegistry::getInstance();
         }
     }
 
