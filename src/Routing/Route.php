@@ -6,6 +6,7 @@ use Explt13\Nosmi\Base\Controller;
 use Explt13\Nosmi\Exceptions\InvalidAssocArrayValueException;
 use Explt13\Nosmi\Interfaces\LightRouteInterface;
 use Explt13\Nosmi\Interfaces\MiddlewareRegistryInterface;
+use Explt13\Nosmi\Middleware\MiddlewareRegistry;
 use Explt13\Nosmi\Utils\PathConvertter;
 use Psr\Http\Server\MiddlewareInterface;
 
@@ -23,12 +24,13 @@ class Route implements LightRouteInterface
     protected static array $routes = [];
     protected static array $patterns_map = [];
     protected static array $route_middleware = [];
-    protected static MiddlewareRegistryInterface $middleware_registry;
+    protected static ?MiddlewareRegistryInterface $middleware_registry = null;
 
     public function __construct(MiddlewareRegistryInterface $middleware_registry)
     {
         self::$middleware_registry = $middleware_registry;
     }
+
     public function resolvePath(string $path, string $method): static
     {
         foreach (self::$routes[$method] as $regexp => $specs) {
@@ -49,18 +51,21 @@ class Route implements LightRouteInterface
 
     public static function useMiddleware(string $path_pattern, MiddlewareInterface $middleware): void
     {
+        self::setMiddlewareRegistry();
         $regexp = PathConvertter::convertPathPatternToRegexp($path_pattern);
         self::$middleware_registry->add($middleware, $regexp);
     }
 
     public static function disableMiddleware(string $path_pattern, string $middleware_class): void
     {
+        self::setMiddlewareRegistry();
         $regexp = PathConvertter::convertPathPatternToRegexp($path_pattern);
         self::$middleware_registry->remove($middleware_class, $regexp);
     }
 
     public function getRouteMiddleware(): array
     {
+        self::setMiddlewareRegistry();
         return self::$middleware_registry->getForRoute($this->getPath());
     }
 
@@ -210,6 +215,14 @@ class Route implements LightRouteInterface
             return $route['controller'] === $controller;
         });
         return array_keys($routes);
+    }
+
+
+    private static function setMiddlewareRegistry(): void
+    {
+        if (is_null(self::$middleware_registry)) {
+            self::$middleware_registry = new MiddlewareRegistry;
+        }
     }
 
     private function checkAction(?string $action): ?string
