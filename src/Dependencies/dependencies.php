@@ -40,6 +40,7 @@ use Explt13\Nosmi\Interfaces\LightRouteInterface;
 use Explt13\Nosmi\Interfaces\LightServerRequestInterface;
 use Explt13\Nosmi\Interfaces\LogFormatterInterface;
 use Explt13\Nosmi\Interfaces\LoggerInterface;
+use Explt13\Nosmi\Interfaces\MailInterface;
 use Explt13\Nosmi\Interfaces\MiddlewareFactoryInterface;
 use Explt13\Nosmi\Interfaces\MiddlewareRegistryInterface;
 use Explt13\Nosmi\Interfaces\ModelInterface;
@@ -49,6 +50,7 @@ use Explt13\Nosmi\Interfaces\ViewInterface;
 use Explt13\Nosmi\Logging\DefaultFormatter;
 use Explt13\Nosmi\Logging\Logger;
 use Explt13\Nosmi\Logging\LogStatus;
+use Explt13\Nosmi\Mail\Mail;
 use Explt13\Nosmi\Middleware\MiddlewareDispatcher;
 use Explt13\Nosmi\Middleware\MiddlewareFactory;
 use Explt13\Nosmi\Middleware\MiddlewareRegistry;
@@ -66,7 +68,7 @@ return [
     ConfigInterface::class              =>  AppConfig::class,
     ConfigLoaderInterface::class        =>  ConfigLoader::class,
     ConfigValidatorInterface::class     =>  ConfigValidator::class,
-
+    
     // Dependencies
     DependencyManagerInterface::class   =>  DependencyManager::class,
     ContainerInterface::class           =>  Container::class,
@@ -80,7 +82,7 @@ return [
     MiddlewareRegistryInterface::class  =>  MiddlewareRegistry::class,
     LightRequestHandlerInterface::class =>  MiddlewareDispatcher::class,
     MiddlewareFactoryInterface::class   =>  MiddlewareFactory::class,
-
+    
     // Http
     LightServerRequestInterface::class  =>  ServerRequest::class,
     LightRequestInterface::class        =>  Request::class,
@@ -90,7 +92,7 @@ return [
     // Routing
     LightRouteInterface::class          =>  Route::class,
     RouterInterface::class              =>  Router::class,
-
+    
     // Base
     AppInterface::class                 =>  App::class,
     ControllerInterface::class          =>  Controller::class,
@@ -101,6 +103,9 @@ return [
     Widget::class                       =>  Widget::class,
     ControllerFactoryInterface::class   =>  ControllerFactory::class,
     RequestPipelineInterface::class     =>  RequestPipeline::class,
+    
+    // Mail
+    MailInterface::class                =>  Mail::class,
 
     // Cache
     CacheFactoryInterface::class        =>  CacheFactory::class,
