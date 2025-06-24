@@ -1,4 +1,4 @@
-# Nosmi PHP Framework
+# Nosmi PHP Framework (still a wip)
 
 **Nosmi** is a minimal and lightweight PHP framework designed for rapid development and prototyping of small to medium-scale web applications.
 
